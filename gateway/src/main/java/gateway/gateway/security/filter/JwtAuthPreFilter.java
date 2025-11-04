@@ -1,8 +1,7 @@
 package gateway.gateway.security.filter;
 
-import gateway.gateway.security.domain.TokenBody;
-import gateway.gateway.security.service.GatewayJwtTokenProvider;
-import lombok.RequiredArgsConstructor;
+import gateway.gateway.security.application.dto.TokenBody;
+import gateway.gateway.security.application.GatewayJwtTokenProvider;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -25,6 +24,13 @@ public class JwtAuthPreFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
+        String path = exchange.getRequest().getPath().toString();
+
+        // 로그인, 회원가입은 JWT 검사 생략
+        if (path.startsWith("/user/login") || path.startsWith("/user/signup") || path.startsWith("/user/reissue-token")) {
+            return chain.filter(exchange);
+        }
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
@@ -36,16 +42,15 @@ public class JwtAuthPreFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        // 필요 시 토큰에서 사용자 정보 추출
         TokenBody tokenBody = jwtTokenProvider.parseJwt(token);
 
-        String path = exchange.getRequest().getPath().toString();
 
         //TODO 추가로 넣을 예정
-        if (path.startsWith("/admin") && !"ADMIN".equals(tokenBody.getRole())) {
+        if (path.startsWith("/master") && !"MASTER".equals(tokenBody.getRole())) {
             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
             return exchange.getResponse().setComplete();
         }
+
 
 
         return chain.filter(exchange);

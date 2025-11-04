@@ -1,9 +1,10 @@
-package gateway.gateway.security.service;
+package gateway.gateway.security.application;
 
-import gateway.gateway.security.domain.TokenBody;
+import gateway.gateway.security.application.dto.TokenBody;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
-import java.util.Date;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +19,10 @@ public class GatewayJwtTokenProvider {
     @Value("${custom.jwt.secrets.appkey}")
     private String appkey;
 
+    // iss, t 등 고정 클레임 검증 로직 필요 (일단 제외)
+
     private SecretKey getSecretKey() {
-        return Keys.hmacShaKeyFor(appkey.getBytes());
+        return Keys.hmacShaKeyFor(appkey.getBytes(StandardCharsets.UTF_8));
     }
 
     // ** 토큰이 유효한지 아닌지 확인 유효성 검사로 access 토큰이 들어오든 refresh 토큰이 들어오든 상관이 없다 그저 형식, 만료 여부만 검샇 **
@@ -27,7 +30,6 @@ public class GatewayJwtTokenProvider {
         try {
             //검증용 생성
             JwtParser jwtParser = Jwts.parser()
-                //내가 만든 키가 맞는지 테스트를 위해 내 비밀키로 설정함
                 .verifyWith(getSecretKey())
                 .build();
 
@@ -52,14 +54,13 @@ public class GatewayJwtTokenProvider {
 
     // JWT "토큰에서" user 정보 꺼내기
     public TokenBody parseJwt(String token) {
-        //jwts.parset는 JWT를 해석하고 검증하기 위한 파서(parser)를 생성하는 객체
         Jws<Claims> parserd = Jwts.parser()
             .verifyWith(getSecretKey())
             .build()
             .parseSignedClaims(token);
         String userId = parserd.getPayload().getSubject();
         String role = parserd.getPayload().get("role").toString();
-        return new TokenBody(Long.parseLong(userId), role);
+        return new TokenBody(UUID.fromString(userId) , role);
     }
 
     //log에서 마스킹 후 출력용

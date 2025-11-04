@@ -1,10 +1,10 @@
-package user_service.user_service;
+package user_server.user_server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UserServiceApplicationTests {
+class UserDomainServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
