@@ -1,0 +1,22 @@
+spring:
+  config:
+    import: optional:file:${user.dir}/eureka-server/.env[.properties]
+
+  application:
+    name: server
+
+server:
+  port: ${EUREKA_SERVER_PORT}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_HOSTNAME}
+  service-url:
+    defaultZone: ${EUREKA_SERVICE_URL} # Eureka 서버 URL로 배포 시 ip로 변경
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    enable-self-preservation: false
+
+
