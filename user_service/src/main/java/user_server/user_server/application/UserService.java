@@ -17,8 +17,8 @@ import user_server.user_server.presentation.error.ErrorCode;
 import user_server.user_server.presentation.unit.CookieUtils;
 import user_server.user_server.infra.sercurity.BCryptPasswordEncoderAdapter;
 import user_server.user_server.infra.sercurity.JwtTokenProvider;
-import user_server.user_server.presentation.success.dto.request.LoginRequest;
-import user_server.user_server.presentation.success.dto.request.SignupRequest;
+import user_server.user_server.presentation.success.dto.request.LoginRequestV1;
+import user_server.user_server.presentation.success.dto.request.SignupRequestV1;
 
 @Service
 @RequiredArgsConstructor
@@ -36,26 +36,26 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public void create(SignupRequest signupRequest) {
-        userRepository.findByUsername(signupRequest.username()).ifPresent(finduser -> {
+    public void create(SignupRequestV1 signupRequestV1) {
+        userRepository.findByUsername(signupRequestV1.username()).ifPresent(finduser -> {
                 throw new BusinessException(ErrorCode.ID_ALREADY_EXISTS);
             });
-        String password = passwordEncoder.encode(signupRequest.password());
-        User user = UserMapper.toUser( signupRequest.slackId(), password, signupRequest.username(), signupRequest.role(),
-            signupRequest.nickname(), signupRequest.email());
+        String password = passwordEncoder.encode(signupRequestV1.password());
+        User user = UserMapper.toUser( signupRequestV1.slackId(), password, signupRequestV1.username(), signupRequestV1.role(),
+            signupRequestV1.nickname(), signupRequestV1.email());
         userRepository.save(user);
     }
 
 
     @Transactional
-    public void login(LoginRequest loginRequest, HttpServletResponse response) {
-        User user = userRepository.findByUsername(loginRequest.username())
+    public void login(LoginRequestV1 loginRequestV1, HttpServletResponse response) {
+        User user = userRepository.findByUsername(loginRequestV1.username())
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (!user.isLoginAllowed(user)){
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
-        if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginRequestV1.password(), user.getPassword())) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 

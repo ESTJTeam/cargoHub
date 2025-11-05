@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import user_server.user_server.application.UserService;
 import user_server.user_server.presentation.success.dto.BaseResponse;
 import user_server.user_server.presentation.success.dto.BaseStatus;
-import user_server.user_server.presentation.success.dto.request.LoginRequest;
-import user_server.user_server.presentation.success.dto.request.SignupRequest;
+import user_server.user_server.presentation.success.dto.request.LoginRequestV1;
+import user_server.user_server.presentation.success.dto.request.SignupRequestV1;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,15 +26,15 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public BaseResponse<Void> signup(@RequestBody @Valid SignupRequest signupRequest) {
-        userService.create(signupRequest);
+    public BaseResponse<Void> signup(@RequestBody @Valid SignupRequestV1 signupRequestV1) {
+        userService.create(signupRequestV1);
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
 
     @PostMapping("/login")
-    public BaseResponse<Void> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
-        userService.login(loginRequest, response);
+    public BaseResponse<Void> login(@RequestBody @Valid LoginRequestV1 loginRequestV1, HttpServletResponse response) {
+        userService.login(loginRequestV1, response);
         return BaseResponse.ok(BaseStatus.OK);
     }
 

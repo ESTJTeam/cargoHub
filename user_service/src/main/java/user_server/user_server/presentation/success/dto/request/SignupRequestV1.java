@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import user_server.user_server.domain.entity.Role;
 
-public record SignupRequest(
+public record SignupRequestV1(
 
     String slackId,
 
