@@ -19,12 +19,12 @@ public class UserRepositoryAdapter implements UserRepository {
     }
 
     @Override
-    public Optional<User> findById(UUID userId) {
-        return jpaUserRepository.findById(userId);
+    public Optional<User> findPublicById(UUID userId) {
+        return jpaUserRepository.findPublicById(userId);
     }
 
     @Override
-    public Optional<User> findBySlackId(String slackId) {
-        return jpaUserRepository.findBySlackId(slackId);
+    public Optional<User> findByUsername(String username) {
+        return jpaUserRepository.findByUsername(username);
     }
 }

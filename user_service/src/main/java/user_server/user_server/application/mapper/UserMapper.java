@@ -1,16 +1,16 @@
 package user_server.user_server.application.mapper;
 
 import user_server.user_server.domain.entity.Role;
-import user_server.user_server.domain.entity.SignupStatus;
 import user_server.user_server.domain.entity.User;
-import user_server.user_server.presentation.dto.request.SignupRequest;
 
 
 public class UserMapper {
 
-    public static User toUser(String name, String password, Role role, String slackId) {
+    public static User toUser(String slackId, String password, String username, Role role, String nickname, String email) {
         return User.builder()
-            .name(name)
+            .username(username)
+            .email(email)
+            .nickname(nickname)
             .password(password)
             .role(role)
             .slackId(slackId).build();

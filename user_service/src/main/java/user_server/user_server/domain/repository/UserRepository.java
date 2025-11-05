@@ -8,9 +8,9 @@ public interface UserRepository {
 
     void save(User user);
 
-    Optional<User> findById(UUID userId);
+    Optional<User> findPublicById(UUID userId);
 
-    Optional<User> findBySlackId(String slackId);
+    Optional<User> findByUsername(String username);
 
 
 }

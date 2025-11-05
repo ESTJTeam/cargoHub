@@ -1,4 +1,4 @@
-package user_server.user_server.global.exception.dto;
+package user_server.user_server.presentation.error.dto;
 
 import lombok.Builder;
 

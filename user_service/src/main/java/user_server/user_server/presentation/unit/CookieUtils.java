@@ -1,4 +1,4 @@
-package user_server.user_server.global.unit;
+package user_server.user_server.presentation.unit;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

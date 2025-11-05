@@ -31,29 +31,27 @@ public class JwtTokenProvider implements TokenIssuer {
     @Value("${custom.jwt.secrets.appkey}")
     private String appkey;
 
-    @Value("${custom.jwt.secrets.originkey}")
-    private String originKey;
-
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(appkey.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
-    public String issueAccessToken(UUID id, Role role) {
-        return issueToken(id, role, accessTokenTime);
+    public String issueAccessToken(UUID id, Role role, String username) {
+        return issueToken(id, role, accessTokenTime, username);
     }
 
     @Override
-    public String issueRefreshToken(UUID id, Role role) {
-        return issueToken(id, role, refreshTokenTime);
+    public String issueRefreshToken(UUID id, Role role, String username) {
+        return issueToken(id, role, refreshTokenTime, username);
     }
 
-    private String issueToken(UUID id, Role role, Long expTime) {
+    private String issueToken(UUID id, Role role, Long expTime, String username) {
         Date now = new Date();
         return Jwts.builder()
             .subject(id.toString())
             .claim("role", role.name())
+            .claim("username", username)
             .issuedAt(now)
             .expiration(new Date(now.getTime() + expTime))
             .signWith(getSecretKey(), Jwts.SIG.HS256)
@@ -83,7 +81,7 @@ public class JwtTokenProvider implements TokenIssuer {
         String userId = parsed.getPayload().getSubject();
         String role = parsed.getPayload().get("role", String.class);
 
-        return new TokenBody(Long.parseLong(userId), Role.valueOf(role));
+        return new TokenBody(UUID.fromString(userId), Role.valueOf(role));
     }
 
     public Date getExpiration(String token) {

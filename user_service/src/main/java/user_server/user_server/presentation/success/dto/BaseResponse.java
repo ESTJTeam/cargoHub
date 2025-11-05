@@ -1,4 +1,4 @@
-package user_server.user_server.global.unit.common;
+package user_server.user_server.presentation.success.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

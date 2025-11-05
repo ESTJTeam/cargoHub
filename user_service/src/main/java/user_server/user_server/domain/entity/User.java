@@ -1,6 +1,5 @@
 package user_server.user_server.domain.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,14 +15,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
-import user_server.user_server.global.unit.common.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_user")
-@SQLRestriction("deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL AND is_public = true")  //TODO 이건 DDD가 아님 수정 필요
 public class User extends BaseEntity {
 
     @Id
@@ -37,8 +34,16 @@ public class User extends BaseEntity {
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(length = 15, nullable = false)
-    private String name;
+    @Column(length = 100, nullable = false)
+    private String username;    // 이게 사용자 ID라 함
+
+    @Column(length = 100, nullable = false)
+    private String nickname;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    private boolean is_public; // 요구사항에서 is로 이름을 시작 함
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -55,15 +60,16 @@ public class User extends BaseEntity {
 
     private LocalDateTime refreshTokenExpiresAt;
 
-    // TODO 소속 업체나 허브 필요
-
 
 // 배송원이나 업체 사람이 가입하는 형태?
     @Builder
-    public User(String slackId, String password, String name, Role role) {
+    public User(String slackId, String password, String username, Role role, String nickname, String email) {
         this.slackId = slackId;
         this.password = password;
-        this.name = name;
+        this.is_public = true;
+        this.email = email;
+        this.nickname = nickname;
+        this.username = username;
         this.signupStatus = SignupStatus.PENDING;
         this.point = 0;
         this.role = role;
@@ -94,6 +100,11 @@ public class User extends BaseEntity {
     public void updateRefreshToken(String hash, LocalDateTime expiresAt) {
         this.refreshToken = hash;
         this.refreshTokenExpiresAt = expiresAt;
+    }
+
+    public boolean isLoginAllowed(User user){
+        return !user.getSignupStatus().equals(SignupStatus.PENDING) &&
+            !user.getSignupStatus().equals(SignupStatus.REJECTED);
     }
 
 

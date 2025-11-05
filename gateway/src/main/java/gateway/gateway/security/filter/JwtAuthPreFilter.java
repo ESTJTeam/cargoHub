@@ -1,17 +1,21 @@
 package gateway.gateway.security.filter;
 
-import gateway.gateway.security.application.dto.TokenBody;
 import gateway.gateway.security.application.GatewayJwtTokenProvider;
+import gateway.gateway.security.application.dto.TokenBody;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Component
+@Slf4j
 public class JwtAuthPreFilter implements GlobalFilter, Ordered {
 
     private final GatewayJwtTokenProvider jwtTokenProvider;
@@ -22,21 +26,35 @@ public class JwtAuthPreFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
         String path = exchange.getRequest().getPath().toString();
 
-        // 로그인, 회원가입은 JWT 검사 생략
-        if (path.startsWith("/user/login") || path.startsWith("/user/signup") || path.startsWith("/user/reissue-token")) {
+        // 로그인, 회원가입 등 화이트리스트 경로는 통과
+        if (path.startsWith("/v1/user/login") || path.startsWith("/v1/user/signup") || path.startsWith("/v1/user/reissue-token")) {
             return chain.filter(exchange);
         }
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+        // Authorization 추출
+        if (authHeader == null) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        String token = authHeader.substring(7);
+        // Bearer 제거 + 공백 정리
+        String token = authHeader.trim();
+        if (token.regionMatches(true, 0, "Bearer", 0, 6)) {
+            token = token.substring(6).trim();
+        }
+        token = token.strip();
+        long dots = token.chars().filter(c -> c == '.').count();
+        if (dots != 2) {
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            return exchange.getResponse().setComplete();
+        }
+
+
+        // 서명/만료 검증
         if (!jwtTokenProvider.validate(token)) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
@@ -44,20 +62,25 @@ public class JwtAuthPreFilter implements GlobalFilter, Ordered {
 
         TokenBody tokenBody = jwtTokenProvider.parseJwt(token);
 
-
-        //TODO 추가로 넣을 예정
-        if (path.startsWith("/master") && !"MASTER".equals(tokenBody.getRole())) {
+        // 예시인 경우로 뺀 후 유저 서비스에서 검증 로직 처리도 괜찮
+        if (path.startsWith("/v1/master") && !"MASTER".equals(tokenBody.getRole())) {
             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
             return exchange.getResponse().setComplete();
         }
 
-
-
-        return chain.filter(exchange);
+        // 정규화한 Authorization으로 교체해서 다운스트림으로 전달 + 신뢰 헤더 붙이기도 가능
+        final String cleanToken = token;
+        ServerHttpRequest mutated = exchange.getRequest().mutate()
+            .headers(h -> {
+                h.set(HttpHeaders.AUTHORIZATION, cleanToken);
+                // h.set("X-User-Id", tokenBody.getUserId().toString()); // 예시
+            })
+            .build();
+        return chain.filter(exchange.mutate().request(mutated).build());
 
     }
     @Override
     public int getOrder() {
-        return -1; // PostFilter보다 먼저 실행
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
