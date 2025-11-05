@@ -1,0 +1,31 @@
+server:
+  port: ${GATEWAY_SERVER_PORT}
+spring:
+  application:
+    name: gateway-server
+  config:
+    import: optional:file:${user.dir}/gateway/.env[.properties]
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+          routes:
+            - id: user-server
+              uri: lb://user-server
+              predicates:
+                - Path=/v1/user/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL}
+
+
+custom:
+  jwt:
+    secrets:
+      appkey: ${SECRET_APPKEY}
+
