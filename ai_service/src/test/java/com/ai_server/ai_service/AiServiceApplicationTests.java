@@ -1,4 +1,4 @@
-package com.sparta.ai_service;
+package com.ai_server.ai_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
