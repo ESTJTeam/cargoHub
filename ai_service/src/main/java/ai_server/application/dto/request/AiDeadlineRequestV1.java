@@ -17,7 +17,7 @@ import lombok.ToString;
 public class AiDeadlineRequestV1 {
 
     @NotNull
-    private Long orderNo;
+    private Long orderNum;
 
     @NotBlank
     private String requesterName;
@@ -55,7 +55,7 @@ public class AiDeadlineRequestV1 {
 
     @Builder
     private AiDeadlineRequestV1(
-        Long orderNo,
+        Long orderNum,
         String requesterName,
         String requesterEmail,
         LocalDateTime orderAt,
@@ -68,7 +68,7 @@ public class AiDeadlineRequestV1 {
         String handlerName,
         String handlerEmail
     ) {
-        this.orderNo = orderNo;
+        this.orderNum = orderNum;
         this.requesterName = requesterName;
         this.requesterEmail = requesterEmail;
         this.orderAt = orderAt;
@@ -82,3 +82,5 @@ public class AiDeadlineRequestV1 {
         this.handlerEmail = handlerEmail;
     }
 }
+
+// TODO - Order 서비스 받아와서 수정 예정

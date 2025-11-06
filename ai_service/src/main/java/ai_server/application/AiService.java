@@ -25,7 +25,7 @@ public class AiService {
         final String model = OpenAiConstants.MODEL_GPT_4O_MINI;
 
         String prompt = OpenAiConstants.DEADLINE_SLACK_PROMPT.formatted(
-            request.getOrderNo(),
+            request.getOrderNum(),
             request.getRequesterName(),
             request.getRequesterEmail(),
             request.getOrderAt(),
