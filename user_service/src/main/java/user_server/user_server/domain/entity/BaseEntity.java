@@ -1,10 +1,10 @@
 package user_server.user_server.domain.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Getter;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedBy;
@@ -28,16 +28,16 @@ public class BaseEntity {
 
     @CreatedBy
     @Column(updatable = false)
-    protected Long createdBy;
+    protected UUID createdBy;
 
     @LastModifiedBy
-    protected Long updatedBy;
+    protected UUID updatedBy;
 
-    protected Long deletedBy;
+    protected UUID deletedBy;
 
     protected LocalDateTime deletedAt;
 
-    public void delete(Long userId) {
+    public void delete(UUID userId) {
         this.deletedBy = userId;
         this.deletedAt = LocalDateTime.now();
     }

@@ -75,7 +75,7 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void deleteUser(Long userId) {
+    public void deleteUser(UUID userId) {
         this.deletedBy = userId;
         this.deletedAt = LocalDateTime.now();
     }
