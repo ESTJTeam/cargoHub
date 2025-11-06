@@ -3,6 +3,8 @@ spring:
     import: optional:file:${user.dir}/user_service/.env[.properties]
   application:
     name: user-server
+  profiles:
+    include: local
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
