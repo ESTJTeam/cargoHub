@@ -1,5 +1,6 @@
-package com.cargohub.product_service.presentation.exception;
+package com.cargohub.product_service.presentation.error;
 
+import com.cargohub.product_service.presentation.error.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
