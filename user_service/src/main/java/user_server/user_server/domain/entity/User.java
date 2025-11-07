@@ -34,7 +34,7 @@ public class User extends BaseEntity {
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100, nullable = false, unique = true)
     private String username;    // 이게 사용자 ID라 함
 
     @Column(length = 100, nullable = false)
@@ -75,7 +75,7 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void deleteUser(Long userId) {
+    public void deleteUser(UUID userId) {
         this.deletedBy = userId;
         this.deletedAt = LocalDateTime.now();
     }
@@ -83,13 +83,13 @@ public class User extends BaseEntity {
     public void updateSignupStatus(SignupStatus newStatus) {
         this.signupStatus = newStatus;
     }
-
+    public void updateSlackId(String newSlackId) {this.slackId = newSlackId;}
+    public void updateUsername(String username) {this.username = username;}
+    public void updateNickname(String nickname) {this.nickname = nickname;}
+    public void updateEmail(String email) {this.email = email;}
     public void updateRole(Role role) {this.role = role;}
+    public void updatePoint(int point) {this.point = point;}
 
-    /** 만료 여부 */
-    public boolean isRefreshExpired(LocalDateTime now) {
-        return refreshTokenExpiresAt == null || now.isAfter(refreshTokenExpiresAt);
-    }
 
     /** 리프레시 토큰 제거(로그아웃) */
     public void clearRefreshToken() {
@@ -105,6 +105,18 @@ public class User extends BaseEntity {
     public boolean isLoginAllowed(User user){
         return !user.getSignupStatus().equals(SignupStatus.PENDING) &&
             !user.getSignupStatus().equals(SignupStatus.REJECTED);
+    }
+
+    public static User createUser(String slackId, String password, String username, Role role,
+        String nickname, String email) {
+            return User.builder()
+                .username(username)
+                .email(email)
+                .nickname(nickname)
+                .password(password)
+                .role(role)
+                .slackId(slackId).build();
+        }
     }
 
 

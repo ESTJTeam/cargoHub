@@ -1,5 +1,6 @@
 package gateway.gateway.security.filter;
 
+import gateway.gateway.domain.Role;
 import gateway.gateway.security.application.GatewayJwtTokenProvider;
 import gateway.gateway.security.application.dto.TokenBody;
 import lombok.extern.slf4j.Slf4j;
@@ -53,20 +54,25 @@ public class JwtAuthPreFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-
         // 서명/만료 검증
         if (!jwtTokenProvider.validate(token)) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
-
+        // accessToken만 들어오게 하고 refreshToken은 막음
         TokenBody tokenBody = jwtTokenProvider.parseJwt(token);
-
-        // 예시인 경우로 뺀 후 유저 서비스에서 검증 로직 처리도 괜찮
-        if (path.startsWith("/v1/master") && !"MASTER".equals(tokenBody.getRole())) {
-            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        if (!tokenBody.getType().equals("access")) {
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
+
+        if (path.startsWith("/v1/master")){
+            if (!tokenBody.getRole().equals(Role.MASTER)) {
+                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                return exchange.getResponse().setComplete();
+            }
+        }
+
 
         // 정규화한 Authorization으로 교체해서 다운스트림으로 전달 + 신뢰 헤더 붙이기도 가능
         final String cleanToken = token;

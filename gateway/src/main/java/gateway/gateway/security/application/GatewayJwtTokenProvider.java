@@ -1,5 +1,6 @@
 package gateway.gateway.security.application;
 
+import gateway.gateway.domain.Role;
 import gateway.gateway.security.application.dto.TokenBody;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -64,8 +65,10 @@ public class GatewayJwtTokenProvider {
             .build()
             .parseSignedClaims(token);
         String userId = parserd.getPayload().getSubject();
-        String role = parserd.getPayload().get("role").toString();
-        return new TokenBody(UUID.fromString(userId) , role);
+        String username = parserd.getPayload().get("username", String.class);
+        String type = parserd.getPayload().get("type", String.class);
+        String role = parserd.getPayload().get("role", String.class);
+        return new TokenBody(UUID.fromString(userId), username, type, Role.valueOf(role) );
     }
 
     //log에서 마스킹 후 출력용
