@@ -10,7 +10,7 @@ import lombok.Getter;
 public class AiDeadlineResponseV1 {
 
     private UUID aiLogId;
-    private String finalDeadlineText;
+    private String orderInfo;
     private LocalDateTime finalDeadline;
     private String slackFormattedText;
 }

@@ -5,6 +5,11 @@ import ai_server.application.dto.response.AiDeadlineResponseV1;
 import ai_server.domain.entity.AiCallLog;
 import ai_server.domain.repository.AiCallLogRepository;
 import ai_server.infra.config.OpenAiConstants;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -24,6 +29,11 @@ public class AiService {
         final String provider = OpenAiConstants.PROVIDER_OPENAI;
         final String model = OpenAiConstants.MODEL_GPT_4O_MINI;
 
+        // 경유지 문자열 생성 (없으면 "없음")
+        final String viaHubsText = (request.getViaHubs() == null || request.getViaHubs().isEmpty())
+            ? "없음"
+            : String.join(", ", request.getViaHubs());
+
         String prompt = OpenAiConstants.DEADLINE_SLACK_PROMPT.formatted(
             request.getOrderNum(),
             request.getRequesterName(),
@@ -33,7 +43,7 @@ public class AiService {
             request.getQuantity(),
             request.getRequestNote(),
             request.getShipFromHub(),
-            String.join(" ", request.getShipFromHub()),
+            viaHubsText,
             request.getDestination(),
             request.getHandlerName(),
             request.getHandlerEmail()
@@ -43,26 +53,37 @@ public class AiService {
             .prompt()
             .user(prompt)
             .call()
-            .content();
+            .content()
+            .trim();
 
-        // 마지막 줄: "최종 발송 시한은 …"
-        String slackFormattedText = outputText.lines().reduce((a, b) -> b).orElse(outputText);
+        // 전체 Slack 메시지 원본
+        String slackFormattedText = outputText;
 
-        AiCallLog aiCallLog = AiCallLog.of(
-            provider,
-            model,
-            prompt,
-            outputText
-        );
+        // 줄 단위 분리
+        String[] lines = outputText.split("\\R");
+
+        // 마지막 줄 (발송 시한 안내 문구)
+        String lastLine = lines[lines.length - 1].trim();
+
+        // 마지막 줄을 제외한 나머지 → orderInfo
+        String orderInfo = String.join("\n", Arrays.copyOf(lines, lines.length - 1)).trim();
+
+        // finalDeadline 파싱
+        LocalDateTime finalDeadline = null;
+        Matcher matcher = Pattern.compile("(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2})").matcher(lastLine);
+        if (matcher.find()) {
+            finalDeadline = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        }
+
+        AiCallLog aiCallLog = AiCallLog.of(provider, model, prompt, outputText);
 
         aiCallLogRepository.save(aiCallLog);
 
-        // TODO - finalDeadlineAt 파싱 추가 시 수정
         return AiDeadlineResponseV1.builder()
             .aiLogId(aiCallLog.getId())
-            .finalDeadlineText(slackFormattedText)
-            .finalDeadline(null)
-            .slackFormattedText(outputText)
+            .orderInfo(orderInfo)
+            .finalDeadline(finalDeadline)
+            .slackFormattedText(slackFormattedText)
             .build();
     }
 }

@@ -19,7 +19,7 @@ spring:
                 - Path=/v1/user/**
 
             - id: ai-service
-              uri: lb://ai-service
+              uri: lb://ai-server
               predicates:
                 - Path=/v1/ai/**
 
