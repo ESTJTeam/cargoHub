@@ -18,9 +18,10 @@ import java.util.UUID;
 @Table(name = "p_product")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Product {
+public class Product extends BaseEntity{
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
@@ -51,30 +52,6 @@ public class Product {
     @Comment("상품 판매 가능 여부")
     private Boolean sellable;
 
-    private LocalDateTime createdAt;
-
-    @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "created_by", updatable = false, nullable = false))
-    private CustomerId createdBy;
-
-    private LocalDateTime updatedAt;
-
-    @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "updated_by"))
-    private CustomerId updatedBy;
-
-    private LocalDateTime deletedAt;
-
-    @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "deleted_by"))
-    private CustomerId deletedBy;
-
-    @PrePersist
-    public void prePersist() {
-        this.id = UUID.randomUUID();
-        this.createdAt = LocalDateTime.now();
-    }
-
     private Product(String name, FirmId firmId, HubId hubId, Integer stockQuantity, Integer price, Boolean sellable, CustomerId createdBy) {
         this.name = name;
         this.firmId = firmId;
@@ -95,7 +72,6 @@ public class Product {
         if(price != null) this.price = price;
         if(sellable != null) this.sellable = sellable;
 
-        this.updatedAt = LocalDateTime.now();
         this.updatedBy = updatedBy;
     }
 
@@ -111,6 +87,4 @@ public class Product {
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
     }
-
-
 }
