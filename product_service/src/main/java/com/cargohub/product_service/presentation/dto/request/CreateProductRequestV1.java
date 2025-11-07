@@ -1,6 +1,5 @@
 package com.cargohub.product_service.presentation.dto.request;
 
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 

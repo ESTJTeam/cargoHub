@@ -1,5 +1,7 @@
 package com.cargohub.product_service.presentation.dto.response;
 
+import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,10 +16,28 @@ public record ReadProductDetailResponseV1(
      Integer price,
      boolean sellable,
      LocalDateTime createdAt,
-     String createdBy,
+     UUID createdBy,
      LocalDateTime updatedAt,
-     String updatedBy,
+     UUID updatedBy,
      LocalDateTime deletedAt,
-     String deletedBy
+     UUID deletedBy
 ) {
+    public static ReadProductDetailResponseV1 from(ReadProductDetailResultV1 result) {
+        return new ReadProductDetailResponseV1(
+                result.id(),
+                result.name(),
+                result.firmId(),
+                result.hubId(),
+                result.stockQuantity(),
+                result.price(),
+                result.sellable(),
+                result.createdAt(),
+                result.createdBy(),
+                result.updatedAt(),
+                result.updatedBy(),
+                result.deletedAt(),
+                result.deletedBy()
+        );
+    }
+
 }

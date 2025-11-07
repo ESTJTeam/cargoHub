@@ -1,6 +1,5 @@
 package com.cargohub.product_service.presentation;
 
-import com.cargohub.product_service.application.ProductService;
 import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.presentation.dto.request.CreateProductRequestV1;
 import com.cargohub.product_service.presentation.dto.request.UpdateProductRequestV1;
@@ -26,8 +25,6 @@ import java.util.UUID;
 @RequestMapping("/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
-
-    private ProductService productService;
 
     @PostMapping
     public BaseResponse<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request){
