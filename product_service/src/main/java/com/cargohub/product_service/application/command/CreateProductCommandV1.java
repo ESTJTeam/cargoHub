@@ -1,5 +1,6 @@
 package com.cargohub.product_service.application.command;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record CreateProductCommandV1(
@@ -7,7 +8,7 @@ public record CreateProductCommandV1(
         UUID firmId,
         UUID hubId,
         Integer stockQuantity,
-        Integer price,
+        BigDecimal price,
         Boolean sellable,
         UUID createdBy
 ) {

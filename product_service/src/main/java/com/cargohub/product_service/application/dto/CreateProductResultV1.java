@@ -2,6 +2,7 @@ package com.cargohub.product_service.application.dto;
 
 import com.cargohub.product_service.domain.entity.Product;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ public record CreateProductResultV1 (
         UUID hubId,
         String hubName,
         Integer stockQuantity,
-        Integer price,
+        BigDecimal price,
         boolean sellable,
         LocalDateTime createdAt
 ) {

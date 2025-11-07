@@ -11,6 +11,7 @@ import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -46,13 +47,13 @@ public class Product extends BaseEntity{
 
     @Column(name = "price", nullable = false)
     @Comment("가격")
-    private Integer price;
+    private BigDecimal price;
 
     @Column(name = "sellable", nullable = false, columnDefinition = "tinyint")
     @Comment("상품 판매 가능 여부")
     private Boolean sellable;
 
-    private Product(String name, FirmId firmId, HubId hubId, Integer stockQuantity, Integer price, Boolean sellable, CustomerId createdBy) {
+    private Product(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, CustomerId createdBy) {
         this.name = name;
         this.firmId = firmId;
         this.hubId = hubId;
@@ -62,11 +63,11 @@ public class Product extends BaseEntity{
         this.createdBy = createdBy;
     }
 
-    public static Product ofNewProduct(String name, FirmId firmId, HubId hubId, Integer stockQuantity, Integer price, Boolean sellable, CustomerId createdBy) {
+    public static Product ofNewProduct(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, CustomerId createdBy) {
         return new Product(name, firmId, hubId, stockQuantity, price, sellable, createdBy);
     }
 
-    public void update(String name, Integer stockQuantity, Integer price, Boolean sellable, CustomerId updatedBy) {
+    public void update(String name, Integer stockQuantity, BigDecimal price, Boolean sellable, CustomerId updatedBy) {
         if(name != null) this.name = name;
         if(stockQuantity != null) this.stockQuantity = stockQuantity;
         if(price != null) this.price = price;

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +52,7 @@ public class ProductController {
                 UUID.randomUUID(),
                 "허브 명",
                 100000,
-                10000,
+                BigDecimal.valueOf(10000),
                 true,
                 LocalDateTime.now()
         );
@@ -70,7 +71,7 @@ public class ProductController {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 100000,
-                10000,
+                BigDecimal.valueOf(10000),
                 true,
                 LocalDateTime.now()
         );
@@ -89,7 +90,7 @@ public class ProductController {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 100000,
-                10000,
+                BigDecimal.valueOf(10000),
                 true,
                 LocalDateTime.now(),
                 UUID.randomUUID(),

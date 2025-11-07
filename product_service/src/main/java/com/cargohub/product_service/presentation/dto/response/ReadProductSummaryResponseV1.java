@@ -2,6 +2,7 @@ package com.cargohub.product_service.presentation.dto.response;
 
 import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ public record ReadProductSummaryResponseV1(
         UUID firmId,
         UUID hubId,
         Integer stockQuantity,
-        Integer price,
+        BigDecimal price,
         boolean sellable,
         LocalDateTime createdAt
 ) {

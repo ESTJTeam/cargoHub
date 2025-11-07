@@ -1,7 +1,6 @@
 package com.cargohub.product_service.presentation.dto.response;
 
-
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,7 +12,7 @@ public record CreateProductResponseV1(
         UUID hubId,
         String hubName,
         Integer stockQuantity,
-        Integer price,
+        BigDecimal price,
         boolean sellable,
         LocalDateTime createdAt
 ) {
