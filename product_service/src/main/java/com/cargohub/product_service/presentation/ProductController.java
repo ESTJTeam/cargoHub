@@ -7,8 +7,8 @@ import com.cargohub.product_service.presentation.dto.request.UpdateProductStockR
 import com.cargohub.product_service.presentation.dto.response.CreateProductResponseV1;
 import com.cargohub.product_service.presentation.dto.response.ReadProductDetailResponseV1;
 import com.cargohub.product_service.presentation.dto.response.ReadProductSummaryResponseV1;
-import com.cargohub.product_service.presentation.success.dto.response.BaseResponse;
-import com.cargohub.product_service.presentation.success.dto.response.BaseStatus;
+import com.cargohub.product_service.common.success.BaseResponse;
+import com.cargohub.product_service.common.success.BaseStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

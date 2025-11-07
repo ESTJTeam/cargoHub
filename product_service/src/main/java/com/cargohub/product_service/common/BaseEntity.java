@@ -1,4 +1,4 @@
-package com.cargohub.product_service.domain.entity;
+package com.cargohub.product_service.common;
 
 import jakarta.persistence.*;
 import lombok.Getter;

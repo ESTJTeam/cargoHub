@@ -1,5 +1,6 @@
 package com.cargohub.product_service.domain.entity;
 
+import com.cargohub.product_service.common.BaseEntity;
 import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Table(name = "p_product")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Product extends BaseEntity{
+public class Product extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

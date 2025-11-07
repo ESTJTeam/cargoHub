@@ -1,4 +1,4 @@
-package com.cargohub.product_service.presentation.error.dto;
+package com.cargohub.product_service.common.error;
 
 public record ErrorResponse(
         int status,

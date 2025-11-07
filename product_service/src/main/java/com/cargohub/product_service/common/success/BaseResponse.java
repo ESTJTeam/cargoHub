@@ -1,4 +1,4 @@
-package com.cargohub.product_service.presentation.success.dto.response;
+package com.cargohub.product_service.common.success;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
