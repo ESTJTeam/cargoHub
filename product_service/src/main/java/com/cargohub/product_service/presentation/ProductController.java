@@ -1,23 +1,21 @@
 package com.cargohub.product_service.presentation;
 
-import com.cargohub.product_service.application.command.CreateProductCommandV1;
-import com.cargohub.product_service.application.command.DeleteProductCommandV1;
-import com.cargohub.product_service.application.command.UpdateProductCommandV1;
-import com.cargohub.product_service.application.command.UpdateProductStockCommandV1;
+import com.cargohub.product_service.application.ProductService;
+import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.presentation.dto.request.CreateProductRequestV1;
 import com.cargohub.product_service.presentation.dto.request.UpdateProductRequestV1;
 import com.cargohub.product_service.presentation.dto.request.UpdateProductStockRequestV1;
 import com.cargohub.product_service.presentation.dto.response.CreateProductResponseV1;
 import com.cargohub.product_service.presentation.dto.response.ReadProductDetailResponseV1;
 import com.cargohub.product_service.presentation.dto.response.ReadProductSummaryResponseV1;
+import com.cargohub.product_service.presentation.success.dto.response.BaseResponse;
+import com.cargohub.product_service.presentation.success.dto.response.BaseStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -29,10 +27,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
 
-//    private ProductService productService;
+    private ProductService productService;
 
     @PostMapping
-    public ResponseEntity<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request){
+    public BaseResponse<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request){
 
         CreateProductCommandV1 commandV1 = new CreateProductCommandV1(
                 UUID.randomUUID(), // todo: userId로 수정
@@ -61,11 +59,11 @@ public class ProductController {
                 LocalDateTime.now()
         );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseV1);
+        return BaseResponse.ok(responseV1, BaseStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<ReadProductSummaryResponseV1>> readProductPage(@PageableDefault(size = 10) Pageable pageable) {
+    public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@PageableDefault(size = 10) Pageable pageable) {
         // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
 //        productService.readProductPage(pageable, user);
 
@@ -80,11 +78,11 @@ public class ProductController {
                 LocalDateTime.now()
         );
 
-        return ResponseEntity.ok(new PageImpl<>(List.of(responseV1)));
+        return BaseResponse.ok(new PageImpl<>(List.of(responseV1)), BaseStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReadProductDetailResponseV1> readProduct(@PathVariable("id") UUID id) {
+    public BaseResponse<ReadProductDetailResponseV1> readProduct(@PathVariable("id") UUID id) {
         // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
 //        ReadProductDetailResultV1 productDetailResultV1 = productService.readProduct(id, user);
 
@@ -97,18 +95,18 @@ public class ProductController {
                 10000,
                 true,
                 LocalDateTime.now(),
-                "작성자",
+                UUID.randomUUID(),
                 null,
                 null,
                 null,
                 null
         );
 
-        return ResponseEntity.ok(responseV1);
+        return BaseResponse.ok(responseV1, BaseStatus.OK);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateProduct(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductRequestV1 request) {
+    public BaseResponse<Void> updateProduct(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductRequestV1 request) {
 
         UpdateProductCommandV1 commandV1 = new UpdateProductCommandV1(
                 id,
@@ -123,11 +121,11 @@ public class ProductController {
 //        productService.updateProduct(commandV1);
 
 
-        return ResponseEntity.ok().build();
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable("id") UUID id) {
+    public BaseResponse<Void> deleteProduct(@PathVariable("id") UUID id) {
 
         DeleteProductCommandV1 commandV1 = new DeleteProductCommandV1(
                 id,
@@ -137,27 +135,27 @@ public class ProductController {
         // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
 //        productService.deleteProduct(commandV1);
 
-        return ResponseEntity.ok().build();
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
-    @PostMapping("/{id}/decrease")
-    public ResponseEntity<Void> decreaseStock(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductStockRequestV1 request) {
+    @PostMapping("/decrease")
+    public BaseResponse<Void> decreaseStock(@RequestBody @Valid UpdateProductStockRequestV1 request) {
 
-        UpdateProductStockCommandV1 commandV1 = new UpdateProductStockCommandV1(id, request.quantity());
+        UpdateProductStockCommandV1 commandV1 = UpdateProductStockCommandV1.from(request);
         // todo: 애플리케이션 서비스 호출
 //        productService.decreaseStock(commandV1);
 
-        return ResponseEntity.ok().build();
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
-    @PostMapping("/{id}/increase")
-    public ResponseEntity<Void> increaseStock(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductStockRequestV1 request) {
+    @PostMapping("/increase")
+    public BaseResponse<Void> increaseStock(@RequestBody @Valid UpdateProductStockRequestV1 request) {
 
-        UpdateProductStockCommandV1 commandV1 = new UpdateProductStockCommandV1(id, request.quantity());
+        UpdateProductStockCommandV1 commandV1 = UpdateProductStockCommandV1.from(request);
         // todo: 애플리케이션 서비스 호출
 //        productService.increaseStock(commandV1);
 
-        return ResponseEntity.ok().build();
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
 }
