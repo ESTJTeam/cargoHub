@@ -30,16 +30,16 @@ public class ProductController {
     public BaseResponse<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request){
 
         CreateProductCommandV1 commandV1 = new CreateProductCommandV1(
-                UUID.randomUUID(), // todo: userId로 수정
                 request.name(),
                 request.firmId(),
                 request.hubId(),
                 request.stockQuantity(),
                 request.price(),
-                request.sellable()
+                request.sellable(),
+                UUID.randomUUID() // todo: 생성자 ID로 수정
         );
 
-        // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
+        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
 //        productService.createProduct(commandV1, user);
 
         // 응답 생성
@@ -61,7 +61,7 @@ public class ProductController {
 
     @GetMapping
     public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@PageableDefault(size = 10) Pageable pageable) {
-        // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
+        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
 //        productService.readProductPage(pageable, user);
 
         ReadProductSummaryResponseV1 responseV1 = new ReadProductSummaryResponseV1(
@@ -80,7 +80,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public BaseResponse<ReadProductDetailResponseV1> readProduct(@PathVariable("id") UUID id) {
-        // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
+        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
 //        ReadProductDetailResultV1 productDetailResultV1 = productService.readProduct(id, user);
 
         ReadProductDetailResponseV1 responseV1 = new ReadProductDetailResponseV1(
@@ -114,7 +114,7 @@ public class ProductController {
                 UUID.randomUUID() // todo: 수정 - 수정자 ID
         );
 
-        // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
+        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
 //        productService.updateProduct(commandV1);
 
 
@@ -126,10 +126,10 @@ public class ProductController {
 
         DeleteProductCommandV1 commandV1 = new DeleteProductCommandV1(
                 id,
-                UUID.randomUUID() // todo: 수정 - 생성자 ID
+                UUID.randomUUID() // todo: 수정 - 삭제자 ID
         );
 
-        // todo: 애플리케이션 서비스 호출 - user 정보 필요(id, role)
+        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
 //        productService.deleteProduct(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
