@@ -1,9 +1,6 @@
 package com.cargohub.product_service.domain.entity;
 
-import com.cargohub.product_service.domain.vo.CustomerId;
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedBy;
@@ -13,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @MappedSuperclass
@@ -29,16 +27,16 @@ public class BaseEntity {
 
     @CreatedBy
     @Column(updatable = false)
-    protected CustomerId createdBy;
+    protected UUID createdBy;
 
     @LastModifiedBy
-    protected CustomerId updatedBy;
+    protected UUID updatedBy;
 
-    protected CustomerId deletedBy;
+    protected UUID deletedBy;
 
     protected LocalDateTime deletedAt;
 
-    public void delete(CustomerId userId) {
+    public void delete(UUID userId) {
         this.deletedBy = userId;
         this.deletedAt = LocalDateTime.now();
     }

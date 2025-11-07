@@ -1,6 +1,5 @@
 package com.cargohub.product_service.domain.entity;
 
-import com.cargohub.product_service.domain.vo.CustomerId;
 import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
 import jakarta.persistence.*;
@@ -8,11 +7,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -24,7 +20,6 @@ public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     @Column(name="name", length = 100, nullable = false)
@@ -53,7 +48,7 @@ public class Product extends BaseEntity{
     @Comment("상품 판매 가능 여부")
     private Boolean sellable;
 
-    private Product(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, CustomerId createdBy) {
+    private Product(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID createdBy) {
         this.name = name;
         this.firmId = firmId;
         this.hubId = hubId;
@@ -63,11 +58,11 @@ public class Product extends BaseEntity{
         this.createdBy = createdBy;
     }
 
-    public static Product ofNewProduct(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, CustomerId createdBy) {
+    public static Product ofNewProduct(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID createdBy) {
         return new Product(name, firmId, hubId, stockQuantity, price, sellable, createdBy);
     }
 
-    public void update(String name, Integer stockQuantity, BigDecimal price, Boolean sellable, CustomerId updatedBy) {
+    public void update(String name, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID updatedBy) {
         if(name != null) this.name = name;
         if(stockQuantity != null) this.stockQuantity = stockQuantity;
         if(price != null) this.price = price;
@@ -82,10 +77,5 @@ public class Product extends BaseEntity{
 
     public void increaseStock(int quantity) {
         this.stockQuantity += quantity;
-    }
-
-    public void delete(CustomerId deletedBy) {
-        this.deletedAt = LocalDateTime.now();
-        this.deletedBy = deletedBy;
     }
 }

@@ -31,11 +31,11 @@ public record ReadProductDetailResultV1(
                 product.getPrice(),
                 product.getSellable(),
                 product.getCreatedAt(),
-                product.getCreatedBy().getId(),
+                product.getCreatedBy(),
                 product.getUpdatedAt(),
-                product.getUpdatedBy().getId(),
+                product.getUpdatedBy(),
                 product.getDeletedAt(),
-                product.getDeletedBy().getId()
+                product.getDeletedBy()
         );
     }
 }
