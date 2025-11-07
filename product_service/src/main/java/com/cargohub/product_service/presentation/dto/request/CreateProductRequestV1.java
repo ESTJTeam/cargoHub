@@ -23,7 +23,4 @@ public record CreateProductRequestV1(
 
         Boolean sellable
 ) {
-        public CreateProductRequestV1(String name, UUID firmId, UUID hubId, Integer stockQuantity, BigDecimal price) {
-                this(name, firmId, hubId, stockQuantity, price, true);
-        }
 }
