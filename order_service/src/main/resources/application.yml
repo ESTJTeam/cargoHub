@@ -16,8 +16,6 @@ spring:
       hibernate:
         format_sql: true
     generate-ddl: true
-#  profiles:
-#    active: dev
   data:
     web:
       pageable:

@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public record ReadOrderDetailResultV1(
         UUID id,
-        UUID supplierId,
-        UUID receiverId,
+        FirmInfoResultV1 supplier,
+        FirmInfoResultV1 receiver,
         UUID hubDeliveryId,
         UUID firmDeliveryId,
         List<OrderProductResultV1> products,
@@ -23,11 +23,11 @@ public record ReadOrderDetailResultV1(
         UUID deletedBy
 ) {
 
-    public static ReadOrderDetailResultV1 from(Order order) {
+    public static ReadOrderDetailResultV1 from(Order order, FirmInfoResultV1 supplier, FirmInfoResultV1 receiver) {
         return new ReadOrderDetailResultV1(
                 order.getId(),
-                order.getSupplierId().getId(),
-                order.getReceiverId().getId(),
+                supplier,
+                receiver,
                 order.getHubDeliveryId().getId(),
                 order.getFirmDeliveryId().getId(),
                 order.getOrderProducts().stream()

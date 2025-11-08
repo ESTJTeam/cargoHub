@@ -6,6 +6,7 @@ import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
 import com.cargohub.order_service.domain.vo.OrderStatus;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
+import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
 import com.cargohub.order_service.presentation.dto.response.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -73,9 +74,7 @@ public class OrderController {
         ReadOrderSummaryResponseV1 responseV1 = new ReadOrderSummaryResponseV1(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                "공급 업체 명",
                 UUID.randomUUID(),
-                "수령 업체 명",
                 status,
                 LocalDateTime.now()
         );
@@ -93,13 +92,22 @@ public class OrderController {
                 10000
         );
 
+        FirmInfoResponseV1 supplier = new FirmInfoResponseV1(
+                UUID.randomUUID(),
+                "공급 업체 명",
+                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
+        );
+
+        FirmInfoResponseV1 receiver = new FirmInfoResponseV1(
+                UUID.randomUUID(),
+                "수령 업체 명",
+                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
+        );
 
         ReadOrderDetailResponseV1 responseV1 = new ReadOrderDetailResponseV1(
                 id,
-                UUID.randomUUID(),
-                "공급 업체",
-                UUID.randomUUID(),
-                "수령 업체",
+                supplier,
+                receiver,
                 List.of(product),
                 OrderStatusResponseV1.of(OrderStatus.PREPARING),
                 "11월 5일 오전 납품 부탁드립니다.",
