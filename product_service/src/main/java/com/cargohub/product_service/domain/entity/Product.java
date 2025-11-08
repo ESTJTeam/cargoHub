@@ -1,6 +1,8 @@
 package com.cargohub.product_service.domain.entity;
 
 import com.cargohub.product_service.common.BaseEntity;
+import com.cargohub.product_service.domain.exception.ProductErrorCode;
+import com.cargohub.product_service.domain.exception.ProductException;
 import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
 import jakarta.persistence.*;
@@ -73,6 +75,9 @@ public class Product extends BaseEntity {
     }
 
     public void decreaseStock(int quantity) {
+        if(this.stockQuantity < quantity) {
+            throw new ProductException(ProductErrorCode.OUT_OF_STOCK);
+        }
         this.stockQuantity -= quantity;
     }
 

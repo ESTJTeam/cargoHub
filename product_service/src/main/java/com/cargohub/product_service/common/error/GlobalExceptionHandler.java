@@ -1,6 +1,5 @@
 package com.cargohub.product_service.common.error;
 
-import com.cargohub.product_service.presentation.error.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -25,7 +24,7 @@ public class GlobalExceptionHandler {
         ErrorCode code = e.getErrorCode();
         String path = request.getMethod() + " " + request.getRequestURI();
 
-        ErrorResponse response = new ErrorResponse(code.getStatus().value(), code.name(), code.getMessage(), path);
+        ErrorResponse response = new ErrorResponse(code.getStatus().value(), code.getCode(), code.getMessage(), path);
 
         return ResponseEntity.status(code.getStatus()).body(response);
     }
