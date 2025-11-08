@@ -17,6 +17,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +48,7 @@ public class OrderController {
                 UUID.randomUUID(),
                 "상품 1",
                 10000,
-                 10000
+                 BigDecimal.valueOf(10000)
         );
 
         CreateOrderResponseV1 responseV1 = new CreateOrderResponseV1(
@@ -89,7 +90,7 @@ public class OrderController {
                 UUID.randomUUID(),
                 "상품 명",
                 1000000,
-                10000
+                BigDecimal.valueOf(10000)
         );
 
         FirmInfoResponseV1 supplier = new FirmInfoResponseV1(

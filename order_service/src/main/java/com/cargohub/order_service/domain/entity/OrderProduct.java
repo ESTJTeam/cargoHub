@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -17,8 +18,8 @@ import java.util.UUID;
 public class OrderProduct {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     @Embedded
@@ -29,25 +30,30 @@ public class OrderProduct {
     private String productName;
 
     @Column(name = "product_price", nullable = false)
-    private Integer productPrice;
+    private BigDecimal productPrice;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @PrePersist
-    public void prePersist() {
-        this.id = UUID.randomUUID();
-    }
+    public OrderProduct(ProductId productId, String productName, BigDecimal productPrice, Integer quantity) {
+        validateProduct(productId, productName, productPrice);
 
-    public OrderProduct(ProductId productId, String productName, Integer productPrice, Integer quantity) {
         this.productId = productId;
         this.productName = productName;
         this.productPrice = productPrice;
         this.quantity = quantity;
     }
 
-    public static OrderProduct ofNewOrderProduct(ProductId productId, String productName, Integer productPrice, Integer quantity) {
-        return new OrderProduct(productId, productName, productPrice, quantity);
+    private void validateProduct(ProductId productId, String productName, BigDecimal productPrice) {
+        if (productId == null) {
+            throw new IllegalArgumentException("상품 ID는 필수입니다");
+        }
+        if (productName == null || productName.trim().isEmpty()) {
+            throw new IllegalArgumentException("상품명은 필수입니다");
+        }
+        if (productPrice == null || productPrice.signum() <= 0) {
+            throw new IllegalArgumentException("상품 가격은 0보다 커야 합니다");
+        }
     }
 
 }

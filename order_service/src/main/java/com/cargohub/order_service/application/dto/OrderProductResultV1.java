@@ -2,13 +2,14 @@ package com.cargohub.order_service.application.dto;
 
 import com.cargohub.order_service.domain.entity.OrderProduct;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record OrderProductResultV1(
         UUID productId,
         String name,
         Integer quantity,
-        Integer productPrice
+        BigDecimal productPrice
 ) {
 
     public static OrderProductResultV1 from(OrderProduct orderProduct) {
