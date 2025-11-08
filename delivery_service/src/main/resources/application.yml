@@ -1,0 +1,30 @@
+spring:
+  config:
+    import: optional:file:${user.dir}/delivery_service/.env[.properties]
+  application:
+    name: delivery-service
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO}
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    generate-ddl: true
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
+
+server:
+  port: ${DELIVERY_SERVER_PORT}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL}
