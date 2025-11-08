@@ -10,22 +10,18 @@ public record CreateProductResultV1 (
         UUID id,
         String name,
         UUID firmId,
-        String firmName,
         UUID hubId,
-        String hubName,
         Integer stockQuantity,
         BigDecimal price,
         boolean sellable,
         LocalDateTime createdAt
 ) {
-    public static CreateProductResultV1 from(Product product, String firmName, String hubName) {
+    public static CreateProductResultV1 from(Product product) {
         return new CreateProductResultV1(
                 product.getId(),
                 product.getName(),
                 product.getFirmId().getId(),
-                firmName,
                 product.getHubId().getId(),
-                hubName,
                 product.getStockQuantity(),
                 product.getPrice(),
                 product.getSellable(),
