@@ -1,10 +1,10 @@
-package firm.service;
+package com.cargohub.firm_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ServiceApplicationTests {
+class FirmServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
