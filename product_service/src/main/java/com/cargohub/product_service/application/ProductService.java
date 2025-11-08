@@ -26,10 +26,10 @@ public class ProductService {
     public CreateProductResultV1 createProduct(CreateProductCommandV1 createProductCommandV1) {
         // todo: 권한 체크
 
-        // todo: 업체 존재 확인 - getId
+        // todo: 업체 존재 확인
 
         FirmId firmId = FirmId.of(createProductCommandV1.firmId());
-       // todo: 허브 존재 확인 - getId, 담당허브인지 확인
+       // todo: 허브 존재 확인, 담당허브인지 확인
 
         HubId hubId = HubId.of(createProductCommandV1.hubId());
         Product product = Product.ofNewProduct(
