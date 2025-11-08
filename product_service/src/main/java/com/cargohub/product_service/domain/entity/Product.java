@@ -60,7 +60,7 @@ public class Product extends BaseEntity {
     }
 
     public static Product ofNewProduct(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID createdBy) {
-        return new Product(name, firmId, hubId, stockQuantity, price, sellable, createdBy);
+        return new Product(name, firmId, hubId, stockQuantity, price, sellable == null || sellable, createdBy);
     }
 
     public void update(String name, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID updatedBy) {
