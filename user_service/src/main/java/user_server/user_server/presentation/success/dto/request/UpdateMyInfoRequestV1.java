@@ -4,6 +4,7 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import user_server.user_server.application.dto.command.UpdateMyInfoCommandV1;
 import user_server.user_server.domain.entity.Role;
 
 public record UpdateMyInfoRequestV1(
@@ -33,5 +34,15 @@ public record UpdateMyInfoRequestV1(
     @AssertTrue(message = "role은 DELIVERY_MANAGER 또는 SUPPLIER_MANAGER만 가능합니다.")
     public boolean isValidRole() {
         return role == Role.DELIVERY_MANAGER || role == Role.SUPPLIER_MANAGER;
+    }
+
+    public UpdateMyInfoCommandV1 toUpdateMyInfoCommandV1() {
+        return UpdateMyInfoCommandV1.builder()
+            .slackId(slackId)
+            .username(username)
+            .email(email)
+            .nickname(nickname)
+            .role(role)
+            .build();
     }
 }

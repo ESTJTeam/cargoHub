@@ -1,4 +1,4 @@
-package user_server.user_server.infra.sercurity.dto;
+package user_server.user_server.libs.sercurity.dto;
 
 import java.util.UUID;
 import lombok.Getter;

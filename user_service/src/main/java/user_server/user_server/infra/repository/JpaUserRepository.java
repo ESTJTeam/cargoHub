@@ -27,7 +27,12 @@ public interface JpaUserRepository extends JpaRepository<User, UUID>{
     List<User> findPendingUser(@Param("status") SignupStatus status);
 
     @Query("SELECT u from User u where u.id =:userId and u.role =:role")
-    Optional<User> findMasterUser(UUID userId, @Param("role") Role role);
+    Optional<User> findMasterUser(@Param("userId") UUID userId, @Param("role") Role role);
 
+    Optional<User> findBySlackId(String slackId);
+
+    Optional<User> findByNickname(String nickname);
+
+    Optional<User> findByEmail(String email);
 }
 

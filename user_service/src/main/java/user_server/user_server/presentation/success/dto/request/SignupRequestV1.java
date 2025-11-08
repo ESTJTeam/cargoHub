@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.UUID;
+import user_server.user_server.application.dto.command.SignupCommandV1;
 import user_server.user_server.domain.entity.Role;
 
 public record SignupRequestV1(
@@ -47,6 +47,17 @@ public record SignupRequestV1(
     @AssertTrue(message = "role은 DELIVERY_MANAGER 또는 SUPPLIER_MANAGER만 가능합니다.")
     public boolean isValidRole() {
         return role == Role.DELIVERY_MANAGER || role == Role.SUPPLIER_MANAGER;
+    }
+
+    public SignupCommandV1 toSignupCommandV1() {
+        return SignupCommandV1.builder()
+            .slackId(slackId)
+            .username(username)
+            .email(email)
+            .nickname(nickname)
+            .password(password)
+            .role(role)
+            .build();
     }
 
 }

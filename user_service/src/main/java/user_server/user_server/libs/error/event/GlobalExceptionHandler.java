@@ -1,4 +1,4 @@
-package user_server.user_server.presentation.error.event;
+package user_server.user_server.libs.error.event;
 
 
 import jakarta.persistence.EntityNotFoundException;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import user_server.user_server.presentation.error.BusinessException;
-import user_server.user_server.presentation.error.ErrorCode;
-import user_server.user_server.presentation.error.dto.ErrorResponse;
+import user_server.user_server.libs.error.BusinessException;
+import user_server.user_server.libs.error.ErrorCode;
+import user_server.user_server.libs.error.dto.ErrorResponse;
 
 
 

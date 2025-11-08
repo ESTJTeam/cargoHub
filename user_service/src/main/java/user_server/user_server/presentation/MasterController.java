@@ -19,16 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import user_server.user_server.application.MasterUserService;
-import user_server.user_server.application.dto.command.SignupStatusCommandV1;
-import user_server.user_server.application.dto.command.UpdateUserInfoCommandV1;
-import user_server.user_server.application.dto.query.UserInfoQueryV1;
 import user_server.user_server.application.dto.query.UserListQueryV1;
-import user_server.user_server.application.mapper.UserMapper;
 import user_server.user_server.presentation.success.dto.BaseResponse;
 import user_server.user_server.presentation.success.dto.BaseStatus;
 import user_server.user_server.presentation.success.dto.request.SignupStatusRequestV1;
-import user_server.user_server.presentation.success.dto.request.UserSearchFilter;
 import user_server.user_server.presentation.success.dto.request.UpdateUserInfoRequestV1;
+import user_server.user_server.presentation.success.dto.request.UserSearchFilter;
 import user_server.user_server.presentation.success.dto.response.UserInfoResponseV1;
 import user_server.user_server.presentation.success.dto.response.UserListResponseV1;
 
@@ -47,8 +43,7 @@ public class MasterController {
         @RequestParam(defaultValue = "ALL") UserSearchFilter userSearchFilter,
         @PageableDefault(page = 0, size = 10, sort = "createAt", direction = Direction.DESC) Pageable pageable) {
         List<UserListQueryV1> userListQuery = masterUserService.readAllUsers(accessToken, userSearchFilter, pageable);
-        List<UserListResponseV1> response = UserMapper.toUserListResponse(userListQuery);
-        return BaseResponse.ok(response, BaseStatus.OK);
+        return BaseResponse.ok(UserListResponseV1.fromUserListResponse(userListQuery), BaseStatus.OK);
     }
 
 
@@ -56,27 +51,24 @@ public class MasterController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<UserInfoResponseV1> readOneUsers(
         @RequestHeader("Authorization") @NotBlank String accessToken, @PathVariable UUID userId) {
-        UserInfoQueryV1 userInfoQuery = masterUserService.readUser(accessToken, userId);
-        UserInfoResponseV1 response = UserMapper.toUserInfoResponse(userInfoQuery);
-        return BaseResponse.ok(response, BaseStatus.OK);
+        return BaseResponse.ok(
+            UserInfoResponseV1.fromUserInfoResponse(masterUserService.readUser(accessToken, userId)), BaseStatus.OK);
     }
 
 
     @PostMapping("/users/{userId}/status")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateStatus(
-        @RequestHeader("Authorization") @NotBlank String accessToken, @PathVariable UUID userId, @RequestBody SignupStatusRequestV1 request) {
-        SignupStatusCommandV1 signupStatusCommand = new SignupStatusCommandV1(request.signupStatus());
-        masterUserService.updateStatus(accessToken, userId, signupStatusCommand);
+        @RequestHeader("Authorization") @NotBlank String accessToken, @PathVariable UUID userId, @RequestBody SignupStatusRequestV1 signupStatusRequest) {
+        masterUserService.updateStatus(accessToken, userId, signupStatusRequest.toSignupStatusCommand());
         return BaseResponse.ok(BaseStatus.OK);
     }
 
     @PatchMapping("/users/{userId}/edit")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateUserInfo(@RequestHeader("Authorization") @NotBlank String accessToken,
-        @PathVariable("userId") UUID userId, @RequestBody UpdateUserInfoRequestV1 request) {
-        UpdateUserInfoCommandV1 updateUserInfoCommand = UserMapper.toUpdateUserInfoCommandV1(request);
-        masterUserService.updateUserInfo(accessToken,userId, updateUserInfoCommand);
+        @PathVariable("userId") UUID userId, @RequestBody UpdateUserInfoRequestV1 updateUserInfoRequest) {
+        masterUserService.updateUserInfo(accessToken,userId, updateUserInfoRequest.toUpdateUserInfoCommand());
         return BaseResponse.ok(BaseStatus.OK);
     }
 

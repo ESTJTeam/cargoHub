@@ -1,4 +1,4 @@
-package user_server.user_server.infra.sercurity;
+package user_server.user_server.libs.sercurity;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;

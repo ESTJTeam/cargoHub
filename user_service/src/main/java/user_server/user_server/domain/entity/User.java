@@ -11,16 +11,13 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_user")
-@SQLRestriction("deleted_at IS NULL AND is_public = true")  //TODO 이건 DDD가 아님 수정 필요
 public class User extends BaseEntity {
 
     @Id
@@ -60,9 +57,8 @@ public class User extends BaseEntity {
 
     private LocalDateTime refreshTokenExpiresAt;
 
+    private UUID hubIdOrFirmId;
 
-// 배송원이나 업체 사람이 가입하는 형태?
-    @Builder
     public User(String slackId, String password, String username, Role role, String nickname, String email) {
         this.slackId = slackId;
         this.password = password;
@@ -107,19 +103,7 @@ public class User extends BaseEntity {
             !user.getSignupStatus().equals(SignupStatus.REJECTED);
     }
 
-    public static User createUser(String slackId, String password, String username, Role role,
-        String nickname, String email) {
-            return User.builder()
-                .username(username)
-                .email(email)
-                .nickname(nickname)
-                .password(password)
-                .role(role)
-                .slackId(slackId).build();
+    public static User createUser(String slackId, String password, String username, Role role, String nickname, String email) {
+        return new User(slackId, password, username, role, nickname, email);
         }
     }
-
-
-
-
-}

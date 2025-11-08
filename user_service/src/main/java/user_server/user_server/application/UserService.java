@@ -1,12 +1,10 @@
 package user_server.user_server.application;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotBlank;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import user_server.user_server.application.dto.command.DeleteCommandV1;
@@ -14,29 +12,21 @@ import user_server.user_server.application.dto.command.LoginCommandV1;
 import user_server.user_server.application.dto.command.SignupCommandV1;
 import user_server.user_server.application.dto.command.UpdateMyInfoCommandV1;
 import user_server.user_server.application.dto.query.MyInfoQueryV1;
-import user_server.user_server.infra.sercurity.dto.TokenBody;
-import user_server.user_server.application.mapper.UserMapper;
 import user_server.user_server.domain.entity.User;
 import user_server.user_server.domain.repository.UserRepository;
-import user_server.user_server.presentation.error.BusinessException;
-import user_server.user_server.presentation.error.ErrorCode;
-import user_server.user_server.presentation.success.dto.request.UpdateMyInfoRequestV1;
-import user_server.user_server.presentation.success.dto.response.MyInfoResponseV1;
-import user_server.user_server.presentation.unit.CookieUtils;
-import user_server.user_server.infra.sercurity.BCryptPasswordEncoderAdapter;
-import user_server.user_server.infra.sercurity.JwtTokenProvider;
+import user_server.user_server.libs.error.BusinessException;
+import user_server.user_server.libs.error.ErrorCode;
+import user_server.user_server.libs.sercurity.BCryptPasswordEncoderAdapter;
+import user_server.user_server.libs.sercurity.JwtTokenProvider;
+import user_server.user_server.libs.sercurity.dto.TokenBody;
+import user_server.user_server.libs.unit.CookieUtils;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
 
-    @Value("${custom.jwt.exp-time.access}")
-    private long accessTokenTime;
-
-    @Value("${custom.jwt.exp-time.refresh}")
-    private long refreshTokenTime;
-
+    private final UserValidationService userValidationService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoderAdapter passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -67,7 +57,6 @@ public class UserService {
         String refreshToken = jwtTokenProvider.issueRefreshToken(user.getId(), user.getRole(), user.getUsername());
         Duration ttl = ttlTime(refreshToken);
         user.updateRefreshToken(refreshToken, LocalDateTime.now().plus(ttl));
-        userRepository.save(user);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
         CookieUtils.setRefreshTokenCookie(response, refreshToken, ttl);
@@ -78,17 +67,14 @@ public class UserService {
 
     @Transactional
     public void logout(HttpServletResponse response, String accessToken) {
-        TokenBody tokenBody = jwtTokenProvider.parseJwt(accessToken);
-        User user = userRepository.findByUserId(tokenBody.getUserId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
+        User user = userValidationService.validateUser(accessToken);
         user.clearRefreshToken();
         CookieUtils.deleteRefreshTokenCookie(response);
     }
 
     @Transactional
     public void delete(HttpServletResponse response, String accessToken, DeleteCommandV1 deleteRequest) {
-        TokenBody tokenBody = jwtTokenProvider.parseJwt(accessToken);
-        User user = userRepository.findByUsername(tokenBody.getUsername()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userValidationService.validateUser(accessToken);
 
         if (! passwordEncoder.matches(deleteRequest.password(), user.getPassword())){
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
@@ -101,8 +87,8 @@ public class UserService {
     @Transactional
     public void reissue(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {throw new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);}
-        TokenBody rtBody = jwtTokenProvider.parseJwt(refreshToken);
-        User user = userRepository.findPublicById(rtBody.getUserId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        TokenBody tokenBody = jwtTokenProvider.parseJwt(refreshToken);
+        User user = userRepository.findPublicById(tokenBody.getUserId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (!refreshToken.equals(user.getRefreshToken())) {throw new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);}
 
@@ -118,44 +104,21 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-        public MyInfoQueryV1 readMyInfo(@NotBlank String accessToken) {
-        TokenBody tokenBody = jwtTokenProvider.parseJwt(accessToken);
-        User user = userRepository.findByUserId(tokenBody.getUserId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        return UserMapper.toMyInfoQuery(user);
-
+        public MyInfoQueryV1 readMyInfo(String accessToken) {
+        User user = userValidationService.validateUser(accessToken);
+        return MyInfoQueryV1.fromMyInfoQuery(user);
     }
 
     @Transactional
-    public void updateMyInfo(@NotBlank String accessToken, UpdateMyInfoCommandV1 request) {
-        TokenBody tokenBody = jwtTokenProvider.parseJwt(accessToken);
-        User user = userRepository.findByUserId(tokenBody.getUserId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    public void updateMyInfo( String accessToken, UpdateMyInfoCommandV1 request) {
+        User user = userValidationService.validateUser(accessToken);
 
-        if (request.slackId() != null && !request.slackId().equals(user.getSlackId())) {
-            userRepository.findBySlackId(request.slackId()).ifPresent(u -> { throw new BusinessException(ErrorCode.DUPLICATE_SLACK_ID); });
-            user.updateSlackId(request.slackId());
-        }
-
-        if (request.username() != null && !request.username().equals(user.getUsername())) {
-            userRepository.findByUsername(request.username()).ifPresent(u -> { throw new BusinessException(ErrorCode.DUPLICATE_USERNAME); });
-            user.updateUsername(request.username());
-        }
-
-        if (request.nickname() != null && !request.nickname().equals(user.getNickname())) {
-            userRepository.findByNickname(request.nickname()).ifPresent(u -> { throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME); });
-            user.updateNickname(request.nickname());
-        }
-
-        if (request.email() != null && !request.email().equals(user.getEmail())) {
-            userRepository.findByEmail(request.email()).ifPresent(u -> { throw new BusinessException(ErrorCode.DUPLICATE_EMAIL); });
-            user.updateEmail(request.email());
-        }
-
-        if (request.role() != null && !request.role().equals(user.getRole())) {
-            user.updateRole(request.role());
-        }
+        userValidationService.duplicateValidateSlackIdUpdate(user, request.slackId());
+        userValidationService.duplicateValidateUsernameUpdate(user, request.username());
+        userValidationService.duplicateValidateEmailUpdate(user, request.email());
+        userValidationService.duplicateValidateNicknameUpdate(user, request.nickname());
+        userValidationService.validateRoleUpdate(user, request.role());
     }
-
-
 
 
     private Duration ttlTime(String jwt) {

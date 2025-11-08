@@ -1,4 +1,4 @@
-package user_server.user_server.infra.sercurity;
+package user_server.user_server.libs.sercurity;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,9 +14,9 @@ import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import user_server.user_server.infra.sercurity.dto.TokenBody;
 import user_server.user_server.application.port.TokenIssuer;
 import user_server.user_server.domain.entity.Role;
+import user_server.user_server.libs.sercurity.dto.TokenBody;
 
 @Slf4j
 @Component

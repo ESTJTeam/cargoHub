@@ -1,4 +1,4 @@
-package user_server.user_server.presentation.error;
+package user_server.user_server.libs.error;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

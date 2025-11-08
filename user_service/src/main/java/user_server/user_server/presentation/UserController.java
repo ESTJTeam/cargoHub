@@ -17,20 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import user_server.user_server.application.UserService;
-import user_server.user_server.application.dto.command.DeleteCommandV1;
-import user_server.user_server.application.dto.command.LoginCommandV1;
-import user_server.user_server.application.dto.command.SignupCommandV1;
-import user_server.user_server.application.dto.command.UpdateMyInfoCommandV1;
-import user_server.user_server.application.dto.query.MyInfoQueryV1;
-import user_server.user_server.application.mapper.UserMapper;
 import user_server.user_server.presentation.success.dto.BaseResponse;
 import user_server.user_server.presentation.success.dto.BaseStatus;
 import user_server.user_server.presentation.success.dto.request.DeleteRequestV1;
 import user_server.user_server.presentation.success.dto.request.LoginRequestV1;
+import user_server.user_server.presentation.success.dto.request.SignupRequestV1;
 import user_server.user_server.presentation.success.dto.request.UpdateMyInfoRequestV1;
 import user_server.user_server.presentation.success.dto.response.MyInfoResponseV1;
-import user_server.user_server.presentation.success.dto.request.SignupRequestV1;
-import user_server.user_server.presentation.success.dto.response.UserInfoResponseV1;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,17 +35,15 @@ public class UserController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<Void> signup(@RequestBody @Valid SignupRequestV1 signupRequestV1) {
-        SignupCommandV1 signupCommand = UserMapper.toSignupCommandV1(signupRequestV1);
-        userService.create(signupCommand);
+    public BaseResponse<Void> signup(@RequestBody @Valid SignupRequestV1 signupRequest) {
+        userService.create(signupRequest.toSignupCommandV1());
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> login(@RequestBody @Valid LoginRequestV1 loginRequestV1, HttpServletResponse response) {
-        LoginCommandV1 loginCommand = new LoginCommandV1(loginRequestV1.username(), loginRequestV1.password());
-        userService.login(loginCommand, response);
+    public BaseResponse<Void> login(@RequestBody @Valid LoginRequestV1 loginRequest, HttpServletResponse response) {
+        userService.login(loginRequest.toLoginCommand(), response);
         return BaseResponse.ok(BaseStatus.OK);
     }
 
@@ -67,16 +58,14 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> delete(HttpServletResponse httpServletResponse,
         @RequestHeader("Authorization") @NotBlank String accessToken, @RequestBody @Valid DeleteRequestV1 deleteRequest) {
-        DeleteCommandV1 deleteCommand = new DeleteCommandV1(deleteRequest.username(), deleteRequest.password());
-        userService.delete(httpServletResponse, accessToken, deleteCommand);
+        userService.delete(httpServletResponse, accessToken, deleteRequest.toCommand());
         return BaseResponse.ok(BaseStatus.OK);
     }
 
 
     @PostMapping("/reissue")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> reissue(@CookieValue(value = "refreshToken", required = false)String refreshToken,
-        HttpServletResponse response) {
+    public BaseResponse<Void> reissue(@CookieValue(value = "refreshToken", required = false)String refreshToken, HttpServletResponse response) {
         userService.reissue(refreshToken, response);
         return BaseResponse.ok(BaseStatus.OK);
     }
@@ -85,19 +74,16 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<MyInfoResponseV1> readMyInfo(
         @RequestHeader("Authorization") @NotBlank String accessToken) {
-        MyInfoQueryV1 myInfoQuery = userService.readMyInfo(accessToken);
-        MyInfoResponseV1 response = UserMapper.toUserInfoResponse(myInfoQuery);
-        return BaseResponse.ok(response, BaseStatus.OK);
+        return BaseResponse.ok(
+            MyInfoResponseV1.fromUserInfoResponse(userService.readMyInfo(accessToken)), BaseStatus.OK);
     }
 
     @PatchMapping("/myinfo")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> updateMyInfo(@RequestHeader("Authorization") @NotBlank String accessToken, @RequestBody UpdateMyInfoRequestV1 request) {
-        UpdateMyInfoCommandV1 updateMyInfoCommand = UserMapper.toUpdateMyInfoCommandV1(request);
-        userService.updateMyInfo(accessToken, updateMyInfoCommand);
+    public BaseResponse<Void> updateMyInfo(@RequestHeader("Authorization") @NotBlank String accessToken, @RequestBody UpdateMyInfoRequestV1 updateMyInfoRequest) {
+        userService.updateMyInfo(accessToken, updateMyInfoRequest.toUpdateMyInfoCommandV1());
         return BaseResponse.ok(BaseStatus.OK);
     }
-
 
 
     @GetMapping("/test")

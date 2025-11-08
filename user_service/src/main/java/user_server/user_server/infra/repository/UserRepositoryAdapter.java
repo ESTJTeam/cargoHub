@@ -17,6 +17,21 @@ public class UserRepositoryAdapter implements UserRepository {
     private final JpaUserRepository jpaUserRepository;
 
     @Override
+    public Optional<User> findBySlackId(String slackId) {
+        return jpaUserRepository.findBySlackId(slackId);
+    }
+
+    @Override
+    public Optional<User> findByNickname(String nickname) {
+        return jpaUserRepository.findByNickname(nickname);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return jpaUserRepository.findByEmail(email);
+    }
+
+    @Override
     public void save(User user) {
         jpaUserRepository.save(user);
     }
