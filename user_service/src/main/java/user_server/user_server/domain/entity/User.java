@@ -57,7 +57,7 @@ public class User extends BaseEntity {
 
     private LocalDateTime refreshTokenExpiresAt;
 
-    private UUID hubIdOrFirmId;
+    //private UUID hubIdOrFirmId;
 
     public User(String slackId, String password, String username, Role role, String nickname, String email) {
         this.slackId = slackId;
