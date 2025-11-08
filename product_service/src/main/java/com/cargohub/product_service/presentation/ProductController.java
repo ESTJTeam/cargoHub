@@ -1,6 +1,8 @@
 package com.cargohub.product_service.presentation;
 
+import com.cargohub.product_service.application.ProductService;
 import com.cargohub.product_service.application.command.*;
+import com.cargohub.product_service.application.dto.CreateProductResultV1;
 import com.cargohub.product_service.presentation.dto.request.CreateProductRequestV1;
 import com.cargohub.product_service.presentation.dto.request.UpdateProductRequestV1;
 import com.cargohub.product_service.presentation.dto.request.UpdateProductStockRequestV1;
@@ -28,6 +30,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
 
+    private final ProductService productService;
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request){
@@ -42,24 +46,12 @@ public class ProductController {
                 UUID.randomUUID() // todo: 생성자 ID로 수정
         );
 
-        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
-//        productService.createProduct(commandV1, user);
+        CreateProductResultV1 result = productService.createProduct(commandV1);
 
-        // 응답 생성
-        CreateProductResponseV1 responseV1 = new CreateProductResponseV1(
-                UUID.randomUUID(),
-                "상품 명",
-                UUID.randomUUID(),
-                "업체 명",
-                UUID.randomUUID(),
-                "허브 명",
-                100000,
-                BigDecimal.valueOf(10000),
-                true,
-                LocalDateTime.now()
+        return BaseResponse.ok(
+                CreateProductResponseV1.from(result),
+                BaseStatus.CREATED
         );
-
-        return BaseResponse.ok(responseV1, BaseStatus.CREATED);
     }
 
     @GetMapping

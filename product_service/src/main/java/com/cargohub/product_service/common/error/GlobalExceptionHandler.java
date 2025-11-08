@@ -1,95 +1,84 @@
 package com.cargohub.product_service.common.error;
 
-import com.cargohub.product_service.presentation.error.ErrorCode;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e, HttpServletRequest request) {
-
-        log.warn("비즈니스 규칙 위반: {}", e.getMessage());
-
         ErrorCode code = e.getErrorCode();
         String path = request.getMethod() + " " + request.getRequestURI();
-
-        ErrorResponse response = new ErrorResponse(code.getStatus().value(), code.name(), code.getMessage(), path);
-
-        return ResponseEntity.status(code.getStatus()).body(response);
+        return ResponseEntity.status(code.getStatus()).body(ErrorResponse.builder()
+                .status(code.getStatus().value())
+                .code(code.getCode())
+                .message(code.getMessage())
+                .path(path)
+                .build());
     }
-
+    // IllegalArgumentException 처리
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
+        String path = request.getMethod() + " " + request.getRequestURI();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .code("INVALID_ARGUMENT")
+                .message(e.getMessage())
+                .path(path)
+                .build());
+    }
+    // EntityNotFoundException 처리 (JPA 프록시 객체 관련)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException e, HttpServletRequest request) {
+        String path = request.getMethod() + " " + request.getRequestURI();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .code("ENTITY_NOT_FOUND")
+                .message(e.getMessage() != null ? e.getMessage() : "요청한 리소스를 찾을 수 없습니다.")
+                .path(path)
+                .build());
+    }
+    // Validation 예외 처리 (@Valid 실패 시)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
-
-        log.warn("입력 검증 실패: {}", e.getMessage());
-
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String path = request.getMethod() + " " + request.getRequestURI();
         String message = e.getBindingResult().getFieldErrors().stream()
+                .findFirst()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("입력 검증 실패");
-        String path = request.getMethod() + " " + request.getRequestURI();
-
-        ErrorResponse response = new ErrorResponse(status.value(), status.name(), message, path);
-        return ResponseEntity.status(status).body(response);
+                .orElse("유효성 검증에 실패했습니다.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .code("VALIDATION_FAILED")
+                .message(message)
+                .path(path)
+                .build());
     }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
-
-        log.warn("제약 위반: {}", e.getMessage());
-
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        String message = e.getConstraintViolations().stream()
-                .map(ConstraintViolation::getMessage)
-                .findFirst()
-                .orElse("제약 위반이 발생했습니다");
-
+    // 타입 불일치 예외 처리 (UUID 파싱 실패 등)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
         String path = request.getMethod() + " " + request.getRequestURI();
-
-        ErrorResponse response = new ErrorResponse(status.value(), status.name(), message, path);
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .code("TYPE_MISMATCH")
+                .message("잘못된 형식의 데이터입니다: " + e.getName())
+                .path(path)
+                .build());
     }
-
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ErrorResponse> handleBindException(BindException e, HttpServletRequest request) {
-
-        log.warn("바인딩 예외: {}", e.getMessage());
-
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        String message = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("바인딩 예외");
-        String path = request.getMethod() + " " + request.getRequestURI();
-
-        ErrorResponse response = new ErrorResponse(status.value(), status.name(), message, path);
-        return ResponseEntity.status(status).body(response);
-    }
-
+    // 기타 모든 예외 처리 (최종 방어선)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleInternalServerError(Exception e, HttpServletRequest request) {
-
-        log.error("서버 내부 오류 발생", e);
-
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+    public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         String path = request.getMethod() + " " + request.getRequestURI();
-
-        ErrorResponse response = new ErrorResponse(status.value(), status.name(), e.getMessage(), path);
-
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .code("INTERNAL_SERVER_ERROR")
+                .message("서버 내부 오류가 발생했습니다.")
+                .path(path)
+                .build());
     }
-
 }

@@ -1,6 +1,8 @@
 package com.cargohub.product_service.domain.entity;
 
 import com.cargohub.product_service.common.BaseEntity;
+import com.cargohub.product_service.domain.exception.ProductErrorCode;
+import com.cargohub.product_service.domain.exception.ProductException;
 import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
 import jakarta.persistence.*;
@@ -60,7 +62,7 @@ public class Product extends BaseEntity {
     }
 
     public static Product ofNewProduct(String name, FirmId firmId, HubId hubId, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID createdBy) {
-        return new Product(name, firmId, hubId, stockQuantity, price, sellable, createdBy);
+        return new Product(name, firmId, hubId, stockQuantity, price, sellable == null || sellable, createdBy);
     }
 
     public void update(String name, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID updatedBy) {
@@ -73,6 +75,9 @@ public class Product extends BaseEntity {
     }
 
     public void decreaseStock(int quantity) {
+        if(this.stockQuantity < quantity) {
+            throw new ProductException(ProductErrorCode.OUT_OF_STOCK);
+        }
         this.stockQuantity -= quantity;
     }
 

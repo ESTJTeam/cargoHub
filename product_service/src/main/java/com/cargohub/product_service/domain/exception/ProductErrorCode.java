@@ -1,11 +1,12 @@
-package com.cargohub.product_service.presentation.error;
+package com.cargohub.product_service.domain.exception;
 
+import com.cargohub.product_service.common.error.ErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 
 @Getter
-public enum ErrorCode {
+public enum ProductErrorCode implements ErrorCode {
 
     HUB_ID_REQUIRED(HttpStatus.BAD_REQUEST, "허브 ID가 필요합니다."),
     FIRM_ID_REQUIRED(HttpStatus.BAD_REQUEST, "업체 ID가 필요합니다."),
@@ -22,8 +23,13 @@ public enum ErrorCode {
     private final HttpStatus status;
     private final String message;
 
-    ErrorCode(HttpStatus status, String message) {
+    ProductErrorCode(HttpStatus status, String message) {
         this.status = status;
         this.message = message;
+    }
+
+    @Override
+    public String getCode() {
+        return this.name();
     }
 }
