@@ -1,19 +1,61 @@
 package com.cargohub.order_service.domain.vo;
 
+import lombok.Getter;
 
+@Getter
 public enum OrderStatus {
 
     /** 상품이 출고 준비 중인 상태 */
-    PREPARING("출고준비중"),
+    PREPARING("출고준비중") {
+        @Override
+        public boolean canTransitionTo(OrderStatus newStatus) {
+            return newStatus == SHIPPED || newStatus == CANCELLED;
+        }
+
+        @Override
+        public boolean canBeCancelled() {
+            return true;
+        }
+    },
 
     /** 배송이 시작된 상태 (배송 엔티티 생성 후 연동) */
-    IN_DELIVERY("배송중"),
+    SHIPPED("배송중") {
+        @Override
+        public boolean canTransitionTo(OrderStatus newStatus) {
+            return newStatus == DELIVERED;
+        }
+
+        @Override
+        public boolean canBeCancelled() {
+            return false;
+        }
+    },
 
     /** 수령 업체가 주문을 수령 완료한 상태 */
-    DELIVERED("납품완료"),
+    DELIVERED("배송 완료") {
+        @Override
+        public boolean canTransitionTo(OrderStatus newStatus) {
+            return false;
+        }
+
+        @Override
+        public boolean canBeCancelled() {
+            return false;
+        }
+    },
 
     /** 주문이 취소된 상태 (논리삭제 처리) */
-    CANCELLED("주문취소");
+    CANCELLED("주문 취소") {
+        @Override
+        public boolean canTransitionTo(OrderStatus newStatus) {
+            return false;
+        }
+
+        @Override
+        public boolean canBeCancelled() {
+            return false;
+        }
+    };
 
     private final String label;
 
@@ -25,8 +67,10 @@ public enum OrderStatus {
         return name();
     }
 
-    public String getLabel() {
-        return label;
-    }
+    // 상태 전이 가능 여부 체크
+    public abstract boolean canTransitionTo(OrderStatus newStatus);
+
+    // 취소 가능 여부
+    public abstract boolean canBeCancelled();
 
 }

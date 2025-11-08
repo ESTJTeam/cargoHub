@@ -1,6 +1,8 @@
 package com.cargohub.order_service.domain.entity;
 
 import com.cargohub.order_service.common.BaseEntity;
+import com.cargohub.order_service.domain.exception.OrderErrorCode;
+import com.cargohub.order_service.domain.exception.OrderException;
 import com.cargohub.order_service.domain.vo.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -69,12 +71,23 @@ public class Order extends BaseEntity {
     }
 
     public static Order ofNewOrder(UUID createdBy, List<OrderProduct> orderProducts, SupplierId supplierId, ReceiverId receiverId, String requestNote) {
+
+        validateOrderProducts(orderProducts);
+
         return new Order(createdBy, orderProducts, supplierId, receiverId,null, null, requestNote, OrderStatus.PREPARING);
     }
 
-    public void updateDelivery(HubDeliveryId hubDeliveryId, FirmDeliveryId firmDeliveryId) {
+    private static void validateOrderProducts(List<OrderProduct> orderProducts) {
+
+        if(orderProducts.isEmpty()) {
+            throw new OrderException(OrderErrorCode.ORDER_PRODUCT_EMPTY);
+        }
+    }
+
+    public void ship(HubDeliveryId hubDeliveryId, FirmDeliveryId firmDeliveryId) {
         this.hubDeliveryId = hubDeliveryId;
         this.firmDeliveryId = firmDeliveryId;
+        this.status = OrderStatus.SHIPPED;
     }
 
     public void updateStatus(OrderStatus status, UUID updatedBy){
@@ -83,9 +96,13 @@ public class Order extends BaseEntity {
     }
 
     public void cancel(UUID deletedBy) {
+
+        if(!status.canBeCancelled()) {
+            throw new OrderException(OrderErrorCode.ORDER_CANCELLATION_NOT_ALLOWED);
+        }
+
         this.status = OrderStatus.CANCELLED;
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
     }
-
 }
