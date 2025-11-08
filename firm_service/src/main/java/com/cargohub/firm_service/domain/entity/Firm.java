@@ -1,5 +1,6 @@
 package com.cargohub.firm_service.domain.entity;
 
+import com.cargohub.firm_service.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Table(name = "p_firm")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Firm {
+public class Firm extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

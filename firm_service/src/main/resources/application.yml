@@ -22,7 +22,7 @@ spring:
         one-indexed-parameters: true
 
 server:
-  port: ${PRODUCT_SERVER_PORT}
+  port: ${FIRM_SERVER_PORT}
 
 eureka:
   client:
