@@ -1,4 +1,4 @@
-package ai_server.presentation.success.dto.response;
+package ai_server.common.success;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

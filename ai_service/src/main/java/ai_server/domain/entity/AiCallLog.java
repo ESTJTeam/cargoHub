@@ -1,5 +1,6 @@
 package ai_server.domain.entity;
 
+import ai_server.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

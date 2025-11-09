@@ -1,4 +1,4 @@
-package ai_server.presentation.error.dto;
+package ai_server.common.error;
 
 import lombok.Builder;
 

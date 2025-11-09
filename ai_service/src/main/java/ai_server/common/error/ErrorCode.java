@@ -1,4 +1,4 @@
-package ai_server.presentation.error;
+package ai_server.common.error;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

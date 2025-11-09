@@ -1,4 +1,4 @@
-package ai_server.domain.entity;
+package ai_server.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
