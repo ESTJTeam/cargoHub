@@ -4,7 +4,6 @@ import com.cargohub.product_service.application.command.CreateProductCommandV1;
 import com.cargohub.product_service.application.command.UpdateProductCommandV1;
 import com.cargohub.product_service.application.command.UpdateProductStockCommandV1;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
-import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
 import com.cargohub.product_service.common.error.BusinessException;
 import com.cargohub.product_service.domain.entity.Product;
 import com.cargohub.product_service.domain.exception.ProductErrorCode;

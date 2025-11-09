@@ -55,6 +55,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@PageableDefault(size = 10) Pageable pageable) {
         // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
 //        productService.readProductPage(pageable, user);
@@ -74,6 +75,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReadProductDetailResponseV1> readProduct(@PathVariable("id") UUID id) {
         // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
 //        ReadProductDetailResultV1 productDetailResultV1 = productService.readProduct(id, user);
@@ -98,6 +100,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateProduct(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductRequestV1 request) {
 
         UpdateProductCommandV1 commandV1 = new UpdateProductCommandV1(
@@ -116,6 +119,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> deleteProduct(@PathVariable("id") UUID id) {
 
         DeleteProductCommandV1 commandV1 = new DeleteProductCommandV1(
@@ -130,6 +134,7 @@ public class ProductController {
     }
 
     @PostMapping("/decrease")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> decreaseStock(@RequestBody @Valid UpdateProductStockRequestV1 request) {
 
         UpdateProductStockCommandV1 commandV1 = UpdateProductStockCommandV1.from(request);
@@ -139,6 +144,7 @@ public class ProductController {
     }
 
     @PostMapping("/increase")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> increaseStock(@RequestBody @Valid UpdateProductStockRequestV1 request) {
 
         UpdateProductStockCommandV1 commandV1 = UpdateProductStockCommandV1.from(request);
