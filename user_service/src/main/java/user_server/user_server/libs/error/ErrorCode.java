@@ -1,4 +1,4 @@
-package user_server.user_server.presentation.error;
+package user_server.user_server.libs.error;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,12 @@ public enum ErrorCode {
 
     //409
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "재로그인이 필요합니다."),
-    ID_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 ID 입니다.");
+    DUPLICATE_USER(HttpStatus.CONFLICT, "이미 존재하는 유저입니다."),
+    DUPLICATE_SLACK_ID(HttpStatus.CONFLICT, "이미 존재하는 slackID"),
+    DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 존재하는 username"),
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 nickname"),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 email"),
+    ;
 
     private final HttpStatus status;
     private final String message;

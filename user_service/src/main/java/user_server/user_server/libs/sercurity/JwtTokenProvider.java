@@ -1,4 +1,4 @@
-package user_server.user_server.infra.sercurity;
+package user_server.user_server.libs.sercurity;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,9 +14,9 @@ import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import user_server.user_server.application.dto.TokenBody;
 import user_server.user_server.application.port.TokenIssuer;
 import user_server.user_server.domain.entity.Role;
+import user_server.user_server.libs.sercurity.dto.TokenBody;
 
 @Slf4j
 @Component
@@ -38,20 +38,23 @@ public class JwtTokenProvider implements TokenIssuer {
 
     @Override
     public String issueAccessToken(UUID id, Role role, String username) {
-        return issueToken(id, role, accessTokenTime, username);
+        String type = "access";
+        return issueToken(id, role, accessTokenTime, username, type);
     }
 
     @Override
     public String issueRefreshToken(UUID id, Role role, String username) {
-        return issueToken(id, role, refreshTokenTime, username);
+        String type = "refresh";
+        return issueToken(id, role, refreshTokenTime, username, type);
     }
 
-    private String issueToken(UUID id, Role role, Long expTime, String username) {
+    private String issueToken(UUID id, Role role, Long expTime, String username, String type) {
         Date now = new Date();
         return Jwts.builder()
             .subject(id.toString())
             .claim("role", role.name())
             .claim("username", username)
+            .claim("type", type)
             .issuedAt(now)
             .expiration(new Date(now.getTime() + expTime))
             .signWith(getSecretKey(), Jwts.SIG.HS256)
@@ -80,8 +83,10 @@ public class JwtTokenProvider implements TokenIssuer {
 
         String userId = parsed.getPayload().getSubject();
         String role = parsed.getPayload().get("role", String.class);
+        String username = parsed.getPayload().get("username", String.class);
+        String type = parsed.getPayload().get("type", String.class);
 
-        return new TokenBody(UUID.fromString(userId), Role.valueOf(role));
+        return new TokenBody(UUID.fromString(userId), Role.valueOf(role), username, type);
     }
 
     public Date getExpiration(String token) {

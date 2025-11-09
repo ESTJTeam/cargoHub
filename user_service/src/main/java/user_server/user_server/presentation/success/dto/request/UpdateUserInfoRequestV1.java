@@ -2,27 +2,15 @@ package user_server.user_server.presentation.success.dto.request;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import user_server.user_server.application.dto.command.SignupCommandV1;
+import user_server.user_server.application.dto.command.UpdateUserInfoCommandV1;
 import user_server.user_server.domain.entity.Role;
+import user_server.user_server.domain.entity.SignupStatus;
 
-public record SignupRequestV1(
-
-    @NotBlank(message = "slackId는 필수입니다.")
+public record UpdateUserInfoRequestV1(
     String slackId,
 
-    @NotBlank(message = "password는 필수입니다.")
-    @Size(min = 3, max = 100)
-    @Pattern(
-        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).*$",
-        message = "password는 대소문자, 숫자, 특수문자를 모두 포함해야 합니다."
-    )
-    String password,
-
-    @NotBlank(message = "username은 필수입니다.")
     @Size(min = 4, max = 100)
     @Pattern(regexp = "^[a-z0-9]+$", message = "username은 소문자(a~z)와 숫자(0~9)만 가능합니다.")
     String username,
@@ -30,16 +18,19 @@ public record SignupRequestV1(
     @Size(max = 100, message = "nickname은 100자 이하이어야 합니다.")
     String nickname,
 
-    @NotBlank(message = "email은 필수입니다.")
     @Email(message = "올바른 이메일 형식이 아닙니다.")
-    @Size(max = 255, message = "email은 100자 이하이어야 합니다.")
+    @Size(max = 255)
     // 선택적으로, 도메인 수준 검증 강화 (예: Gmail, Naver 등 허용)
-    @Pattern(
-        regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "이메일 형식이 올바르지 않습니다.")
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "이메일 형식이 올바르지 않습니다.")
     String email,
 
-    @NotNull(message = "DELIVERY_MANAGER, SUPPLIER_MANAGER 중 하나를 선택해야 합니다.")
-    Role role
+    Role role,
+
+    SignupStatus signupStatus,
+
+    Integer point
+
+
 
     // TODO 허브나 업체 id를 받고 존재하는 허브인지 체크 후 회원가입 ?
     // UUID hubIdOrFirmId
@@ -49,15 +40,15 @@ public record SignupRequestV1(
         return role == Role.DELIVERY_MANAGER || role == Role.SUPPLIER_MANAGER;
     }
 
-    public SignupCommandV1 toSignupCommandV1() {
-        return SignupCommandV1.builder()
+    public UpdateUserInfoCommandV1 toUpdateUserInfoCommand() {
+        return UpdateUserInfoCommandV1.builder()
             .slackId(slackId)
-            .username(username)
             .email(email)
             .nickname(nickname)
-            .password(password)
+            .username(username)
             .role(role)
+            .point(point)
+            .signupStatus(signupStatus)
             .build();
     }
-
 }

@@ -16,7 +16,7 @@ spring:
             - id: user-server
               uri: lb://user-server
               predicates:
-                - Path=/v1/user/**
+                - Path=/v1/user/**,/v1/master/**
 
 eureka:
   client:

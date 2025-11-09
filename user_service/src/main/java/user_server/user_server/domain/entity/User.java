@@ -11,16 +11,13 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_user")
-@SQLRestriction("deleted_at IS NULL AND is_public = true")  //TODO 이건 DDD가 아님 수정 필요
 public class User extends BaseEntity {
 
     @Id
@@ -34,7 +31,7 @@ public class User extends BaseEntity {
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100, nullable = false, unique = true)
     private String username;    // 이게 사용자 ID라 함
 
     @Column(length = 100, nullable = false)
@@ -60,9 +57,8 @@ public class User extends BaseEntity {
 
     private LocalDateTime refreshTokenExpiresAt;
 
+    //private UUID hubIdOrFirmId;
 
-// 배송원이나 업체 사람이 가입하는 형태?
-    @Builder
     public User(String slackId, String password, String username, Role role, String nickname, String email) {
         this.slackId = slackId;
         this.password = password;
@@ -75,7 +71,7 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void deleteUser(Long userId) {
+    public void deleteUser(UUID userId) {
         this.deletedBy = userId;
         this.deletedAt = LocalDateTime.now();
     }
@@ -83,13 +79,13 @@ public class User extends BaseEntity {
     public void updateSignupStatus(SignupStatus newStatus) {
         this.signupStatus = newStatus;
     }
-
+    public void updateSlackId(String newSlackId) {this.slackId = newSlackId;}
+    public void updateUsername(String username) {this.username = username;}
+    public void updateNickname(String nickname) {this.nickname = nickname;}
+    public void updateEmail(String email) {this.email = email;}
     public void updateRole(Role role) {this.role = role;}
+    public void updatePoint(int point) {this.point = point;}
 
-    /** 만료 여부 */
-    public boolean isRefreshExpired(LocalDateTime now) {
-        return refreshTokenExpiresAt == null || now.isAfter(refreshTokenExpiresAt);
-    }
 
     /** 리프레시 토큰 제거(로그아웃) */
     public void clearRefreshToken() {
@@ -107,7 +103,7 @@ public class User extends BaseEntity {
             !user.getSignupStatus().equals(SignupStatus.REJECTED);
     }
 
-
-
-
-}
+    public static User createUser(String slackId, String password, String username, Role role, String nickname, String email) {
+        return new User(slackId, password, username, role, nickname, email);
+        }
+    }
