@@ -133,8 +133,7 @@ public class ProductController {
     public BaseResponse<Void> decreaseStock(@RequestBody @Valid UpdateProductStockRequestV1 request) {
 
         UpdateProductStockCommandV1 commandV1 = UpdateProductStockCommandV1.from(request);
-        // todo: 애플리케이션 서비스 호출
-//        productService.decreaseStock(commandV1);
+        productService.decreaseStock(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
     }
@@ -143,8 +142,7 @@ public class ProductController {
     public BaseResponse<Void> increaseStock(@RequestBody @Valid UpdateProductStockRequestV1 request) {
 
         UpdateProductStockCommandV1 commandV1 = UpdateProductStockCommandV1.from(request);
-        // todo: 애플리케이션 서비스 호출
-//        productService.increaseStock(commandV1);
+        productService.increaseStock(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
     }

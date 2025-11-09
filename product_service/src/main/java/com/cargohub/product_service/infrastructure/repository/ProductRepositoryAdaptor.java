@@ -6,7 +6,9 @@ import com.cargohub.product_service.domain.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -23,5 +25,10 @@ public class ProductRepositoryAdaptor implements ProductRepository {
     @Override
     public Optional<Product> findById(UUID id) {
         return jpaProductRepository.findById(id);
+    }
+
+    @Override
+    public List<Product> findAllById(Set<UUID> id) {
+        return jpaProductRepository.findAllById(id);
     }
 }

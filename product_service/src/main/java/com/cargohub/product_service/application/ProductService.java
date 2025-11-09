@@ -2,7 +2,10 @@ package com.cargohub.product_service.application;
 
 import com.cargohub.product_service.application.command.CreateProductCommandV1;
 import com.cargohub.product_service.application.command.UpdateProductCommandV1;
+import com.cargohub.product_service.application.command.UpdateProductStockCommandV1;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
+import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
+import com.cargohub.product_service.common.error.BusinessException;
 import com.cargohub.product_service.domain.entity.Product;
 import com.cargohub.product_service.domain.exception.ProductErrorCode;
 import com.cargohub.product_service.domain.exception.ProductException;
@@ -14,7 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -71,8 +79,48 @@ public class ProductService {
         );
     }
 
+    @Transactional
+    public void decreaseStock(UpdateProductStockCommandV1 updateProductStockCommandV1) {
+
+        List<Product> products = findProductList(updateProductStockCommandV1.items().keySet());
+
+        Map<UUID, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        updateProductStockCommandV1.items().forEach((id, quantity) -> {
+            Product product = productMap.get(id);
+            if (product == null) {
+                throw new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
+            }
+
+            product.decreaseStock(quantity);
+        });
+    }
+
+    @Transactional
+    public void increaseStock(UpdateProductStockCommandV1 updateProductStockCommandV1) {
+
+        List<Product> products = findProductList(updateProductStockCommandV1.items().keySet());
+
+        Map<UUID, Product> productMap = products.stream()
+                        .collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        updateProductStockCommandV1.items().forEach((id, quantity) -> {
+            Product product = productMap.get(id);
+            if (product == null) {
+                throw new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
+            }
+
+            product.increaseStock(quantity);
+        });
+    }
+
     private Product findProduct(UUID productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    private List<Product> findProductList(Set<UUID> productIds) {
+        return productRepository.findAllById(productIds);
     }
 }
