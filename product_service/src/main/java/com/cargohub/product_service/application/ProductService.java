@@ -4,7 +4,6 @@ import com.cargohub.product_service.application.command.CreateProductCommandV1;
 import com.cargohub.product_service.application.command.UpdateProductCommandV1;
 import com.cargohub.product_service.application.command.UpdateProductStockCommandV1;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
-import com.cargohub.product_service.common.error.BusinessException;
 import com.cargohub.product_service.domain.entity.Product;
 import com.cargohub.product_service.domain.exception.ProductErrorCode;
 import com.cargohub.product_service.domain.exception.ProductException;
@@ -89,7 +88,7 @@ public class ProductService {
         updateProductStockCommandV1.items().forEach((id, quantity) -> {
             Product product = productMap.get(id);
             if (product == null) {
-                throw new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
             }
 
             product.decreaseStock(quantity);
@@ -107,7 +106,7 @@ public class ProductService {
         updateProductStockCommandV1.items().forEach((id, quantity) -> {
             Product product = productMap.get(id);
             if (product == null) {
-                throw new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
             }
 
             product.increaseStock(quantity);

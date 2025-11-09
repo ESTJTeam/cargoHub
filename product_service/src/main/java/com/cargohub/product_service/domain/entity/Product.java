@@ -66,6 +66,7 @@ public class Product extends BaseEntity {
     }
 
     public void update(String name, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID updatedBy) {
+
         if(name != null) this.name = name;
         if(stockQuantity != null) this.stockQuantity = stockQuantity;
         if(price != null) this.price = price;
@@ -75,6 +76,11 @@ public class Product extends BaseEntity {
     }
 
     public void decreaseStock(int quantity) {
+
+        if(quantity <= 0) {
+            throw new ProductException(ProductErrorCode.INVALID_DECREASE_QUANTITY);
+        }
+
         if(this.stockQuantity < quantity) {
             throw new ProductException(ProductErrorCode.OUT_OF_STOCK);
         }
@@ -82,6 +88,11 @@ public class Product extends BaseEntity {
     }
 
     public void increaseStock(int quantity) {
+
+        if(quantity <= 0) {
+            throw new ProductException(ProductErrorCode.INVALID_INCREASE_QUANTITY);
+        }
+
         this.stockQuantity += quantity;
     }
 }
