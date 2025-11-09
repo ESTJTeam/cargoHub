@@ -109,9 +109,8 @@ public class ProductController {
                 UUID.randomUUID() // todo: 수정 - 수정자 ID
         );
 
-        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
-//        productService.updateProduct(commandV1);
-
+        // todo: 사용자 정보 필요(id, role)
+        productService.updateProduct(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
     }
