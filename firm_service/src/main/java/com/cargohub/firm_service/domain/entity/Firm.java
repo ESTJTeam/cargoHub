@@ -21,7 +21,7 @@ public class Firm extends BaseEntity {
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,  
+            cascade = CascadeType.ALL,
             orphanRemoval = true)
     @JoinColumn(name = "firm_address_id")
     private FirmAddress address;            // 업체 주소 아이디(FK) (PRODUCER,RECEIVER)
@@ -45,5 +45,12 @@ public class Firm extends BaseEntity {
 
     public static Firm ofNewFirm(String name, String type, HubId hubId, FirmAddress address) {
         return new Firm(name, type, hubId, address);
+    }
+
+    public void update(String name, String type, HubId hubId, FirmAddress address) {
+        this.name = name;
+        this.address = address;
+        this.hubId = hubId;
+        this.type = FirmType.valueOf(type);
     }
 }

@@ -2,14 +2,18 @@ package com.cargohub.firm_service.presentation.controller;
 
 
 import com.cargohub.firm_service.application.command.CreateFirmCommandV1;
+import com.cargohub.firm_service.application.command.UpdateFirmCommandV1;
 import com.cargohub.firm_service.application.service.FirmServiceV1;
 import com.cargohub.firm_service.common.success.BaseResponse;
 import com.cargohub.firm_service.common.success.BaseStatus;
 import com.cargohub.firm_service.domain.entity.FirmAddress;
 import com.cargohub.firm_service.presentation.dto.request.CreateFirmRequestV1;
+import com.cargohub.firm_service.presentation.dto.request.UpdateFirmRequestV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/firms")
@@ -48,5 +52,39 @@ public class FirmControllerV1 {
         return BaseResponse.ok(
                 BaseStatus.CREATED
         );
+    }
+
+    @PutMapping("/{firmId}")
+    @ResponseStatus(HttpStatus.OK)  // 수정이니까 200 OK
+    public BaseResponse<Void> updateFirm(@PathVariable UUID firmId,
+                                         @RequestBody UpdateFirmRequestV1 request) {
+
+        var addrReq = request.address();
+        FirmAddress address = new FirmAddress(
+                addrReq.postalCode(),
+                addrReq.country(),
+                addrReq.region(),
+                addrReq.city(),
+                addrReq.district(),
+                addrReq.roadName(),
+                addrReq.buildingName(),
+                addrReq.detailAddress(),
+                addrReq.latitude(),
+                addrReq.longitude()
+        );
+
+        UpdateFirmCommandV1 command = new UpdateFirmCommandV1(
+                firmId,
+                request.name(),
+                request.type(),
+                request.hubId(),
+                address
+        );
+
+        firmService.updateFirm(command);
+
+        // BaseStatus에 UPDATED 같은 거 있으면 그거 쓰고,
+        // 없으면 OK로 써도 됨
+        return BaseResponse.ok(BaseStatus.OK);
     }
 }

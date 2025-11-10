@@ -1,6 +1,7 @@
 package com.cargohub.firm_service.application.service;
 
 import com.cargohub.firm_service.application.command.CreateFirmCommandV1;
+import com.cargohub.firm_service.application.command.UpdateFirmCommandV1;
 import com.cargohub.firm_service.domain.entity.Firm;
 import com.cargohub.firm_service.domain.port.HubValidatorPort;
 import com.cargohub.firm_service.domain.repository.FirmRepository;
@@ -8,6 +9,8 @@ import com.cargohub.firm_service.domain.vo.HubId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +39,29 @@ public class FirmServiceV1 {
         );
 
         return firmRepository.save(firm);
+    }
+
+    @Transactional
+    public void updateFirm(UpdateFirmCommandV1 command) {
+
+        UUID firmId = command.firmId();
+
+        // 기존 엔티티 조회
+        Firm firm = firmRepository.findById(command.firmId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 업체입니다. id=" + command.firmId()));
+
+        // HubId VO 변환 + 검증
+        HubId hubId = HubId.of(command.hubId());
+        if (!hubValidatorPort.validateHub(hubId)) {
+            throw new IllegalArgumentException("유효하지 않은 허브 ID입니다: " + hubId.getHubId());
+        }
+
+        // 엔티티에 값 반영
+        firm.update(
+                command.name(),
+                command.type(),
+                hubId,
+                command.address()
+        );
     }
 }
