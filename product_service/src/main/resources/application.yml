@@ -1,6 +1,6 @@
 spring:
   config:
-    import: optional:file:${user.dir}/product_service/.env[properties]
+    import: optional:file:${user.dir}/product_service/.env[.properties]
   application:
     name: product-service
   datasource:
