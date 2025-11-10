@@ -4,17 +4,20 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import slack_service.application.SlackService;
 import slack_service.application.dto.request.SlackDeadlineRequestV1;
 import slack_service.application.dto.request.SlackMessageRequestV1;
 import slack_service.common.success.BaseResponse;
 import slack_service.common.success.BaseStatus;
+import slack_service.presentation.dto.response.SlackLogListResponseV1;
 import slack_service.presentation.dto.response.SlackLogResponseV1;
 
 @RestController
@@ -69,6 +72,29 @@ public class SlackController {
     public BaseResponse<SlackLogResponseV1> getSlackLog(@PathVariable("id") UUID id) {
 
         SlackLogResponseV1 data = slackService.getSlackLog(id);
+
+        return BaseResponse.ok(data, BaseStatus.OK);
+    }
+
+    /**
+     * [Slack 로그 검색 조회 - 페이징]
+     * keyword 존재하면 검색 결과를 목록으로 페이징 반환, 없으면 전체 로그 목록 페이징
+     *
+     * @param receiverSlackId 수신자 Slack 아이디
+     * @param keyword 메시지 본문 내 검색할 키워드 (null 또는 빈 값이면 전체 목록 조회)
+     * @param page 조회할 페이지 번호 (1부터 시작)
+     * @param pageSize 페이지당 데이터 개수
+     * @return SlackLogListResponseV1 (검색 또는 전체 로그 목록 반환)
+     */
+    @GetMapping("/logs")
+    public BaseResponse<Page<SlackLogListResponseV1>> searchSlackLogs(
+        @RequestParam(name = "receiverSlackId", required = false) String receiverSlackId,
+        @RequestParam(name = "keyword", required = false) String keyword,
+        @RequestParam(name = "page", defaultValue = "1") Long page,
+        @RequestParam(name = "pageSize", defaultValue = "10") Long pageSize) {
+
+        Page<SlackLogListResponseV1> data =
+            slackService.searchLogListByContent(receiverSlackId, keyword, page, pageSize);
 
         return BaseResponse.ok(data, BaseStatus.OK);
     }
