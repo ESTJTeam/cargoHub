@@ -18,11 +18,6 @@ spring:
               predicates:
                 - Path=/v1/user/**,/v1/master/**
 
-            - id: ai-service
-              uri: lb://ai-service
-              predicates:
-                - Path=/v1/ai/**
-
 eureka:
   client:
     service-url:
