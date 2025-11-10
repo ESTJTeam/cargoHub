@@ -1,4 +1,4 @@
-package com.cargohub.order_service.domain.exception;
+package com.cargohub.order_service.application.exception;
 
 import com.cargohub.order_service.common.error.ErrorCode;
 import lombok.Getter;

@@ -1,8 +1,8 @@
 package com.cargohub.order_service.domain.entity;
 
 import com.cargohub.order_service.common.BaseEntity;
-import com.cargohub.order_service.domain.exception.OrderErrorCode;
-import com.cargohub.order_service.domain.exception.OrderException;
+import com.cargohub.order_service.application.exception.OrderErrorCode;
+import com.cargohub.order_service.application.exception.OrderException;
 import com.cargohub.order_service.domain.vo.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -80,7 +80,7 @@ public class Order extends BaseEntity {
     private static void validateOrderProducts(List<OrderProduct> orderProducts) {
 
         if(orderProducts.isEmpty()) {
-            throw new OrderException(OrderErrorCode.ORDER_PRODUCT_EMPTY);
+            throw new IllegalArgumentException("주문 항목은 최소 1개 이상이어야 합니다.");
         }
     }
 
