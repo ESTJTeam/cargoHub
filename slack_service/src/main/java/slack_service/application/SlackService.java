@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import slack_service.application.dto.request.SlackDeadlineRequestV1;
@@ -22,16 +22,13 @@ import slack_service.presentation.dto.response.SlackLogResponseV1;
 @RequiredArgsConstructor
 public class SlackService {
 
-    @Value("${spring.slack.bot-token}")
-    private String slackBotToken;
-
     private static final String OPEN_CONVERSATION_URL = "https://slack.com/api/conversations.open";
     private static final String POST_MESSAGE_URL = "https://slack.com/api/chat.postMessage";
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final DateTimeFormatter DEADLINE_FORMAT = DateTimeFormatter.ofPattern(
         "yyyy-MM-dd HH:mm");
 
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient;
     private final SlackLogRepository slackLogRepository;
 
     /**
@@ -43,10 +40,8 @@ public class SlackService {
      */
     private String openConversation(String userSlackId) {
 
-        var response = restClient.post()
+        Map<?, ?> response = restClient.post()
             .uri(OPEN_CONVERSATION_URL)
-            .header("Authorization", "Bearer " + slackBotToken)
-            .header("Content-Type", "application/json")
             .body("""
                 { "users": ["%s"] }
                 """.formatted(userSlackId))
@@ -73,7 +68,12 @@ public class SlackService {
      * @param receiverSlackId 메시지 수신자의 Slack 아이디
      * @param message         전송할 메시지 본문
      */
+    @Transactional
     public void sendDmToUser(String receiverSlackId, String message) {
+
+        if (!StringUtils.hasText(receiverSlackId) || !StringUtils.hasText(message)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER);
+        }
 
         // 1. DM 채널 생성 (또는 기존 DM 채널 가져오기)
         String channelId = openConversation(receiverSlackId);
@@ -84,13 +84,16 @@ public class SlackService {
             .build();
 
         // 2. DM 전송
-        restClient.post()
+        Map<?, ?> response = restClient.post()
             .uri(POST_MESSAGE_URL)
-            .header("Authorization", "Bearer " + slackBotToken)
-            .header("Content-Type", "application/json")
             .body(request)
             .retrieve()
-            .toBodilessEntity();
+            .body(Map.class);
+
+        if (response == null || Boolean.FALSE.equals(response.get("ok"))) {
+
+            throw new BusinessException(ErrorCode.SLACK_MESSAGE_SEND_FAILED);
+        }
 
         SlackLog slackLog = SlackLog.of(receiverSlackId, message);
 
@@ -106,6 +109,7 @@ public class SlackService {
      *
      * @param request AI 메시지 또는 Fallback 데이터
      */
+    @Transactional
     public void sendDeadlineNotice(SlackDeadlineRequestV1 request) {
 
         if (!StringUtils.hasText(request.getReceiverSlackId())) {
@@ -125,8 +129,7 @@ public class SlackService {
 
             text = buildFallbackDeadlineText(
                 request.getOrderInfo(),
-                request.getFinalDeadline(),
-                request.getAiLogId()
+                request.getFinalDeadline()
             );
         }
 
@@ -143,6 +146,7 @@ public class SlackService {
      * @param slackId 조회 대상 Slack 로그의 UUID
      * @return SlackLogResponseV1 (id, receiverSlackId, message, createdAt)
      */
+    @Transactional(readOnly = true)
     public SlackLogResponseV1 getSlackLog(UUID slackId) {
 
         SlackLog slackLog = slackLogRepository.findById(slackId)
@@ -152,8 +156,7 @@ public class SlackService {
     }
 
     // Fallback 텍스트 생성
-    private String buildFallbackDeadlineText(String orderInfo, LocalDateTime finalDeadline,
-        UUID aiLogId) {
+    private String buildFallbackDeadlineText(String orderInfo, LocalDateTime finalDeadline) {
 
         // 시스템 시간대 → 한국 시간대(KST) 변환 및 포맷팅
         String deadlineKst = finalDeadline.atZone(ZoneId.systemDefault())
@@ -161,13 +164,11 @@ public class SlackService {
             .toLocalDateTime()
             .format(DEADLINE_FORMAT);
 
-        String body = """
+        return """
             *배송 최종 발송 시한 알림*
             • 주문: %s
             • 최종 발송 시한(KST): %s
             """.formatted(orderInfo, deadlineKst);
-
-        return appendMetaLine(body, aiLogId);
     }
 
     // aiLogId 추적 용도
