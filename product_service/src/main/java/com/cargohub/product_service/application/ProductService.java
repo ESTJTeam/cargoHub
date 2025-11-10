@@ -3,6 +3,7 @@ package com.cargohub.product_service.application;
 import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
 import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
+import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
 import com.cargohub.product_service.domain.entity.Product;
 import com.cargohub.product_service.application.exception.ProductErrorCode;
 import com.cargohub.product_service.application.exception.ProductException;
@@ -11,6 +12,8 @@ import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +58,42 @@ public class ProductService {
         Product newProduct = productRepository.save(product);
 
         return CreateProductResultV1.from(newProduct);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReadProductSummaryResultV1> readProductPage(SearchProductCommandV1 search, Pageable pageable, UserInfo user) {
+
+        Page<Product> productPage;
+
+        /**
+         * 허브 담당자일 경우 - 허브 id 필요함
+         * 업체 담당자일 경우 - 업체 id 필요함
+         */
+
+        switch (user.role()) {
+            case MASTER, DELIVERY_MANAGER ->
+                    productPage = productRepository.findProductPage(search, pageable);
+
+            case HUB_MANAGER -> {
+                // todo: userId를 통한 hubId 조회 -> hubClient 단건 조회
+                HubId hubId = HubId.of(UUID.randomUUID());
+                if(hubId == null) {
+                    throw new ProductException(ProductErrorCode.HUB_ID_REQUIRED);
+                }
+                productPage = productRepository.findProductPageByHubId(hubId, search, pageable);
+            }
+            case SUPPLIER_MANAGER -> {
+                // todo: firmId 조회 -> firmClient 단건 조회
+                FirmId firmId = FirmId.of(UUID.randomUUID());
+                if(firmId == null) {
+                    throw new ProductException(ProductErrorCode.FIRM_ID_REQUIRED);
+                }
+                productPage = productRepository.findProductPageByFirmId(firmId, search, pageable);
+            }
+            default ->
+                    throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
+        }
+        return productPage.map(ReadProductSummaryResultV1::from);
     }
 
     @Transactional(readOnly = true)
