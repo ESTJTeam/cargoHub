@@ -1,6 +1,7 @@
 package com.cargohub.product_service.application;
 
 import com.cargohub.product_service.application.command.CreateProductCommandV1;
+import com.cargohub.product_service.application.command.DeleteProductCommandV1;
 import com.cargohub.product_service.application.command.UpdateProductCommandV1;
 import com.cargohub.product_service.application.command.UpdateProductStockCommandV1;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
@@ -75,6 +76,18 @@ public class ProductService {
                 updateProductCommandV1.sellable(),
                 updateProductCommandV1.updatedBy()
         );
+    }
+
+    @Transactional
+    public void deleteProduct(DeleteProductCommandV1 deleteProductCommandV1) {
+        // 권한 체크
+//        checkPermission(deleteProductCommandV1.user().role());
+
+        Product product = findProduct(deleteProductCommandV1.id());
+
+        //todo: 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
+
+        product.delete(deleteProductCommandV1.deletedBy());
     }
 
     @Transactional
