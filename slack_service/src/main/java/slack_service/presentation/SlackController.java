@@ -42,12 +42,12 @@ public class SlackController {
      *
      * @param request "receiverSlackId": "대상자 Slack ID",
      *                "slackFormattedText": "AI가 생성한 전체 메시지(있을 경우 그대로 전송)",
-     *                "orderInfo": "주문 기본 정보(fallback 용도)",
+     *                "orderInfo": "주문 기본 정보(Fallback 용도)",
      *                "finalDeadline": "최종 발송 시한",
      *                "aiLogId": "AI 로그 추적용 UUID"
      * @return status CREATED 반환
      */
-    @PostMapping("/deadline-notice")
+    @PostMapping("/send-deadline-notice")
     public BaseResponse<Void> sendDeadlineNotice(@Valid @RequestBody SlackDeadlineRequestV1 request) {
 
         slackService.sendDeadlineNotice(request);

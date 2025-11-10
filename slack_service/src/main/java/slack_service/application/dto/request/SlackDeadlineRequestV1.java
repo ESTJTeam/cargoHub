@@ -1,5 +1,6 @@
 package slack_service.application.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,6 +14,7 @@ import lombok.ToString;
 public class SlackDeadlineRequestV1 {
 
     // DM을 보낼 대상 (userSlackId)
+    @NotBlank(message = "receiverSlackId는 필수입니다.")
     private String receiverSlackId;
 
     // AI로 만든 전체 Text (있으면 그대로 전송)

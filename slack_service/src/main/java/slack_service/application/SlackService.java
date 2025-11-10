@@ -13,6 +13,8 @@ import slack_service.application.dto.request.SlackDeadlineRequestV1;
 import slack_service.application.dto.request.SlackMessageRequestV1;
 import slack_service.common.error.BusinessException;
 import slack_service.common.error.ErrorCode;
+import slack_service.domain.entity.SlackLog;
+import slack_service.domain.repository.SlackLogRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class SlackService {
         "yyyy-MM-dd HH:mm");
 
     private final RestClient restClient = RestClient.create();
+    private final SlackLogRepository slackLogRepository;
 
     /**
      * [Slack DM 채널 생성]
@@ -86,6 +89,10 @@ public class SlackService {
             .body(request)
             .retrieve()
             .toBodilessEntity();
+
+        SlackLog slackLog = SlackLog.of(receiverSlackId, message);
+
+        slackLogRepository.save(slackLog);
     }
 
     /**
@@ -94,7 +101,7 @@ public class SlackService {
      * slackFormattedText 있으면 그대로 전송
      * 없으면 orderInfo + finalDeadline 으로 폴백 메시지 생성 후 전송
      *
-     * @param request AI 메시지 또는 fallback 데이터
+     * @param request AI 메시지 또는 Fallback 데이터
      */
     public void sendDeadlineNotice(SlackDeadlineRequestV1 request) {
 
@@ -105,7 +112,7 @@ public class SlackService {
         // 1. AI가 생성한 메시지가 존재할 경우 그대로 사용
         String text = request.getSlackFormattedText();
 
-        // 2. 없을 경우 fallback 메시지 구성
+        // 2. 없을 경우 Fallback 메시지 구성
         if (!StringUtils.hasText(text)) {
 
             // 필수 정보(orderInfo, finalDeadline) 없으면 예외
@@ -126,7 +133,7 @@ public class SlackService {
         sendDmToUser(request.getReceiverSlackId(), text);
     }
 
-    // fallback 텍스트 생성
+    // Fallback 텍스트 생성
     private String buildFallbackDeadlineText(String orderInfo, LocalDateTime finalDeadline,
         String aiLogId) {
 
