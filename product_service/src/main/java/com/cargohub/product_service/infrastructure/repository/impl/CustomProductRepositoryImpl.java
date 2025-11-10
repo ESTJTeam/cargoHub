@@ -48,10 +48,7 @@ public class CustomProductRepositoryImpl extends QuerydslRepositorySupport imple
         return findProductPageByCondition(param, pageable, qProduct.firmId.eq(firmId));
     }
 
-    public Page<Product> findProductPageByCondition(
-            SearchProductCommandV1 param,
-            Pageable pageable,
-            @Nullable Predicate additionalCondition) {
+    public Page<Product> findProductPageByCondition(SearchProductCommandV1 param, Pageable pageable, @Nullable Predicate additionalCondition) {
 
         BooleanBuilder where = whereExpression(param);
 
