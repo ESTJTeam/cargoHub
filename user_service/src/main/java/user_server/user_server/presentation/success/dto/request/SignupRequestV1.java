@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.UUID;
 import user_server.user_server.application.dto.command.SignupCommandV1;
 import user_server.user_server.domain.entity.Role;
 
@@ -39,10 +40,10 @@ public record SignupRequestV1(
     String email,
 
     @NotNull(message = "DELIVERY_MANAGER, SUPPLIER_MANAGER 중 하나를 선택해야 합니다.")
-    Role role
+    Role role,
 
-    // TODO 허브나 업체 id를 받고 존재하는 허브인지 체크 후 회원가입 ?
-    // UUID hubIdOrFirmId
+    @NotNull(message = "hubId는 필수입니다.")
+    UUID hubId
 ) {
     @AssertTrue(message = "role은 DELIVERY_MANAGER 또는 SUPPLIER_MANAGER만 가능합니다.")
     public boolean isValidRole() {
@@ -57,6 +58,7 @@ public record SignupRequestV1(
             .nickname(nickname)
             .password(password)
             .role(role)
+            .hubId(hubId)
             .build();
     }
 
