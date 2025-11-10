@@ -1,8 +1,6 @@
 package com.cargohub.product_service.domain.entity;
 
 import com.cargohub.product_service.common.BaseEntity;
-import com.cargohub.product_service.domain.exception.ProductErrorCode;
-import com.cargohub.product_service.domain.exception.ProductException;
 import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
 import jakarta.persistence.*;
@@ -66,6 +64,7 @@ public class Product extends BaseEntity {
     }
 
     public void update(String name, Integer stockQuantity, BigDecimal price, Boolean sellable, UUID updatedBy) {
+
         if(name != null) this.name = name;
         if(stockQuantity != null) this.stockQuantity = stockQuantity;
         if(price != null) this.price = price;
@@ -75,13 +74,23 @@ public class Product extends BaseEntity {
     }
 
     public void decreaseStock(int quantity) {
+
+        if(quantity <= 0) {
+            throw new IllegalArgumentException("차감 수량은 0보다 커야 합니다.");
+        }
+
         if(this.stockQuantity < quantity) {
-            throw new ProductException(ProductErrorCode.OUT_OF_STOCK);
+            throw new IllegalArgumentException("해당 상품의 재고가 부족합니다.");
         }
         this.stockQuantity -= quantity;
     }
 
     public void increaseStock(int quantity) {
+
+        if(quantity <= 0) {
+            throw new IllegalArgumentException("증가 수량은 0보다 커야 합니다.");
+        }
+
         this.stockQuantity += quantity;
     }
 }
