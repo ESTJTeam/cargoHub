@@ -64,4 +64,12 @@ public class FirmServiceV1 {
                 command.address()
         );
     }
+
+    @Transactional
+    public void deleteFirm(UUID firmId, UUID userId) {
+        Firm firm = firmRepository.findById(firmId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 업체입니다. id=" + firmId));
+
+        firm.deleteFirm(userId); // BaseEntity.delete(userId) 호출
+    }
 }

@@ -53,4 +53,8 @@ public class Firm extends BaseEntity {
         this.hubId = hubId;
         this.type = FirmType.valueOf(type);
     }
+
+    public void deleteFirm(UUID userId) {
+        super.delete(userId);
+    }
 }

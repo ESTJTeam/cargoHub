@@ -87,4 +87,14 @@ public class FirmControllerV1 {
         // 없으면 OK로 써도 됨
         return BaseResponse.ok(BaseStatus.OK);
     }
+
+    @DeleteMapping("/{firmId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public BaseResponse<Void> deleteFirm(@PathVariable UUID firmId,
+                                         @RequestHeader("X-User-Id") UUID userId) {
+        // userId는 API Gateway가 JWT에서 파싱해서 넣어준 헤더 값
+        firmService.deleteFirm(firmId, userId);
+
+        return BaseResponse.ok(BaseStatus.OK);
+    }
 }
