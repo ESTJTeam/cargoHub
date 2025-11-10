@@ -1,4 +1,4 @@
-package user_server.user_server.domain.entity;
+package ai_service.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -6,6 +6,7 @@ import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -15,6 +16,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@SQLRestriction("deleted_at IS NULL")
 public class BaseEntity {
 
     @CreatedDate
