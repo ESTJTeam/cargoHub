@@ -2,6 +2,7 @@ package com.cargohub.order_service.presentation;
 
 import com.cargohub.order_service.application.OrderService;
 import com.cargohub.order_service.application.command.CreateOrderCommandV1;
+import com.cargohub.order_service.application.command.DeleteOrderCommandV1;
 import com.cargohub.order_service.application.command.OrderProductCommandV1;
 import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
@@ -129,6 +130,12 @@ public class OrderController {
     @DeleteMapping("/{id}/cancel")
     public BaseResponse<Void> cancelOrder(@PathVariable("id") UUID id) {
 
+        DeleteOrderCommandV1 commandV1 = new DeleteOrderCommandV1(
+                id,
+                UUID.randomUUID() // todo: 삭제자 ID
+        );
+
+        orderService.cancelOrder(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
     }

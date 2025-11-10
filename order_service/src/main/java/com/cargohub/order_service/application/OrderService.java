@@ -1,6 +1,7 @@
 package com.cargohub.order_service.application;
 
 import com.cargohub.order_service.application.command.CreateOrderCommandV1;
+import com.cargohub.order_service.application.command.DeleteOrderCommandV1;
 import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
 import com.cargohub.order_service.application.exception.OrderErrorCode;
@@ -69,6 +70,23 @@ public class OrderService {
         // todo: 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
 
         order.updateStatus(updateOrderStatusCommandV1.status(), updateOrderStatusCommandV1.updatedBy());
+    }
+
+    public void cancelOrder(DeleteOrderCommandV1 deleteOrderCommandV1) {
+        // todo: 본인만 취소 가능
+        Order order = findOrder(deleteOrderCommandV1.id());
+
+        // 업체 담당자일 경우
+//        if(!role.equals(UserRole.MASTER) && !role.equals(UserRole.HUB_MANAGER)){
+//            // todo: 업체 담당자(createdBY)의 업체 ID 필요
+//            ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
+//            if(order.getReceiverId().equals(receiverId)) {
+//                throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
+//            }
+//        }
+
+        order.delete(deleteOrderCommandV1.deletedBy());
+
     }
 
     private Order findOrder(UUID id) {
