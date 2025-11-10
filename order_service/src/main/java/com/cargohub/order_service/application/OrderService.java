@@ -2,10 +2,7 @@ package com.cargohub.order_service.application;
 
 import com.cargohub.order_service.application.command.CreateOrderCommandV1;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
-import com.cargohub.order_service.application.exception.OrderErrorCode;
-import com.cargohub.order_service.application.exception.OrderException;
 import com.cargohub.order_service.domain.entity.Order;
-import com.cargohub.order_service.domain.entity.OrderProduct;
 import com.cargohub.order_service.domain.repository.OrderRepository;
 import com.cargohub.order_service.domain.vo.*;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -54,14 +48,11 @@ public class OrderService {
 
         Order newOrder = orderRepository.save(order);
 
-        // todo: 배송 생성 -> 주문 상태 수정(배송 중)
+        // todo: 배송 생성
 
         HubDeliveryId hubDeliveryId = HubDeliveryId.of(UUID.randomUUID());
         FirmDeliveryId firmDeliveryId = FirmDeliveryId.of(UUID.randomUUID());
         newOrder.ship(hubDeliveryId, firmDeliveryId);
-
-
-        // todo: 슬랙 알림 생성 -> event
 
         return CreateOrderResultV1.from(newOrder);
     }
