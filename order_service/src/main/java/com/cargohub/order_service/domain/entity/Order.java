@@ -59,8 +59,7 @@ public class Order extends BaseEntity {
     private OrderStatus status;
 
 
-    private Order(UUID createdBy, List<OrderProduct> orderProducts, SupplierId supplierId, ReceiverId receiverId, HubDeliveryId hubDeliveryId, FirmDeliveryId firmDeliveryId, String requestNote, OrderStatus status) {
-        this.createdBy = createdBy;
+    private Order(List<OrderProduct> orderProducts, SupplierId supplierId, ReceiverId receiverId, HubDeliveryId hubDeliveryId, FirmDeliveryId firmDeliveryId, String requestNote, OrderStatus status, UUID createdBy) {
         this.orderProducts = orderProducts;
         this.supplierId = supplierId;
         this.receiverId = receiverId;
@@ -68,13 +67,14 @@ public class Order extends BaseEntity {
         this.firmDeliveryId = firmDeliveryId;
         this.requestNote = requestNote;
         this.status = status;
+        this.createdBy = createdBy;
     }
 
-    public static Order ofNewOrder(UUID createdBy, List<OrderProduct> orderProducts, SupplierId supplierId, ReceiverId receiverId, String requestNote) {
+    public static Order ofNewOrder(List<OrderProduct> orderProducts, SupplierId supplierId, ReceiverId receiverId, String requestNote, UUID createdBy) {
 
         validateOrderProducts(orderProducts);
 
-        return new Order(createdBy, orderProducts, supplierId, receiverId,null, null, requestNote, OrderStatus.PREPARING);
+        return new Order(orderProducts, supplierId, receiverId,null, null, requestNote, OrderStatus.PREPARING, createdBy);
     }
 
     private static void validateOrderProducts(List<OrderProduct> orderProducts) {
