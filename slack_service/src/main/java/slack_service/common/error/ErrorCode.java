@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // 500
-    SLACK_CHANNEL_OPEN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "슬랙 채널 생성 실패");
+    SLACK_CHANNEL_OPEN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "슬랙 채널 생성 실패"),
+
+    // 400
+    INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "수신자의 슬랙 아이디가 올바르지 않습니다.");
 
     private final HttpStatus status;
     private final String message;
