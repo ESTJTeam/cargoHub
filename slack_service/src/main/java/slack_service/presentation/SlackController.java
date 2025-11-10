@@ -1,8 +1,11 @@
 package slack_service.presentation;
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +15,7 @@ import slack_service.application.dto.request.SlackDeadlineRequestV1;
 import slack_service.application.dto.request.SlackMessageRequestV1;
 import slack_service.common.success.BaseResponse;
 import slack_service.common.success.BaseStatus;
+import slack_service.presentation.dto.response.SlackLogResponseV1;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,5 +57,19 @@ public class SlackController {
         slackService.sendDeadlineNotice(request);
 
         return BaseResponse.ok(BaseStatus.CREATED);
+    }
+
+    /**
+     * [Slack 로그 단건 조회]
+     *
+     * @param id 조회 대상 Slack 로그의 UUID
+     * @return SlackLogResponseV1
+     */
+    @GetMapping("/logs/{id}")
+    public BaseResponse<SlackLogResponseV1> getSlackLog(@PathVariable("id") UUID id) {
+
+        SlackLogResponseV1 data = slackService.getSlackLog(id);
+
+        return BaseResponse.ok(data, BaseStatus.OK);
     }
 }

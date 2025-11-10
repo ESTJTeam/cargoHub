@@ -16,6 +16,7 @@ import slack_service.common.error.BusinessException;
 import slack_service.common.error.ErrorCode;
 import slack_service.domain.entity.SlackLog;
 import slack_service.domain.repository.SlackLogRepository;
+import slack_service.presentation.dto.response.SlackLogResponseV1;
 
 @Service
 @RequiredArgsConstructor
@@ -96,6 +97,7 @@ public class SlackService {
         slackLogRepository.save(slackLog);
     }
 
+    // TODO - Order 가져와서 수정 예정
     /**
      * [Ai 연동 - 최종 발송 시한 메시지 자동 전송]
      * AI가 생성한 Slack 메시지를 담당자에게 자동으로 전송한다.
@@ -132,6 +134,21 @@ public class SlackService {
         text = appendMetaLine(text, request.getAiLogId());
 
         sendDmToUser(request.getReceiverSlackId(), text);
+    }
+
+    /**
+     * [SlackLog 단건 조회]
+     * Slack 메시지 전송 이력을 ID로 단건 조회
+     *
+     * @param slackId 조회 대상 Slack 로그의 UUID
+     * @return SlackLogResponseV1 (id, receiverSlackId, message, createdAt)
+     */
+    public SlackLogResponseV1 getSlackLog(UUID slackId) {
+
+        SlackLog slackLog = slackLogRepository.findById(slackId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.SLACK_LOG_NOT_FOUND));
+
+        return SlackLogResponseV1.from(slackLog);
     }
 
     // Fallback 텍스트 생성
