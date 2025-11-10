@@ -114,10 +114,12 @@ public class ProductService {
     }
 
     private List<Product> findProductList(Set<UUID> productIds) {
+
         List<Product> products = productRepository.findAllById(productIds);
         if (products.size() != productIds.size()) {
             throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
         }
+
         return products;
     }
 }
