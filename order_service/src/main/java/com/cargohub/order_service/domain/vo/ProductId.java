@@ -1,0 +1,29 @@
+package com.cargohub.order_service.domain.vo;
+
+import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Embeddable
+@Getter
+@EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ProductId {
+
+    private UUID id;
+
+    private ProductId(UUID id) {
+        if(id == null) {
+            throw new IllegalArgumentException("유효하지 않은 상품 ID 입니다");
+        }
+        this.id = id;
+    }
+
+    public static ProductId of(UUID id) {
+        return new ProductId(id);
+    }
+}
