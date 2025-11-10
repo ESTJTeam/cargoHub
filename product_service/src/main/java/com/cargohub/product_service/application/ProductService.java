@@ -1,10 +1,8 @@
 package com.cargohub.product_service.application;
 
-import com.cargohub.product_service.application.command.CreateProductCommandV1;
-import com.cargohub.product_service.application.command.DeleteProductCommandV1;
-import com.cargohub.product_service.application.command.UpdateProductCommandV1;
-import com.cargohub.product_service.application.command.UpdateProductStockCommandV1;
+import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
+import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
 import com.cargohub.product_service.domain.entity.Product;
 import com.cargohub.product_service.application.exception.ProductErrorCode;
 import com.cargohub.product_service.application.exception.ProductException;
@@ -57,6 +55,14 @@ public class ProductService {
         Product newProduct = productRepository.save(product);
 
         return CreateProductResultV1.from(newProduct);
+    }
+
+    @Transactional(readOnly = true)
+    public ReadProductDetailResultV1 readProduct(UUID productId) {
+
+        Product product = findProduct(productId);
+
+        return ReadProductDetailResultV1.from(product);
     }
 
     @Transactional
