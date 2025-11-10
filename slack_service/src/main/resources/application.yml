@@ -18,7 +18,7 @@ spring:
     generate-ddl: true
 
 server:
-  port: ${AI_SERVER_PORT}
+  port: ${SLACK_SERVER_PORT}
 
 eureka:
   client:
