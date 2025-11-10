@@ -20,7 +20,7 @@ public class AiController {
 
     private final AiService aiService;
 
-    @PostMapping("/generate-shipping-deadline-predictions")
+    @PostMapping("/generate-shipping-deadline-prediction")
     public BaseResponse<AiDeadlineResponseV1> generateShippingDeadlinePrediction(
         @RequestBody AiDeadlineRequestV1 request) {
 

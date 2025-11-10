@@ -28,7 +28,7 @@ public class SlackController {
      * @param request "channel": "userSlackId", "text": "메시지 내용"
      * @return status CREATED 반환
      */
-    @PostMapping("/post-messages")
+    @PostMapping("/post-message")
     public BaseResponse<Void> postMessage(@RequestBody SlackMessageRequestV1 request) {
 
         slackService.sendDmToUser(request.getChannel(), request.getText());

@@ -2,6 +2,7 @@ package slack_service.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +26,7 @@ public class SlackDeadlineRequestV1 {
     private LocalDateTime finalDeadline;
 
     // 추적 편의 위한 로그 id
-    private String aiLogId;
+    private UUID aiLogId;
 
     @Builder
     private SlackDeadlineRequestV1(
@@ -33,7 +34,7 @@ public class SlackDeadlineRequestV1 {
         String slackFormattedText,
         String orderInfo,
         LocalDateTime finalDeadline,
-        String aiLogId
+        UUID aiLogId
     ) {
         this.receiverSlackId = receiverSlackId;
         this.slackFormattedText = slackFormattedText;

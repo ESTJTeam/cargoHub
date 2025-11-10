@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -135,7 +136,7 @@ public class SlackService {
 
     // Fallback 텍스트 생성
     private String buildFallbackDeadlineText(String orderInfo, LocalDateTime finalDeadline,
-        String aiLogId) {
+        UUID aiLogId) {
 
         // 시스템 시간대 → 한국 시간대(KST) 변환 및 포맷팅
         String deadlineKst = finalDeadline.atZone(ZoneId.systemDefault())
@@ -153,9 +154,9 @@ public class SlackService {
     }
 
     // aiLogId 추적 용도
-    private String appendMetaLine(String text, String aiLogId) {
+    private String appendMetaLine(String text, UUID aiLogId) {
 
-        if (!StringUtils.hasText(aiLogId)) {
+        if (aiLogId == null) {
             return text;
         }
 
