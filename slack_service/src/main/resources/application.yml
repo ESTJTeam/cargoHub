@@ -17,6 +17,10 @@ spring:
         format_sql: true
     generate-ddl: true
 
+  # Slack
+  slack:
+    bot-token: ${SLACK_BOT_TOKEN}
+
 server:
   port: ${SLACK_SERVER_PORT}
 
