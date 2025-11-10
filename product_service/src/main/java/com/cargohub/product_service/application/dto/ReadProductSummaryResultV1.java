@@ -16,7 +16,9 @@ public record ReadProductSummaryResultV1(
         boolean sellable,
         LocalDateTime createdAt
 ) {
+
     public static ReadProductSummaryResultV1 from(Product product) {
+
         return new ReadProductSummaryResultV1(
                 product.getId(),
                 product.getName(),

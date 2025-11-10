@@ -83,6 +83,7 @@ public class CustomProductRepositoryImpl extends QuerydslRepositorySupport imple
 
 
     private BooleanBuilder whereExpression(SearchProductCommandV1 param) {
+
         BooleanBuilder where = new BooleanBuilder();
 
         if (param.name() != null) {
