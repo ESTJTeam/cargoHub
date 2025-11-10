@@ -6,10 +6,15 @@ import com.cargohub.firm_service.domain.entity.Firm;
 import com.cargohub.firm_service.domain.port.HubValidatorPort;
 import com.cargohub.firm_service.domain.repository.FirmRepository;
 import com.cargohub.firm_service.domain.vo.HubId;
+import com.cargohub.firm_service.presentation.dto.response.FirmListResponseV1;
+import com.cargohub.firm_service.presentation.dto.response.FirmSummaryV1;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,6 +23,28 @@ public class FirmServiceV1 {
 
     private final FirmRepository firmRepository;
     private final HubValidatorPort hubValidatorPort;
+
+    @Transactional(readOnly = true)
+    public FirmListResponseV1 getFirmsByHubId(UUID hubIdValue, int page, int size) {
+
+        HubId hubId = HubId.of(hubIdValue);
+
+        PageRequest pageable = PageRequest.of(page - 1, size);
+
+        Page<Firm> result = firmRepository.findByHubId(hubId, pageable);
+
+        List<FirmSummaryV1> firms = result.getContent().stream()
+                .map(FirmSummaryV1::from)
+                .toList();
+
+        return new FirmListResponseV1(
+                hubIdValue,
+                page,
+                size,
+                result.getTotalElements(),
+                firms
+        );
+    }
 
     @Transactional
     public Firm createFirm(CreateFirmCommandV1 command) {

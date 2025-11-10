@@ -2,7 +2,10 @@ package com.cargohub.firm_service.infrastructure.repository;
 
 import com.cargohub.firm_service.domain.entity.Firm;
 import com.cargohub.firm_service.domain.repository.FirmRepository;
+import com.cargohub.firm_service.domain.vo.HubId;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -22,5 +25,10 @@ public class FirmRepositoryAdapter implements FirmRepository {
     @Override
     public Optional<Firm> findById(UUID id) {
         return jpa.findById(id);
+    }
+
+    @Override
+    public Page<Firm> findByHubId(HubId hubId, Pageable pageable) {
+        return jpa.findByHubId(hubId.getHubId(), pageable);
     }
 }
