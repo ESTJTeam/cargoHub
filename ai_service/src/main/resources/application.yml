@@ -2,7 +2,7 @@ spring:
   config:
     import: optional:file:${user.dir}/ai_service/.env[.properties]
   application:
-    name: ai-server
+    name: ai-service
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
