@@ -1,5 +1,6 @@
 package user_server.user_server.application.dto.command;
 
+import java.util.UUID;
 import lombok.Builder;
 import user_server.user_server.domain.entity.Role;
 
@@ -10,5 +11,6 @@ public record SignupCommandV1(
     String username,
     String nickname,
     String email,
-    Role role
+    Role role,
+    UUID hubId
 ){}
