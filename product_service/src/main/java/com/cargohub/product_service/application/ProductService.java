@@ -78,38 +78,33 @@ public class ProductService {
     }
 
     @Transactional
-    public void decreaseStock(UpdateProductStockCommandV1 updateProductStockCommandV1) {
+    public void decreaseStock(UpdateProductStockCommandV1 command) {
+        updateStock(command, false);
+    }
 
-        List<Product> products = findProductList(updateProductStockCommandV1.items().keySet());
+    @Transactional
+    public void increaseStock(UpdateProductStockCommandV1 command) {
+        updateStock(command, true);
+    }
+
+    private void updateStock(UpdateProductStockCommandV1 command, boolean increase) {
+
+        List<Product> products = findProductList(command.items().keySet());
 
         Map<UUID, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
 
-        updateProductStockCommandV1.items().forEach((id, quantity) -> {
+        command.items().forEach((id, quantity) -> {
             Product product = productMap.get(id);
             if (product == null) {
                 throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
             }
 
-            product.decreaseStock(quantity);
-        });
-    }
-
-    @Transactional
-    public void increaseStock(UpdateProductStockCommandV1 updateProductStockCommandV1) {
-
-        List<Product> products = findProductList(updateProductStockCommandV1.items().keySet());
-
-        Map<UUID, Product> productMap = products.stream()
-                        .collect(Collectors.toMap(Product::getId, Function.identity()));
-
-        updateProductStockCommandV1.items().forEach((id, quantity) -> {
-            Product product = productMap.get(id);
-            if (product == null) {
-                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
+            if (increase) {
+                product.increaseStock(quantity);
+            } else {
+                product.decreaseStock(quantity);
             }
-
-            product.increaseStock(quantity);
         });
     }
 
@@ -119,6 +114,10 @@ public class ProductService {
     }
 
     private List<Product> findProductList(Set<UUID> productIds) {
-        return productRepository.findAllById(productIds);
+        List<Product> products = productRepository.findAllById(productIds);
+        if (products.size() != productIds.size()) {
+            throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return products;
     }
 }
