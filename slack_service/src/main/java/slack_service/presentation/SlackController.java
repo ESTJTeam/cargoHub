@@ -5,6 +5,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -97,5 +98,19 @@ public class SlackController {
             slackService.searchLogListByContent(receiverSlackId, keyword, page, pageSize);
 
         return BaseResponse.ok(data, BaseStatus.OK);
+    }
+
+    /**
+     * [Slack 로그 단건 삭제 - Soft Delete 처리]
+     *
+     * @param id 삭제할 Slack 로그의 UUID
+     * @return status DELETED 반환
+     */
+    @DeleteMapping("/logs/{id}")
+    public BaseResponse<Void> deleteSlackLog(@PathVariable("id") UUID id) {
+
+        slackService.deleteSlackLog(id);
+
+        return BaseResponse.ok(BaseStatus.DELETED);
     }
 }

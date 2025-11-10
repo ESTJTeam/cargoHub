@@ -23,27 +23,35 @@ public class BaseEntity {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
-
     @CreatedBy
     @Column(updatable = false)
     protected UUID createdBy;
 
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
     @LastModifiedBy
     protected UUID updatedBy;
 
-    protected UUID deletedBy;
-
     protected LocalDateTime deletedAt;
 
-    public void delete(UUID userId) {
-        this.deletedBy = userId;
+    protected UUID deletedBy;
+
+    // TODO - User 정보 가져와서 deletedBy 추가
+    public void delete() {
+//        this.deletedBy = deletedBy;
         this.deletedAt = LocalDateTime.now();
     }
 
+    // TODO - User 정보 가져와서 updatedBy 추가
     public void recover() {
-        this.deletedBy = null;
         this.deletedAt = null;
+        this.deletedBy = null;
+        this.updatedAt = LocalDateTime.now();
+//        this.updatedBy = updatedBy;
+    }
+
+    public boolean checkDeleted() {
+        return deletedAt != null || deletedBy != null;
     }
 }
