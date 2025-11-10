@@ -1,6 +1,5 @@
 package com.cargohub.firm_service.common.error;
 
-import com.cargohub.product_service.common.error.ErrorCode;
 import lombok.Getter;
 
 @Getter
