@@ -51,6 +51,7 @@ public class CustomProductRepositoryImpl extends QuerydslRepositorySupport imple
     public Page<Product> findProductPageByCondition(SearchProductCommandV1 param, Pageable pageable, @Nullable Predicate additionalCondition) {
 
         BooleanBuilder where = whereExpression(param);
+        where.and(qProduct.deletedAt.isNull());
 
         if (additionalCondition != null) {
             where.and(additionalCondition);
