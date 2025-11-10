@@ -4,6 +4,8 @@ import com.cargohub.order_service.application.command.CreateOrderCommandV1;
 import com.cargohub.order_service.application.command.DeleteOrderCommandV1;
 import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
+import com.cargohub.order_service.application.dto.FirmInfoResultV1;
+import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.application.exception.OrderErrorCode;
 import com.cargohub.order_service.application.exception.OrderException;
 import com.cargohub.order_service.domain.entity.Order;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+//    private final ProductClient productClient;
 
     @Transactional
     public CreateOrderResultV1 createOrder(CreateOrderCommandV1 createOrderCommandV1) {
@@ -59,6 +62,26 @@ public class OrderService {
         newOrder.ship(hubDeliveryId, firmDeliveryId);
 
         return CreateOrderResultV1.from(newOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public ReadOrderDetailResultV1 readOrder(UUID orderId) {
+        Order order = findOrder(orderId);
+
+        // todo 수령업체, 공급업체 정보 필요 - 이름, 주소
+        FirmInfoResultV1 supplier = new FirmInfoResultV1(
+                UUID.randomUUID(),
+                "공급 업체 명",
+                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
+        );
+
+        FirmInfoResultV1 receiver = new FirmInfoResultV1(
+                UUID.randomUUID(),
+                "수령 업체 명",
+                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
+        );
+
+        return ReadOrderDetailResultV1.from(order, supplier, receiver);
     }
 
 

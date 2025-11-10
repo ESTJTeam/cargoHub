@@ -6,9 +6,9 @@ import com.cargohub.order_service.application.command.DeleteOrderCommandV1;
 import com.cargohub.order_service.application.command.OrderProductCommandV1;
 import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
+import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
-import com.cargohub.order_service.domain.vo.OrderStatus;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
 import com.cargohub.order_service.presentation.dto.request.UpdateOrderStatusRequestV1;
@@ -22,7 +22,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +48,18 @@ public class OrderController {
 
         CreateOrderResultV1 result = orderService.createOrder(commandV1);
 
-        return BaseResponse.ok(CreateOrderResponseV1.from(result), BaseStatus.CREATED);
+        CreateOrderResponseV1 responseV1 = new CreateOrderResponseV1(
+                result.id(),
+                result.supplierId(),
+                result.receiverId(),
+                result.products().stream()
+                        .map(OrderProductResponseV1::from)
+                        .toList(),
+                result.requestNote(),
+                result.createdAt()
+        );
+
+        return BaseResponse.ok(responseV1, BaseStatus.CREATED);
     }
 
     @GetMapping
@@ -58,13 +68,11 @@ public class OrderController {
         // todo: 애플리케이션 서비스 호출
 
 
-        OrderStatusResponseV1 status = OrderStatusResponseV1.of(OrderStatus.PREPARING);
-
         ReadOrderSummaryResponseV1 responseV1 = new ReadOrderSummaryResponseV1(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                status,
+                null,
                 LocalDateTime.now()
         );
 
@@ -74,39 +82,23 @@ public class OrderController {
     @GetMapping("/{id}")
     public BaseResponse<ReadOrderDetailResponseV1> readOrder(@PathVariable("id") UUID id) {
 
-        OrderProductResponseV1 product = new OrderProductResponseV1(
-                UUID.randomUUID(),
-                "상품 명",
-                1000000,
-                BigDecimal.valueOf(10000)
-        );
-
-        FirmInfoResponseV1 supplier = new FirmInfoResponseV1(
-                UUID.randomUUID(),
-                "공급 업체 명",
-                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
-        );
-
-        FirmInfoResponseV1 receiver = new FirmInfoResponseV1(
-                UUID.randomUUID(),
-                "수령 업체 명",
-                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
-        );
+        ReadOrderDetailResultV1 result = orderService.readOrder(id);
 
         ReadOrderDetailResponseV1 responseV1 = new ReadOrderDetailResponseV1(
-                id,
-                supplier,
-                receiver,
-                List.of(product),
-                OrderStatusResponseV1.of(OrderStatus.PREPARING),
-                "11월 5일 오전 납품 부탁드립니다.",
-                LocalDateTime.now(),
-                UUID.randomUUID(),
-                LocalDateTime.now(),
-                UUID.randomUUID(),
-                null,
-                null
-
+                result.id(),
+                FirmInfoResponseV1.from(result.supplier()),
+                FirmInfoResponseV1.from(result.receiver()),
+                result.products().stream()
+                        .map(OrderProductResponseV1::from)
+                        .toList(),
+                OrderStatusResponseV1.from(result.status()),
+                result.requestNote(),
+                result.createdAt(),
+                result.createdBy(),
+                result.updatedAt(),
+                result.updatedBy(),
+                result.deletedAt(),
+                result.deletedBy()
         );
 
         return BaseResponse.ok(responseV1, BaseStatus.OK);
