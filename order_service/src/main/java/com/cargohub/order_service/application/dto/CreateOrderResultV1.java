@@ -9,7 +9,7 @@ import java.util.UUID;
 public record CreateOrderResultV1(
     UUID id,
     UUID supplierId,
-    UUID receiverID,
+    UUID receiverId,
     List<OrderProductResultV1> products,
     String requestNote,
     LocalDateTime createdAt

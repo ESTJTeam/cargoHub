@@ -1,12 +1,16 @@
 package com.cargohub.order_service.presentation;
 
+import com.cargohub.order_service.application.OrderService;
 import com.cargohub.order_service.application.command.CreateOrderCommandV1;
 import com.cargohub.order_service.application.command.OrderProductCommandV1;
+import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
+import com.cargohub.order_service.application.dto.CreateOrderResultV1;
 import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
 import com.cargohub.order_service.domain.vo.OrderStatus;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
+import com.cargohub.order_service.presentation.dto.request.UpdateOrderStatusRequestV1;
 import com.cargohub.order_service.presentation.dto.response.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +31,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
 
+    private final OrderService orderService;
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<CreateOrderResponseV1> createOrder(@RequestBody @Valid CreateOrderRequestV1 request) {
@@ -40,28 +46,9 @@ public class OrderController {
                 UUID.randomUUID() // todo: userId로 수정
         );
 
-        // todo: 애플리케이션 서비스 호출
+        CreateOrderResultV1 result = orderService.createOrder(commandV1);
 
-
-
-        OrderProductResponseV1 orderProductResponseV1 = new OrderProductResponseV1(
-                UUID.randomUUID(),
-                "상품 1",
-                10000,
-                 BigDecimal.valueOf(10000)
-        );
-
-        CreateOrderResponseV1 responseV1 = new CreateOrderResponseV1(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                "공급 업체 명",
-                request.receiverId(),
-                "수령 업체 명",
-                List.of(orderProductResponseV1),
-                "11월 5일 오전 납품 부탁드립니다.",
-                LocalDateTime.now()
-        );
-        return BaseResponse.ok(responseV1, BaseStatus.CREATED);
+        return BaseResponse.ok(CreateOrderResponseV1.from(result), BaseStatus.CREATED);
     }
 
     @GetMapping
@@ -123,7 +110,6 @@ public class OrderController {
 
         return BaseResponse.ok(responseV1, BaseStatus.OK);
     }
-
 
     @DeleteMapping("/{id}/cancel")
     public BaseResponse<Void> cancelOrder(@PathVariable("id") UUID id) {
