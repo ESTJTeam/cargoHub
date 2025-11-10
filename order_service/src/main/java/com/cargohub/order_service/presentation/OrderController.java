@@ -4,24 +4,24 @@ import com.cargohub.order_service.application.OrderService;
 import com.cargohub.order_service.application.command.*;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
+import com.cargohub.order_service.application.dto.ReadOrderSummaryResultV1;
 import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
+import com.cargohub.order_service.domain.vo.OrderStatus;
 import com.cargohub.order_service.domain.vo.UserRole;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
+import com.cargohub.order_service.presentation.dto.request.SearchOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.UpdateOrderStatusRequestV1;
 import com.cargohub.order_service.presentation.dto.response.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -61,25 +61,27 @@ public class OrderController {
     }
 
     @GetMapping
-    public BaseResponse<Page<ReadOrderSummaryResponseV1>>  readOrderPage(@PageableDefault(size = 10)Pageable pageable) {
+    public BaseResponse<Page<ReadOrderSummaryResponseV1>>  readOrderPage(@ModelAttribute SearchOrderRequestV1 search, @PageableDefault(size = 10)Pageable pageable) {
 
         UserInfo userInfo = new UserInfo(
                 UUID.randomUUID(),
                 UserRole.MASTER
         );
 
-        // todo: 애플리케이션 서비스 호출
-        orderService.readOrderPage(pageable, userInfo);
-
-        ReadOrderSummaryResponseV1 responseV1 = new ReadOrderSummaryResponseV1(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                null,
-                LocalDateTime.now()
+        SearchOrderCommandV1 searchCommandV1 = new SearchOrderCommandV1(
+                search.supplierId(),
+                search.receiverId(),
+                search.status() != null ? OrderStatus.valueOf(search.status()) : null,
+                search.createdBy(),
+                search.requestNote(),
+                search.startDate(),
+                search.endDate()
         );
 
-        return BaseResponse.ok(new PageImpl<>(List.of(responseV1)), BaseStatus.OK);
+        // todo: 사용자 정보 필요
+        Page<ReadOrderSummaryResultV1> orderPage = orderService.readOrderPage(searchCommandV1, pageable, userInfo);
+
+        return BaseResponse.ok(orderPage.map(ReadOrderSummaryResponseV1::from), BaseStatus.OK);
     }
 
     @GetMapping("/{id}")

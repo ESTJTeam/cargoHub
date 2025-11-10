@@ -1,5 +1,6 @@
 package com.cargohub.order_service.domain.repository;
 
+import com.cargohub.order_service.application.command.SearchOrderCommandV1;
 import com.cargohub.order_service.domain.entity.Order;
 import com.cargohub.order_service.domain.vo.FirmDeliveryId;
 import com.cargohub.order_service.domain.vo.HubDeliveryId;
@@ -26,18 +27,18 @@ public interface OrderRepository {
      */
 
     // 마스터 - 전체 주문 조회
-    Page<Order> findAll(Pageable pageable);
+    Page<Order> findOrderPage(SearchOrderCommandV1 search, Pageable pageable);
 
     // 허브 관리자 - 담당 공급 업체 주문 조회
-    Page<Order> findAllBySupplierId(SupplierId supplierId, Pageable pageable);
+    Page<Order> findOrderPageBySupplierId(SupplierId supplierId, SearchOrderCommandV1 search, Pageable pageable);
 
     // 업체 담당자
-    Page<Order> findAllByReceiverId(ReceiverId receiverId, Pageable pageable);
+    Page<Order> findOrderPageByReceiverId(ReceiverId receiverId, SearchOrderCommandV1 search, Pageable pageable);
 
     // 허브 배송 담당자
-    Page<Order> findAllByHubDeliveryId(HubDeliveryId hubDeliveryId, Pageable pageable);
+    Page<Order> findOrderPageByHubDeliveryId(HubDeliveryId hubDeliveryId, SearchOrderCommandV1 search, Pageable pageable);
 
     // 업체 배송 담당자
-    Page<Order> findAllByFirmDeliveryId(FirmDeliveryId firmDeliveryId, Pageable pageable);
+    Page<Order> findOrderPageByFirmDeliveryId(FirmDeliveryId firmDeliveryId, SearchOrderCommandV1 search, Pageable pageable);
 
 }

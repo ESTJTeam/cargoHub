@@ -1,5 +1,6 @@
 package com.cargohub.order_service.infrastructure.repository;
 
+import com.cargohub.order_service.application.command.SearchOrderCommandV1;
 import com.cargohub.order_service.domain.entity.Order;
 import com.cargohub.order_service.domain.repository.OrderRepository;
 import com.cargohub.order_service.domain.vo.FirmDeliveryId;
@@ -31,27 +32,27 @@ public class OrderRepositoryAdaptor implements OrderRepository {
     }
 
     @Override
-    public Page<Order> findAll(Pageable pageable) {
-        return jpaOrderRepository.findAll(pageable);
+    public Page<Order> findOrderPage(SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPage(search, pageable);
     }
 
     @Override
-    public Page<Order> findAllBySupplierId(SupplierId supplierId, Pageable pageable) {
-        return jpaOrderRepository.findAllBySupplierId(supplierId, pageable);
+    public Page<Order> findOrderPageBySupplierId(SupplierId supplierId, SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPageBySupplierId(supplierId, search, pageable);
     }
 
     @Override
-    public Page<Order> findAllByReceiverId(ReceiverId receiverId, Pageable pageable) {
-        return jpaOrderRepository.findAllByReceiverId(receiverId, pageable);
+    public Page<Order> findOrderPageByReceiverId(ReceiverId receiverId, SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPageByReceiverId(receiverId, search, pageable);
     }
 
     @Override
-    public Page<Order> findAllByHubDeliveryId(HubDeliveryId hubDeliveryId, Pageable pageable) {
-        return jpaOrderRepository.findAllByHubDeliveryId(hubDeliveryId, pageable);
+    public Page<Order> findOrderPageByHubDeliveryId(HubDeliveryId hubDeliveryId, SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPageByHubDeliveryId(hubDeliveryId, search, pageable);
     }
 
     @Override
-    public Page<Order> findAllByFirmDeliveryId(FirmDeliveryId firmDeliveryId, Pageable pageable) {
-        return jpaOrderRepository.findAllByFirmDeliveryId(firmDeliveryId, pageable);
+    public Page<Order> findOrderPageByFirmDeliveryId(FirmDeliveryId firmDeliveryId, SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPageByFirmDeliveryId(firmDeliveryId, search, pageable);
     }
 }

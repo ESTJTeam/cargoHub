@@ -1,9 +1,6 @@
 package com.cargohub.order_service.application;
 
-import com.cargohub.order_service.application.command.CreateOrderCommandV1;
-import com.cargohub.order_service.application.command.DeleteOrderCommandV1;
-import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
-import com.cargohub.order_service.application.command.UserInfo;
+import com.cargohub.order_service.application.command.*;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
 import com.cargohub.order_service.application.dto.FirmInfoResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
@@ -70,12 +67,12 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReadOrderSummaryResultV1> readOrderPage(Pageable pageable, UserInfo userInfo) {
+    public Page<ReadOrderSummaryResultV1> readOrderPage(SearchOrderCommandV1 searchOrderCommandV1, Pageable pageable, UserInfo userInfo) {
 
         Page<Order> orderPage;
 
         switch (userInfo.role()) {
-            case MASTER -> orderPage = orderRepository.findAll(pageable);
+            case MASTER -> orderPage = orderRepository.findOrderPage(searchOrderCommandV1, pageable);
             case HUB_MANAGER -> {
                 /**
                  * todo:
@@ -84,14 +81,14 @@ public class OrderService {
                  * 3. firm List??로 주문 찾기
                  */
 
-                ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
-                orderPage = orderRepository.findAllByReceiverId(receiverId, pageable);
+                SupplierId receiverId = SupplierId.of(UUID.randomUUID());
+                orderPage = orderRepository.findOrderPageBySupplierId(receiverId, searchOrderCommandV1, pageable);
             }
             case SUPPLIER_MANAGER -> {
                 // todo: firm client에서 userId로 업체 찾기
 
                 ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
-                orderPage = orderRepository.findAllByReceiverId(receiverId, pageable);
+                orderPage = orderRepository.findOrderPageByReceiverId(receiverId, searchOrderCommandV1, pageable);
             }
             case DELIVERY_MANAGER -> {
                 // todo 배송 담당자 조회(업체 배송, 허브 배송)
