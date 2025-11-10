@@ -111,6 +111,21 @@ public class OrderController {
         return BaseResponse.ok(responseV1, BaseStatus.OK);
     }
 
+
+    @PatchMapping("/{id}/status")
+    public BaseResponse<Void> updateOrderStatus(@PathVariable("id") UUID id, @RequestBody @Valid UpdateOrderStatusRequestV1 request) {
+
+        UpdateOrderStatusCommandV1 commandV1 = new UpdateOrderStatusCommandV1(
+                id,
+                request.status(),
+                UUID.randomUUID() // todo: 수정자 ID
+        );
+
+        orderService.updateOrderStatus(commandV1);
+
+        return BaseResponse.ok(BaseStatus.OK);
+    }
+
     @DeleteMapping("/{id}/cancel")
     public BaseResponse<Void> cancelOrder(@PathVariable("id") UUID id) {
 

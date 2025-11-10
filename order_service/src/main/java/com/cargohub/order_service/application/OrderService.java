@@ -1,7 +1,10 @@
 package com.cargohub.order_service.application;
 
 import com.cargohub.order_service.application.command.CreateOrderCommandV1;
+import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
+import com.cargohub.order_service.application.exception.OrderErrorCode;
+import com.cargohub.order_service.application.exception.OrderException;
 import com.cargohub.order_service.domain.entity.Order;
 import com.cargohub.order_service.domain.repository.OrderRepository;
 import com.cargohub.order_service.domain.vo.*;
@@ -58,4 +61,18 @@ public class OrderService {
     }
 
 
+    @Transactional
+    public void updateOrderStatus(UpdateOrderStatusCommandV1 updateOrderStatusCommandV1) {
+        // todo: 권한체크
+
+        Order order = findOrder(updateOrderStatusCommandV1.id());
+        // todo: 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
+
+        order.updateStatus(updateOrderStatusCommandV1.status(), updateOrderStatusCommandV1.updatedBy());
+    }
+
+    private Order findOrder(UUID id) {
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+    }
 }
