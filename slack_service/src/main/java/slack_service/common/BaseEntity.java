@@ -44,7 +44,7 @@ public class BaseEntity {
     }
 
     // TODO - User 정보 가져와서 updatedBy 추가
-    public void recover() {
+    public void restore() {
         this.deletedAt = null;
         this.deletedBy = null;
         this.updatedAt = LocalDateTime.now();

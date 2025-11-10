@@ -198,7 +198,8 @@ public class SlackService {
 
     // TODO - User UUID 가져와서 deleterUserId 추가
     /**
-     * [Slack 로그 단건 삭제 - Soft Delete 처리]
+     * [Slack 로그 단건 삭제]
+     * Soft Delete 처리
      *
      * @param slackId 삭제할 Slack 로그의 UUID
      */
@@ -212,6 +213,24 @@ public class SlackService {
         }
 
         slackLog.delete();
+    }
+
+    /**
+     * [Slack 슬랙 로그 단건 복구]
+     * deletedAt, deletedBy null 처리
+     *
+     * @param slackId 삭제할 Slack 로그의 UUID
+     */
+    @Transactional
+    public void restoreSlackLog(UUID slackId) {
+
+        SlackLog slackLog = getLogOrThrow(slackId);
+
+        if (!slackLog.checkDeleted()) {
+            throw new BusinessException(ErrorCode.SLACK_LOG_ALREADY_DELETED);
+        }
+
+        slackLog.restore();
     }
 
     // [공통] 로그 조회 메서드
