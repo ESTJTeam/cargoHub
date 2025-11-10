@@ -1,14 +1,12 @@
 package com.cargohub.order_service.presentation;
 
 import com.cargohub.order_service.application.OrderService;
-import com.cargohub.order_service.application.command.CreateOrderCommandV1;
-import com.cargohub.order_service.application.command.DeleteOrderCommandV1;
-import com.cargohub.order_service.application.command.OrderProductCommandV1;
-import com.cargohub.order_service.application.command.UpdateOrderStatusCommandV1;
+import com.cargohub.order_service.application.command.*;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
+import com.cargohub.order_service.domain.vo.UserRole;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
 import com.cargohub.order_service.presentation.dto.request.UpdateOrderStatusRequestV1;
@@ -65,8 +63,13 @@ public class OrderController {
     @GetMapping
     public BaseResponse<Page<ReadOrderSummaryResponseV1>>  readOrderPage(@PageableDefault(size = 10)Pageable pageable) {
 
-        // todo: 애플리케이션 서비스 호출
+        UserInfo userInfo = new UserInfo(
+                UUID.randomUUID(),
+                UserRole.MASTER
+        );
 
+        // todo: 애플리케이션 서비스 호출
+        orderService.readOrderPage(pageable, userInfo);
 
         ReadOrderSummaryResponseV1 responseV1 = new ReadOrderSummaryResponseV1(
                 UUID.randomUUID(),
