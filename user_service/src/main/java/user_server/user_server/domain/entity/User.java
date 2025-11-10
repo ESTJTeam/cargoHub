@@ -53,6 +53,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "refresh_token", length = 2000)
     private String refreshToken;
 
     private LocalDateTime refreshTokenExpiresAt;
