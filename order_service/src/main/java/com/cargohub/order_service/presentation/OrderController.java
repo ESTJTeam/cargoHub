@@ -33,12 +33,14 @@ public class OrderController {
     private final OrderService orderService;
 
     private final JwtUtil jwtUtil;
-
 //    private final UserClient userClient;
 
     @ModelAttribute("userInfo")
-    public UserInfoResponse getUser(@RequestHeader("Authorization") String accessToken) {
+    public UserInfoResponse getUser(@RequestHeader(value = "Authorization", required = false) String accessToken) {
 //        return userClient.getUser(accessToken);
+        if (accessToken == null || accessToken.isBlank()) {
+            return UserInfoResponse.anonymous();
+        }
         return jwtUtil.parseJwt(accessToken);
     }
 

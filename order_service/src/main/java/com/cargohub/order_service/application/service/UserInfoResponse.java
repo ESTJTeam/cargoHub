@@ -10,4 +10,14 @@ public record UserInfoResponse(
         String username,
         String type
 ) {
+
+    public static UserInfoResponse anonymous() {
+
+        return new UserInfoResponse(
+                null,
+                null,
+                "anonymous",
+                "anonymous"
+        );
+    }
 }
