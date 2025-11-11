@@ -57,4 +57,62 @@ public class HubAddress extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hub_id")
     private Hub hub;
+
+    public static HubAddress create(
+            String postalCode,
+            String country,
+            String region,
+            String city,
+            String district,
+            String roadName,
+            String buildingName,
+            String detailAddress,
+            String fullAddress,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Hub hub
+    ) {
+
+        HubAddress address = new HubAddress();
+        address.postalCode = postalCode;
+        address.country = country;
+        address.region = region;
+        address.city = city;
+        address.district = district;
+        address.roadName = roadName;
+        address.buildingName = buildingName;
+        address.detailAddress = detailAddress;
+        address.fullAddress = fullAddress;
+        address.latitude = latitude;
+        address.longitude = longitude;
+        address.hub = hub;
+        return address;
+    }
+
+    public void update(
+            String postalCode,
+            String country,
+            String region,
+            String city,
+            String district,
+            String roadName,
+            String buildingName,
+            String detailAddress,
+            String fullAddress,
+            BigDecimal latitude,
+            BigDecimal longitude
+    ) {
+
+        this.postalCode = postalCode;
+        this.country = country;
+        this.region = region;
+        this.city = city;
+        this.district = district;
+        this.roadName = roadName;
+        this.buildingName = buildingName;
+        this.detailAddress = detailAddress;
+        this.fullAddress = fullAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }
