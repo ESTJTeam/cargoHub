@@ -29,6 +29,6 @@ public class FirmRepositoryAdapter implements FirmRepository {
 
     @Override
     public Page<Firm> findByHubId(HubId hubId, Pageable pageable) {
-        return jpa.findByHubId(hubId.getHubId(), pageable);
+        return jpa.findByHubId_HubId(hubId.getHubId(), pageable);
     }
 }

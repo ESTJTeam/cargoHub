@@ -12,6 +12,8 @@ import com.cargohub.firm_service.presentation.dto.request.UpdateFirmRequestV1;
 import com.cargohub.firm_service.presentation.dto.response.FirmListResponseV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,14 +25,14 @@ public class FirmControllerV1 {
 
     private final FirmServiceV1 firmService;
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public BaseResponse<FirmListResponseV1> getFirms(@RequestParam UUID hubId,
-                                                     @RequestParam(defaultValue = "1") int page,
-                                                     @RequestParam(defaultValue = "10") int size) {
+                                                                    @RequestParam(defaultValue = "1") int page,
+                                                                    @RequestParam(defaultValue = "10") int size) {
 
         FirmListResponseV1 response = firmService.getFirmsByHubId(hubId, page, size);
 
-        return BaseResponse.ok(response, BaseStatus.OK);
+        return BaseResponse.ok(BaseStatus.OK, response);
     }
 
     @PostMapping

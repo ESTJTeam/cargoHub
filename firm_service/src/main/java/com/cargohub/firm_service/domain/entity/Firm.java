@@ -29,7 +29,7 @@ public class Firm extends BaseEntity {
     @Column(name = "name", length = 20, nullable = false)
     private String name;                   // 업체명
 
-    @Column(name = "hub_id")
+    @Embedded
     private HubId hubId;                    // 허브 id
 
     @Enumerated(EnumType.STRING)

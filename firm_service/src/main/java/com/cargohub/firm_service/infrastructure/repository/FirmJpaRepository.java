@@ -12,6 +12,5 @@ import java.util.UUID;
 
 public interface FirmJpaRepository extends JpaRepository<Firm, UUID> {
 
-    @Query("select f from Firm f where f.hubId.hubId = :hubId")
-    Page<Firm> findByHubId(@Param("hubId") UUID hubId, Pageable pageable);
+    Page<Firm> findByHubId_HubId(UUID hubId, Pageable pageable);
 }

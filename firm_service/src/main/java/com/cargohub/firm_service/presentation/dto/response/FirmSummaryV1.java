@@ -2,6 +2,7 @@ package com.cargohub.firm_service.presentation.dto.response;
 
 import com.cargohub.firm_service.domain.entity.Firm;
 import com.cargohub.firm_service.domain.entity.FirmAddress;
+import com.cargohub.firm_service.domain.entity.FirmType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,7 +10,7 @@ import java.util.UUID;
 public record FirmSummaryV1(
         UUID id,
         String name,
-        com.cargohub.firm_service.domain.entity.FirmType type,
+        FirmType type,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         AddressSummaryV1 address

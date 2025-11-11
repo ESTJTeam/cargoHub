@@ -47,7 +47,7 @@ public class FirmServiceV1 {
     }
 
     @Transactional
-    public Firm createFirm(CreateFirmCommandV1 command) {
+    public void createFirm(CreateFirmCommandV1 command) {
 
         // HubId 생성
         HubId hubId = HubId.of(command.hubId());
@@ -65,7 +65,7 @@ public class FirmServiceV1 {
           command.address()
         );
 
-        return firmRepository.save(firm);
+        firmRepository.save(firm);
     }
 
     @Transactional
