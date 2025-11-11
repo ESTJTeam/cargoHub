@@ -6,6 +6,7 @@ import com.cargohub.firm_service.domain.entity.Firm;
 import com.cargohub.firm_service.domain.port.HubValidatorPort;
 import com.cargohub.firm_service.domain.repository.FirmRepository;
 import com.cargohub.firm_service.domain.vo.HubId;
+import com.cargohub.firm_service.presentation.dto.response.FirmDetailResponseV1;
 import com.cargohub.firm_service.presentation.dto.response.FirmListResponseV1;
 import com.cargohub.firm_service.presentation.dto.response.FirmSummaryV1;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,15 @@ public class FirmServiceV1 {
                 result.getTotalElements(),
                 firms
         );
+    }
+
+    @Transactional(readOnly = true)
+    public FirmDetailResponseV1 getFirm(UUID firmId) {
+
+        Firm firm = firmRepository.findById(firmId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 업체입니다. id=" + firmId));
+
+        return FirmDetailResponseV1.from(firm);
     }
 
     @Transactional
