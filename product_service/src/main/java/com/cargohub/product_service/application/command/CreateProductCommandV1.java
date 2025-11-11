@@ -10,6 +10,6 @@ public record CreateProductCommandV1(
         Integer stockQuantity,
         BigDecimal price,
         Boolean sellable,
-        UUID createdBy
+        UserInfo user
 ) {
 }

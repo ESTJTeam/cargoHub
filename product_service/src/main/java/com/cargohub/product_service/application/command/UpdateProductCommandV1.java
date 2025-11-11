@@ -9,6 +9,6 @@ public record UpdateProductCommandV1(
         Integer stockQuantity,
         BigDecimal price,
         Boolean sellable,
-        UUID updatedBy
+        UserInfo user
 ) {
 }

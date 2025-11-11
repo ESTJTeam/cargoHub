@@ -5,7 +5,8 @@ import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
 import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
 import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
-import com.cargohub.product_service.domain.vo.UserRole;
+import com.cargohub.product_service.application.service.UserInfoResponse;
+import com.cargohub.product_service.common.JwtUtil;
 import com.cargohub.product_service.presentation.dto.request.*;
 import com.cargohub.product_service.presentation.dto.response.BulkProductQueryResponseV1;
 import com.cargohub.product_service.presentation.dto.response.CreateProductResponseV1;
@@ -16,16 +17,12 @@ import com.cargohub.product_service.common.success.BaseStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -37,10 +34,16 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     private final ProductService productService;
+    private final JwtUtil jwtUtil;
+
+    @ModelAttribute("userInfo")
+    public UserInfoResponse getUser(@RequestHeader("Authorization") String accessToken) {
+        return jwtUtil.parseJwt(accessToken);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request){
+    public BaseResponse<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse){
 
         CreateProductCommandV1 commandV1 = new CreateProductCommandV1(
                 request.name(),
@@ -49,7 +52,7 @@ public class ProductController {
                 request.stockQuantity(),
                 request.price(),
                 request.sellable(),
-                UUID.randomUUID() // todo: 생성자 ID로 수정
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
         CreateProductResultV1 result = productService.createProduct(commandV1);
@@ -62,22 +65,17 @@ public class ProductController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@ModelAttribute SearchProductRequestV1 search, @PageableDefault(size = 10) Pageable pageable) {
+    public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@ModelAttribute SearchProductRequestV1 search, @PageableDefault(size = 10) Pageable pageable, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         SearchProductCommandV1 searchCommand = new SearchProductCommandV1(
                 search.name(),
                 search.firmId(),
                 search.hubId(),
-                search.sellable()
+                search.sellable(),
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
-        // todo: 사용자 정보 필요(id, role)
-        UserInfo userInfo = new UserInfo(
-                UUID.randomUUID(),
-                UserRole.MASTER
-        );
-
-        Page<ReadProductSummaryResultV1> pageResult = productService.readProductPage(searchCommand, pageable, userInfo);
+        Page<ReadProductSummaryResultV1> pageResult = productService.readProductPage(searchCommand, pageable);
 
         return BaseResponse.ok(pageResult.map(ReadProductSummaryResponseV1::from), BaseStatus.OK);
     }
@@ -93,7 +91,7 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> updateProduct(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductRequestV1 request) {
+    public BaseResponse<Void> updateProduct(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         UpdateProductCommandV1 commandV1 = new UpdateProductCommandV1(
                 id,
@@ -101,10 +99,9 @@ public class ProductController {
                 request.stockQuantity(),
                 request.price(),
                 request.sellable(),
-                UUID.randomUUID() // todo: 수정 - 수정자 ID
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
-        // todo: 사용자 정보 필요(id, role)
         productService.updateProduct(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
@@ -112,14 +109,13 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> deleteProduct(@PathVariable("id") UUID id) {
+    public BaseResponse<Void> deleteProduct(@PathVariable("id") UUID id, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         DeleteProductCommandV1 commandV1 = new DeleteProductCommandV1(
                 id,
-                UUID.randomUUID() // todo: 수정 - 삭제자 ID
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
-        // todo: 사용자 정보 필요(id, role)
         productService.deleteProduct(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);

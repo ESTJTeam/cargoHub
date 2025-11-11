@@ -10,6 +10,7 @@ import com.cargohub.product_service.application.exception.ProductException;
 import com.cargohub.product_service.domain.repository.ProductRepository;
 import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
+import com.cargohub.product_service.domain.vo.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,8 @@ public class ProductService {
 
     @Transactional
     public CreateProductResultV1 createProduct(CreateProductCommandV1 createProductCommandV1) {
-        // todo: 권한 체크
+        // 권한 체크
+        checkPermission(createProductCommandV1.user().role());
 
         // todo: 업체 존재 확인
 
@@ -52,7 +54,7 @@ public class ProductService {
                 createProductCommandV1.stockQuantity(),
                 createProductCommandV1.price(),
                 createProductCommandV1.sellable(),
-                createProductCommandV1.createdBy()
+                createProductCommandV1.user().id()
         );
 
         Product newProduct = productRepository.save(product);
@@ -61,7 +63,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReadProductSummaryResultV1> readProductPage(SearchProductCommandV1 search, Pageable pageable, UserInfo user) {
+    public Page<ReadProductSummaryResultV1> readProductPage(SearchProductCommandV1 searchProductCommandV1, Pageable pageable) {
 
         Page<Product> productPage;
 
@@ -70,9 +72,9 @@ public class ProductService {
          * 업체 담당자일 경우 - 업체 id 필요함
          */
 
-        switch (user.role()) {
+        switch (searchProductCommandV1.user().role()) {
             case MASTER, DELIVERY_MANAGER ->
-                    productPage = productRepository.findProductPage(search, pageable);
+                    productPage = productRepository.findProductPage(searchProductCommandV1, pageable);
 
             case HUB_MANAGER -> {
                 // todo: userId를 통한 hubId 조회 -> hubClient 단건 조회
@@ -80,7 +82,7 @@ public class ProductService {
                 if(hubId == null) {
                     throw new ProductException(ProductErrorCode.HUB_ID_REQUIRED);
                 }
-                productPage = productRepository.findProductPageByHubId(hubId, search, pageable);
+                productPage = productRepository.findProductPageByHubId(hubId, searchProductCommandV1, pageable);
             }
             case SUPPLIER_MANAGER -> {
                 // todo: firmId 조회 -> firmClient 단건 조회
@@ -88,7 +90,7 @@ public class ProductService {
                 if(firmId == null) {
                     throw new ProductException(ProductErrorCode.FIRM_ID_REQUIRED);
                 }
-                productPage = productRepository.findProductPageByFirmId(firmId, search, pageable);
+                productPage = productRepository.findProductPageByFirmId(firmId, searchProductCommandV1, pageable);
             }
             default ->
                     throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
@@ -108,7 +110,7 @@ public class ProductService {
     public void updateProduct(UpdateProductCommandV1 updateProductCommandV1) {
 
         // 권한 체크
-//        checkPermission(updateProductCommandV1.user().role());
+        checkPermission(updateProductCommandV1.user().role());
 
         Product product = findProduct(updateProductCommandV1.id());
 
@@ -119,7 +121,7 @@ public class ProductService {
                 updateProductCommandV1.stockQuantity(),
                 updateProductCommandV1.price(),
                 updateProductCommandV1.sellable(),
-                updateProductCommandV1.updatedBy()
+                updateProductCommandV1.user().id()
         );
     }
 
@@ -132,14 +134,16 @@ public class ProductService {
 
         //todo: 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
 
-        product.delete(deleteProductCommandV1.deletedBy());
+        product.delete(deleteProductCommandV1.user().id());
     }
 
+    // 재고 차감
     @Transactional
     public void decreaseStock(UpdateProductStockCommandV1 command) {
         updateStock(command, false);
     }
 
+    // 재고 증가
     @Transactional
     public void increaseStock(UpdateProductStockCommandV1 command) {
         updateStock(command, true);
@@ -189,5 +193,14 @@ public class ProductService {
         }
 
         return products;
+    }
+
+    private void checkPermission(UserRole role) {
+
+        if(role != UserRole.MASTER
+                && role != UserRole.HUB_MANAGER) {
+            throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
+        }
+
     }
 }
