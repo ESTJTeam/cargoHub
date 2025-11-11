@@ -9,7 +9,7 @@ ext {
     querydslVersion = "7.0"
 }
 
-group = 'com.example'
+group = 'com.cargohub'
 version = '0.0.1-SNAPSHOT'
 description = 'order_service'
 

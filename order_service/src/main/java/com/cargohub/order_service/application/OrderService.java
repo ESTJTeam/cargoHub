@@ -7,7 +7,12 @@ import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderSummaryResultV1;
 import com.cargohub.order_service.application.exception.OrderErrorCode;
 import com.cargohub.order_service.application.exception.OrderException;
+import com.cargohub.order_service.application.service.ProductClient;
+import com.cargohub.order_service.application.service.product.BilkProductQueryRequestV1;
+import com.cargohub.order_service.application.service.product.BulkProductQueryResponseV1;
+import com.cargohub.order_service.application.service.product.UpdateProductStockRequestV1;
 import com.cargohub.order_service.domain.entity.Order;
+import com.cargohub.order_service.domain.entity.OrderProduct;
 import com.cargohub.order_service.domain.repository.OrderRepository;
 import com.cargohub.order_service.domain.vo.*;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,28 +35,55 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-//    private final ProductClient productClient;
+    private final ProductClient productClient;
 
     @Transactional
     public CreateOrderResultV1 createOrder(CreateOrderCommandV1 createOrderCommandV1) {
-        // todo: 권한 체크 - 마스터, 업체 담당자가 아닐경우 403
+        // todo: 1. 권한 체크 - 마스터, 업체 담당자가 아닐경우 403
 
 
-        // todo: 상품 조회
+        // 2. 상품 조회
         List<ProductId> productIds = createOrderCommandV1.products().stream()
                 .map(request -> ProductId.of(request.productId()))
                 .distinct()
                 .toList();
 
-        // todo: 상품 재고 차감
+        BilkProductQueryRequestV1 requestV1 = new BilkProductQueryRequestV1(
+                createOrderCommandV1.products().stream()
+                .map(OrderProductCommandV1::productId)
+                .toList());
 
-        // todo: order.save()
+        BulkProductQueryResponseV1 productMap = productClient.getProducts(requestV1);
+
+        // 3. 같은 공급 업체인지
+        Set<SupplierId> supplierIds = productMap.products().values().stream()
+                .map(product -> SupplierId.of(product.firmId()))
+                .collect(Collectors.toSet());
+
+        if(supplierIds.size() > 1) {
+            throw new OrderException(OrderErrorCode.INVALID_ORDER_SUPPLIER);
+        }
+
+        // 4. 상품 재고 차감
+        List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = createOrderCommandV1.products().stream()
+                .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(
+                        p.productId(),
+                        p.quantity()
+                ))
+                .collect(Collectors.toList());
+
+        productClient.decreaseStock(new UpdateProductStockRequestV1(stockUpdateItems));
+
+        // 5. 주문 상품 생성
+        List<OrderProduct> productList = createOrderCommandV1.products().stream()
+                .map(request -> createOrderProduct(request, productMap))
+                .toList();
 
         ReceiverId receiverId = ReceiverId.of(createOrderCommandV1.receiverId());
-        SupplierId supplierId = SupplierId.of(UUID.randomUUID()); // todo: 공급 업체 Id 수정
+        SupplierId supplierId = supplierIds.iterator().next();
 
         Order order = Order.ofNewOrder(
-                null, // productList
+                productList,
                 supplierId,
                 receiverId,
                 createOrderCommandV1.requestNote(),
@@ -151,5 +186,26 @@ public class OrderService {
     private Order findOrder(UUID id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+    }
+
+    private OrderProduct createOrderProduct(OrderProductCommandV1 request, BulkProductQueryResponseV1 productMap) {
+        ProductId productId = ProductId.of(request.productId());
+
+        BulkProductQueryResponseV1.ProductInfo product = productMap.products().get(request.productId());
+
+        if(product == null) {
+            throw new OrderException(OrderErrorCode.ORDER_NOT_FOUND);
+        }
+
+        if(!product.sellable()) {
+            throw new OrderException(OrderErrorCode.ORDER_PRODUCT_NOT_AVAILABLE);
+        }
+
+        return new OrderProduct(
+                productId,
+                product.name(),
+                product.price(),
+                request.quantity()
+        );
     }
 }
