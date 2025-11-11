@@ -42,12 +42,8 @@ public class OrderService {
         // todo: 1. 권한 체크 - 마스터, 업체 담당자가 아닐경우 403
 
 
-        // 2. 상품 조회
-        List<ProductId> productIds = createOrderCommandV1.products().stream()
-                .map(request -> ProductId.of(request.productId()))
-                .distinct()
-                .toList();
 
+        // todo: 재고 차감 로직 분리
         BilkProductQueryRequestV1 requestV1 = new BilkProductQueryRequestV1(
                 createOrderCommandV1.products().stream()
                 .map(OrderProductCommandV1::productId)
@@ -179,6 +175,15 @@ public class OrderService {
 //            }
 //        }
 
+        List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = order.getOrderProducts().stream()
+                .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(
+                        p.getProductId().getId(),
+                        p.getQuantity()
+                ))
+                .toList();
+
+        UpdateProductStockRequestV1 requestV1 = new UpdateProductStockRequestV1(stockUpdateItems);
+        productClient.increaseStock(requestV1);
         order.delete(deleteOrderCommandV1.deletedBy());
 
     }

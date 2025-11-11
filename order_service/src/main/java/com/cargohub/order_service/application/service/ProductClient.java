@@ -25,7 +25,7 @@ public interface ProductClient {
     void decreaseStock(@RequestBody UpdateProductStockRequestV1 request);
 
     @PostMapping("/increase")
-    void increaseStock(@RequestBody List<OrderProductCommandV1> requestV1s);
+    void increaseStock(@RequestBody UpdateProductStockRequestV1 request);
 
 
 
