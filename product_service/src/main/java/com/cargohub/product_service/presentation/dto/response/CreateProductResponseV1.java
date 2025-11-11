@@ -16,7 +16,9 @@ public record CreateProductResponseV1(
         boolean sellable,
         LocalDateTime createdAt
 ) {
+
     public static CreateProductResponseV1 from(CreateProductResultV1 result) {
+
         return new CreateProductResponseV1(
                 result.id(),
                 result.name(),
