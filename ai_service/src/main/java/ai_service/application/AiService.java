@@ -22,8 +22,19 @@ public class AiService {
     private final ChatClient chatClient;
     private final AiCallLogRepository aiCallLogRepository;
 
+    private static final DateTimeFormatter ORDER_AT_FMT =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * [AI 발송 시한 계산 - Prompt 데이터 직접 입력 버전]
+     * 입력 받은 데이터를 기반으로 최종 발송 시한을 계산하고, Slack 메시지 형식의 텍스트를 반환
+     * 발송 시한과 orderInfo를 파싱하여 Slack 전송용 데이터로 가공
+     *
+     * @param request AiDeadlineRequestV1 DTO (주문번호, 주문자 정보, 상품명, 수량, 출발 허브, 경유지, 목적지, 배송자 정보)
+     * @return AI가 계산한 발송 시한과 Slack 메시지 원문, 주문 정보 요약을 담은 응답 DTO
+     */
     @Transactional
-    public AiDeadlineResponseV1 generateShippingDeadlinePrediction(
+    public AiDeadlineResponseV1 calculateDeadlineWithPromptData(
         AiDeadlineRequestV1 request) {
 
         final String provider = OpenAiConstants.PROVIDER_OPENAI;
@@ -34,11 +45,13 @@ public class AiService {
             ? "없음"
             : String.join(", ", request.getViaHubs());
 
+        String orderAtText = request.getOrderAt().format(ORDER_AT_FMT);
+
         String prompt = OpenAiConstants.DEADLINE_SLACK_PROMPT.formatted(
             request.getOrderNum(),
             request.getRequesterName(),
             request.getRequesterEmail(),
-            request.getOrderAt(),
+            orderAtText,
             request.getProductName(),
             request.getQuantity(),
             request.getRequestNote(),
@@ -87,5 +100,3 @@ public class AiService {
             .build();
     }
 }
-
-// TODO - 유저 받아오면 수정 작업 필요
