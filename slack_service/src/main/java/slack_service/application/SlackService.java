@@ -158,6 +158,11 @@ public class SlackService {
 
         SlackLog slackLog = getLogOrThrow(slackId);
 
+        if (slackLog.getDeletedAt() != null) {
+
+            throw new BusinessException(ErrorCode.SLACK_LOG_ALREADY_DELETED);
+        }
+
         return SlackLogResponseV1.from(slackLog);
     }
 

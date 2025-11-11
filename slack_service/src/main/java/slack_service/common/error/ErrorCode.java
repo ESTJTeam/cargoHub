@@ -12,7 +12,7 @@ public enum ErrorCode {
 
     // 400
     INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "수신자의 슬랙 아이디가 올바르지 않습니다."),
-    SLACK_LOG_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 로그입니다."),
+    SLACK_LOG_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "삭제된 로그입니다."),
     SLACK_LOG_HAS_NOT_BEEN_DELETED(HttpStatus.BAD_REQUEST, "삭제되지 않은 로그입니다."),
 
     // 404
