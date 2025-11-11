@@ -33,3 +33,7 @@ custom:
   jwt:
     secrets:
       appkey: ${SECRET_APP_KEY}
+
+clients:
+  product:
+    url: ${PRODUCT_SERVICE_URL}

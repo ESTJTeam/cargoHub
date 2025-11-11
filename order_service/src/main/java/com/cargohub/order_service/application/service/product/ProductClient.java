@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "product-service", url="http://localhost:19100", path="/v1/products")
+@FeignClient(name = "product-service", url="${clients.product.url}", path="/v1/products")
 public interface ProductClient {
 
     @PostMapping("/bulk-query")
