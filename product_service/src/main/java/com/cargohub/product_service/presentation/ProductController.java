@@ -37,7 +37,10 @@ public class ProductController {
     private final JwtUtil jwtUtil;
 
     @ModelAttribute("userInfo")
-    public UserInfoResponse getUser(@RequestHeader("Authorization") String accessToken) {
+    public UserInfoResponse getUser(@RequestHeader(value = "Authorization", required = false) String accessToken) {
+        if (accessToken == null || accessToken.isBlank()) {
+            return UserInfoResponse.anonymous();
+        }
         return jwtUtil.parseJwt(accessToken);
     }
 
@@ -117,6 +120,15 @@ public class ProductController {
         );
 
         productService.deleteProduct(commandV1);
+
+        return BaseResponse.ok(BaseStatus.OK);
+    }
+
+    @PostMapping("/check-stock")
+    public BaseResponse<Void> checkStock(@RequestBody CheckProductStockRequestV1 request) {
+
+        CheckProductStockCommandV1 commandV1 = CheckProductStockCommandV1.from(request);
+        productService.checkStock(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
     }

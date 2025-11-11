@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -137,6 +136,27 @@ public class ProductService {
         product.delete(deleteProductCommandV1.user().id());
     }
 
+    public void checkStock(CheckProductStockCommandV1 checkProductStockCommandV1) {
+        List<UUID> productIds = checkProductStockCommandV1.products().stream()
+                .map(CheckProductStockCommandV1.ProductStockItem::id)
+                .toList();
+
+        List<Product> products = productRepository.findAllById(productIds);
+
+        Map<UUID, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        for (var item : checkProductStockCommandV1.products()) {
+            Product product = productMap.get(item.id());
+            if (product == null) {
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
+            }
+            if (product.getStockQuantity() < item.quantity()) {
+                throw new ProductException(ProductErrorCode.INVALID_DECREASE_QUANTITY);
+            }
+        }
+    }
+
     // 재고 차감
     @Transactional
     public void decreaseStock(UpdateProductStockCommandV1 command) {
@@ -149,7 +169,6 @@ public class ProductService {
         updateStock(command, true);
     }
 
-    @Transactional(readOnly = true)
     public List<ReadProductSummaryResultV1> bulkProduct(BulkProductQueryCommandV1 bulkProductQueryCommandV1) {
         List<UUID> uniqueIds = bulkProductQueryCommandV1.ids().stream()
                 .distinct()
