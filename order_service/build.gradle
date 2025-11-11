@@ -6,6 +6,7 @@ plugins {
 
 ext {
     springCloudVersion = "2025.0.0"
+    querydslVersion = "7.0"
 }
 
 group = 'com.example'
@@ -33,6 +34,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    // Querydsl
+    implementation "io.github.openfeign.querydsl:querydsl-core:${querydslVersion}"
+    implementation "io.github.openfeign.querydsl:querydsl-jpa:${querydslVersion}"
+    annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:${querydslVersion}:jpa"
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'

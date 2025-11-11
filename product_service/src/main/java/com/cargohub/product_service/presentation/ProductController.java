@@ -3,7 +3,11 @@ package com.cargohub.product_service.presentation;
 import com.cargohub.product_service.application.ProductService;
 import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
+import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
+import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
+import com.cargohub.product_service.domain.vo.UserRole;
 import com.cargohub.product_service.presentation.dto.request.CreateProductRequestV1;
+import com.cargohub.product_service.presentation.dto.request.SearchProductRequestV1;
 import com.cargohub.product_service.presentation.dto.request.UpdateProductRequestV1;
 import com.cargohub.product_service.presentation.dto.request.UpdateProductStockRequestV1;
 import com.cargohub.product_service.presentation.dto.response.CreateProductResponseV1;
@@ -56,47 +60,32 @@ public class ProductController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@PageableDefault(size = 10) Pageable pageable) {
-        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
-//        productService.readProductPage(pageable, user);
-
-        ReadProductSummaryResponseV1 responseV1 = new ReadProductSummaryResponseV1(
-                UUID.randomUUID(),
-                "상품 명",
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                100000,
-                BigDecimal.valueOf(10000),
-                true,
-                LocalDateTime.now()
+    public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@ModelAttribute SearchProductRequestV1 search, @PageableDefault(size = 10) Pageable pageable) {
+        SearchProductCommandV1 searchCommand = new SearchProductCommandV1(
+                search.name(),
+                search.firmId(),
+                search.hubId(),
+                search.sellable()
         );
 
-        return BaseResponse.ok(new PageImpl<>(List.of(responseV1)), BaseStatus.OK);
+        // todo: 사용자 정보 필요(id, role)
+        UserInfo userInfo = new UserInfo(
+                UUID.randomUUID(),
+                UserRole.MASTER
+        );
+
+        Page<ReadProductSummaryResultV1> pageResult = productService.readProductPage(searchCommand, pageable, userInfo);
+
+        return BaseResponse.ok(pageResult.map(ReadProductSummaryResponseV1::from), BaseStatus.OK);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReadProductDetailResponseV1> readProduct(@PathVariable("id") UUID id) {
-        // todo: 애플리케이션 서비스 호출 - 사용자 정보 필요(id, role)
-//        ReadProductDetailResultV1 productDetailResultV1 = productService.readProduct(id, user);
 
-        ReadProductDetailResponseV1 responseV1 = new ReadProductDetailResponseV1(
-                UUID.randomUUID(),
-                "상품 명",
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                100000,
-                BigDecimal.valueOf(10000),
-                true,
-                LocalDateTime.now(),
-                UUID.randomUUID(),
-                null,
-                null,
-                null,
-                null
-        );
+        ReadProductDetailResultV1 productDetailResult = productService.readProduct(id);
 
-        return BaseResponse.ok(responseV1, BaseStatus.OK);
+        return BaseResponse.ok(ReadProductDetailResponseV1.from(productDetailResult), BaseStatus.OK);
     }
 
     @PatchMapping("/{id}")

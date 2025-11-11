@@ -11,8 +11,12 @@ public record UpdateProductStockCommandV1(
 ) {
 
     public static UpdateProductStockCommandV1 from(UpdateProductStockRequestV1 request) {
+
         Map<UUID, Integer> map = request.items().stream()
-                .collect(Collectors.toMap(UpdateProductStockRequestV1.StockUpdateItemRequest::id, UpdateProductStockRequestV1.StockUpdateItemRequest::quantity));
+                .collect(Collectors.toMap(
+                        UpdateProductStockRequestV1.StockUpdateItemRequest::id,
+                        UpdateProductStockRequestV1.StockUpdateItemRequest::quantity
+                ));
 
         return new UpdateProductStockCommandV1(map);
     }

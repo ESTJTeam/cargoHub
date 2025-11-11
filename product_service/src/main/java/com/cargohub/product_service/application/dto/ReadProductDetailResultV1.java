@@ -21,7 +21,9 @@ public record ReadProductDetailResultV1(
         LocalDateTime deletedAt,
         UUID deletedBy
 ) {
+
     public static ReadProductDetailResultV1 from(Product product) {
+
         return new ReadProductDetailResultV1(
                 product.getId(),
                 product.getName(),
