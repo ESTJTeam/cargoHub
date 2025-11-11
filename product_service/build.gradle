@@ -38,6 +38,7 @@ dependencies {
     // Querydsl
     implementation "io.github.openfeign.querydsl:querydsl-core:${querydslVersion}"
     implementation "io.github.openfeign.querydsl:querydsl-jpa:${querydslVersion}"
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:${querydslVersion}:jpa"
 
     compileOnly 'org.projectlombok:lombok'
