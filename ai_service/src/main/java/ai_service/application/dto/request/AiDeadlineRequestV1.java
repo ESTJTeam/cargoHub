@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ import lombok.ToString;
 public class AiDeadlineRequestV1 {
 
     @NotNull
-    private Long orderNum;
+    private UUID orderNum;
 
     @NotBlank
     private String requesterName;
@@ -55,7 +56,7 @@ public class AiDeadlineRequestV1 {
 
     @Builder
     private AiDeadlineRequestV1(
-        Long orderNum,
+        UUID orderNum,
         String requesterName,
         String requesterEmail,
         LocalDateTime orderAt,
