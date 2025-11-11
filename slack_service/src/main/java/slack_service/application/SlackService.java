@@ -156,8 +156,12 @@ public class SlackService {
     @Transactional(readOnly = true)
     public SlackLogResponseV1 getSlackLog(UUID slackId) {
 
-        SlackLog slackLog = slackLogRepository.findById(slackId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.SLACK_LOG_NOT_FOUND));
+        SlackLog slackLog = getLogOrThrow(slackId);
+
+        if (slackLog.getDeletedAt() != null) {
+
+            throw new BusinessException(ErrorCode.SLACK_LOG_ALREADY_DELETED);
+        }
 
         return SlackLogResponseV1.from(slackLog);
     }
@@ -195,6 +199,50 @@ public class SlackService {
         }
 
         return result.map(SlackLogListResponseV1::from);
+    }
+
+    // TODO - User UUID 가져와서 deleterUserId 추가
+    /**
+     * [Slack 로그 단건 삭제]
+     * Soft Delete 처리
+     *
+     * @param slackId 삭제할 Slack 로그의 UUID
+     */
+    @Transactional
+    public void deleteSlackLog(UUID slackId) {
+
+        SlackLog slackLog = getLogOrThrow(slackId);
+
+        if (slackLog.checkDeleted()) {
+            throw new BusinessException(ErrorCode.SLACK_LOG_ALREADY_DELETED);
+        }
+
+        slackLog.delete();
+    }
+
+    /**
+     * [Slack 슬랙 로그 단건 복구]
+     * deletedAt, deletedBy null 처리
+     *
+     * @param slackId 삭제할 Slack 로그의 UUID
+     */
+    @Transactional
+    public void restoreSlackLog(UUID slackId) {
+
+        SlackLog slackLog = getLogOrThrow(slackId);
+
+        if (!slackLog.checkDeleted()) {
+            throw new BusinessException(ErrorCode.SLACK_LOG_ALREADY_DELETED);
+        }
+
+        slackLog.restore();
+    }
+
+    // [공통] 로그 조회 메서드
+    private SlackLog getLogOrThrow(UUID slackId) {
+
+        return slackLogRepository.findById(slackId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.SLACK_LOG_NOT_FOUND));
     }
 
     // [공통] 페이징 보정 - 페이지 번호: null 또는 1 미만이면 1
