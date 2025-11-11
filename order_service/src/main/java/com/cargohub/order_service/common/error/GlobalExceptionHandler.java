@@ -91,6 +91,9 @@ public class GlobalExceptionHandler {
             if (rootNode.has("message")) {
                 message = rootNode.get("message").asText();
             }
+            if (rootNode.has("path")) {
+                path = rootNode.get("path").asText();
+            }
         } catch (Exception ex) {
             // 파싱 실패 시 기존 메시지 유지
         }
