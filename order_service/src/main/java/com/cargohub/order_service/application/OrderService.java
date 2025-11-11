@@ -7,10 +7,7 @@ import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderSummaryResultV1;
 import com.cargohub.order_service.application.exception.OrderErrorCode;
 import com.cargohub.order_service.application.exception.OrderException;
-import com.cargohub.order_service.application.service.product.ProductClient;
-import com.cargohub.order_service.application.service.product.BilkProductQueryRequestV1;
-import com.cargohub.order_service.application.service.product.BulkProductQueryResponseV1;
-import com.cargohub.order_service.application.service.product.UpdateProductStockRequestV1;
+import com.cargohub.order_service.application.service.product.*;
 import com.cargohub.order_service.domain.entity.Order;
 import com.cargohub.order_service.domain.entity.OrderProduct;
 import com.cargohub.order_service.domain.repository.OrderRepository;
@@ -37,11 +34,14 @@ public class OrderService {
 
     @Transactional
     public CreateOrderResultV1 createOrder(CreateOrderCommandV1 createOrderCommandV1) {
-        // todo: 1. 권한 체크 - 마스터, 업체 담당자가 아닐경우 403
+        // todo: 권한 체크 - 분리
+        UserRole role = createOrderCommandV1.user().role();
+        if(role != UserRole.MASTER
+                && role != UserRole.SUPPLIER_MANAGER) {
+            throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
 
-
-        // todo: 재고 차감 로직 분리 - 실패시 재고 차감되는 문제
-        BilkProductQueryRequestV1 requestV1 = new BilkProductQueryRequestV1(
+        BulkProductQueryRequestV1 requestV1 = new BulkProductQueryRequestV1(
                 createOrderCommandV1.products().stream()
                 .map(OrderProductCommandV1::productId)
                 .toList());
@@ -57,15 +57,16 @@ public class OrderService {
             throw new OrderException(OrderErrorCode.INVALID_ORDER_SUPPLIER);
         }
 
-        // 4. 상품 재고 차감
-        List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = createOrderCommandV1.products().stream()
-                .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(
-                        p.productId(),
-                        p.quantity()
-                ))
-                .collect(Collectors.toList());
+        CheckProductStockRequestV1 stockRequest = new CheckProductStockRequestV1(
+                createOrderCommandV1.products().stream()
+                        .map(product -> new CheckProductStockRequestV1.ProductStockItem(
+                                product.productId(),
+                                product.quantity()
+                        ))
+                        .toList()
+        );
 
-        productClient.decreaseStock(new UpdateProductStockRequestV1(stockUpdateItems));
+        productClient.checkStock(stockRequest);
 
         // 5. 주문 상품 생성
         List<OrderProduct> productList = createOrderCommandV1.products().stream()
@@ -84,6 +85,16 @@ public class OrderService {
         );
 
         Order newOrder = orderRepository.save(order);
+
+        // todo: 재고 차감 로직 분리
+        List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = createOrderCommandV1.products().stream()
+                .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(
+                        p.productId(),
+                        p.quantity()
+                ))
+                .collect(Collectors.toList());
+
+        productClient.decreaseStock(new UpdateProductStockRequestV1(stockUpdateItems));
 
         // todo: 배송 생성
 
@@ -151,7 +162,12 @@ public class OrderService {
 
     @Transactional
     public void updateOrderStatus(UpdateOrderStatusCommandV1 updateOrderStatusCommandV1) {
-        // todo: 권한체크
+        // todo: 권한체크 - 분리
+        UserRole role = updateOrderStatusCommandV1.user().role();
+        if(role != UserRole.MASTER
+                && role != UserRole.HUB_MANAGER) {
+            throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
 
         Order order = findOrder(updateOrderStatusCommandV1.id());
         // todo: 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
@@ -160,17 +176,23 @@ public class OrderService {
     }
 
     public void cancelOrder(DeleteOrderCommandV1 deleteOrderCommandV1) {
-        // todo: 본인만 취소 가능
+
         Order order = findOrder(deleteOrderCommandV1.id());
 
+        UserRole role = deleteOrderCommandV1.user().role();
+
+        if(role.equals(UserRole.DELIVERY_MANAGER)) {
+            throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
+
         // 업체 담당자일 경우
-//        if(!role.equals(UserRole.MASTER) && !role.equals(UserRole.HUB_MANAGER)){
-//            // todo: 업체 담당자(createdBY)의 업체 ID 필요
-//            ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
-//            if(order.getReceiverId().equals(receiverId)) {
-//                throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
-//            }
-//        }
+        if(role.equals(UserRole.SUPPLIER_MANAGER)) {
+            // todo: 업체 담당자(createdBY)의 업체 ID 필요
+            ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
+            if(order.getReceiverId().equals(receiverId)) {
+                throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
+            }
+        }
 
         List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = order.getOrderProducts().stream()
                 .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(

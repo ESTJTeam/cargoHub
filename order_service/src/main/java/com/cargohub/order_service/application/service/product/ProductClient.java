@@ -8,14 +8,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface ProductClient {
 
     @PostMapping("/bulk-query")
-    BulkProductQueryResponseV1 getProducts(@RequestBody BilkProductQueryRequestV1 request);
+    BulkProductQueryResponseV1 getProducts(@RequestBody BulkProductQueryRequestV1 request);
+
+    @PostMapping("/check-stock")
+    void checkStock(@RequestBody CheckProductStockRequestV1 request);
 
     @PostMapping("/decrease")
     void decreaseStock(@RequestBody UpdateProductStockRequestV1 request);
 
     @PostMapping("/increase")
     void increaseStock(@RequestBody UpdateProductStockRequestV1 request);
-
-
 
 }
