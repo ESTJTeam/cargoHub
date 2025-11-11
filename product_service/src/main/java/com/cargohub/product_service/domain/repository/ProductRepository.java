@@ -18,7 +18,7 @@ public interface ProductRepository {
 
     Optional<Product> findById(UUID id);
 
-    List<Product> findAllById(Set<UUID> id);
+    List<Product> findAllById(List<UUID> id);
 
     /**
      * todo: 권한 별 조회 필요

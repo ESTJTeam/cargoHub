@@ -6,10 +6,8 @@ import com.cargohub.product_service.application.dto.CreateProductResultV1;
 import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
 import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
 import com.cargohub.product_service.domain.vo.UserRole;
-import com.cargohub.product_service.presentation.dto.request.CreateProductRequestV1;
-import com.cargohub.product_service.presentation.dto.request.SearchProductRequestV1;
-import com.cargohub.product_service.presentation.dto.request.UpdateProductRequestV1;
-import com.cargohub.product_service.presentation.dto.request.UpdateProductStockRequestV1;
+import com.cargohub.product_service.presentation.dto.request.*;
+import com.cargohub.product_service.presentation.dto.response.BulkProductQueryResponseV1;
 import com.cargohub.product_service.presentation.dto.response.CreateProductResponseV1;
 import com.cargohub.product_service.presentation.dto.response.ReadProductDetailResponseV1;
 import com.cargohub.product_service.presentation.dto.response.ReadProductSummaryResponseV1;
@@ -22,12 +20,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/products")
@@ -61,6 +63,7 @@ public class ProductController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@ModelAttribute SearchProductRequestV1 search, @PageableDefault(size = 10) Pageable pageable) {
+
         SearchProductCommandV1 searchCommand = new SearchProductCommandV1(
                 search.name(),
                 search.firmId(),
@@ -140,6 +143,18 @@ public class ProductController {
         productService.increaseStock(commandV1);
 
         return BaseResponse.ok(BaseStatus.OK);
+    }
+
+    @PostMapping("/bulk-query")
+    public ResponseEntity<BulkProductQueryResponseV1> bulkProduct(@RequestBody BulkProductQueryRequestV1 request) {
+
+        BulkProductQueryCommandV1 commandV1 = new BulkProductQueryCommandV1(request.ids());
+
+        Map<UUID, ReadProductSummaryResponseV1> productMap = productService.bulkProduct(commandV1).stream()
+                .map(ReadProductSummaryResponseV1::from)
+                .collect(Collectors.toMap(ReadProductSummaryResponseV1::id, Function.identity()));
+
+        return ResponseEntity.ok(new BulkProductQueryResponseV1(productMap));
     }
 
 }

@@ -145,9 +145,18 @@ public class ProductService {
         updateStock(command, true);
     }
 
-    private void updateStock(UpdateProductStockCommandV1 command, boolean increase) {
+    public List<ReadProductSummaryResultV1> bulkProduct(BulkProductQueryCommandV1 bulkProductQueryCommandV1) {
+        List<UUID> uniqueIds = bulkProductQueryCommandV1.ids().stream()
+                .distinct()
+                .toList();
 
-        List<Product> products = findProductList(command.items().keySet());
+        return findProductList(uniqueIds).stream()
+                .map(ReadProductSummaryResultV1::from)
+                .toList();
+    }
+
+    private void updateStock(UpdateProductStockCommandV1 command, boolean increase) {
+        List<Product> products = findProductList(command.items().keySet().stream().toList());
 
         Map<UUID, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
@@ -171,7 +180,7 @@ public class ProductService {
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    private List<Product> findProductList(Set<UUID> productIds) {
+    private List<Product> findProductList(List<UUID> productIds) {
 
         List<Product> products = productRepository.findAllById(productIds);
         if (products.size() != productIds.size()) {

@@ -33,7 +33,7 @@ public class ProductRepositoryAdaptor implements ProductRepository {
     }
 
     @Override
-    public List<Product> findAllById(Set<UUID> id) {
+    public List<Product> findAllById(List<UUID> id) {
         return jpaProductRepository.findAllById(id);
     }
 
