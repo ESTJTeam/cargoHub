@@ -15,6 +15,7 @@ import java.util.UUID;
 public class FirmAddress {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -54,5 +55,18 @@ public class FirmAddress {
 
     public FirmAddress(UUID id) {
         this.id = id;
+    }
+
+    public FirmAddress(String postalCode, String country, String region, String city, String district, String roadName, String buildingName, String detailAddress, BigDecimal latitude, BigDecimal longitude) {
+        this.postalCode = postalCode;
+        this.country = country;
+        this.region = region;
+        this.city = city;
+        this.district = district;
+        this.roadName = roadName;
+        this.buildingName = buildingName;
+        this.detailAddress = detailAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }

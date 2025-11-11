@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableFeignClients(basePackages = "com.cargohub.firm_service")
 @EnableJpaAuditing
 public class FirmServiceApplication {
 
