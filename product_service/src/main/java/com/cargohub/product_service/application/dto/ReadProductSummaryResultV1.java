@@ -27,7 +27,7 @@ public record ReadProductSummaryResultV1(
                 product.getStockQuantity(),
                 product.getPrice(),
                 product.getSellable(),
-                product.getDeletedAt()
+                product.getCreatedAt()
         );
     }
 }

@@ -29,7 +29,7 @@ public class ProductRepositoryAdaptor implements ProductRepository {
 
     @Override
     public Optional<Product> findById(UUID id) {
-        return jpaProductRepository.findById(id);
+        return jpaProductRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     @Override
