@@ -4,8 +4,6 @@ import hub_server.hub_server.application.dto.query.HubManagerCheckResponseDto;
 import hub_server.hub_server.application.dto.query.HubResponseDto;
 import hub_server.hub_server.application.dto.query.HubSimpleResponseDto;
 import hub_server.hub_server.application.service.HubService;
-import hub_server.hub_server.common.error.BusinessException;
-import hub_server.hub_server.common.error.ErrorCode;
 import hub_server.hub_server.common.success.BaseResponse;
 import hub_server.hub_server.common.success.BaseStatus;
 import hub_server.hub_server.presentation.request.CreateHubRequest;
@@ -17,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
