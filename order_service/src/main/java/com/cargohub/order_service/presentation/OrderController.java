@@ -5,10 +5,11 @@ import com.cargohub.order_service.application.command.*;
 import com.cargohub.order_service.application.dto.CreateOrderResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderSummaryResultV1;
+import com.cargohub.order_service.common.JwtUtil;
 import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
 import com.cargohub.order_service.domain.vo.OrderStatus;
-import com.cargohub.order_service.domain.vo.UserRole;
+import com.cargohub.order_service.application.service.UserInfoResponse;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
 import com.cargohub.order_service.presentation.dto.request.SearchOrderRequestV1;
@@ -31,9 +32,19 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    private final JwtUtil jwtUtil;
+
+//    private final UserClient userClient;
+
+    @ModelAttribute("userInfo")
+    public UserInfoResponse getUser(@RequestHeader("Authorization") String accessToken) {
+//        return userClient.getUser(accessToken);
+        return jwtUtil.parseJwt(accessToken);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<CreateOrderResponseV1> createOrder(@RequestBody @Valid CreateOrderRequestV1 request) {
+    public BaseResponse<CreateOrderResponseV1> createOrder(@RequestBody @Valid CreateOrderRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         CreateOrderCommandV1 commandV1 = new CreateOrderCommandV1(
                 request.receiverId(),
@@ -41,7 +52,7 @@ public class OrderController {
                         .map(p -> new OrderProductCommandV1(p.id(), p.quantity()))
                         .toList(),
                 request.requestNote(),
-                UUID.randomUUID() // todo: userId로 수정
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
         CreateOrderResultV1 result = orderService.createOrder(commandV1);
@@ -61,12 +72,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public BaseResponse<Page<ReadOrderSummaryResponseV1>>  readOrderPage(@ModelAttribute SearchOrderRequestV1 search, @PageableDefault(size = 10)Pageable pageable) {
-
-        UserInfo userInfo = new UserInfo(
-                UUID.randomUUID(),
-                UserRole.MASTER
-        );
+    public BaseResponse<Page<ReadOrderSummaryResponseV1>>  readOrderPage(@ModelAttribute SearchOrderRequestV1 search, @PageableDefault(size = 10)Pageable pageable, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         SearchOrderCommandV1 searchCommandV1 = new SearchOrderCommandV1(
                 search.supplierId(),
@@ -75,11 +81,12 @@ public class OrderController {
                 search.createdBy(),
                 search.requestNote(),
                 search.startDate(),
-                search.endDate()
+                search.endDate(),
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
         // todo: 사용자 정보 필요
-        Page<ReadOrderSummaryResultV1> orderPage = orderService.readOrderPage(searchCommandV1, pageable, userInfo);
+        Page<ReadOrderSummaryResultV1> orderPage = orderService.readOrderPage(searchCommandV1, pageable);
 
         return BaseResponse.ok(orderPage.map(ReadOrderSummaryResponseV1::from), BaseStatus.OK);
     }
@@ -111,12 +118,12 @@ public class OrderController {
 
 
     @PatchMapping("/{id}/status")
-    public BaseResponse<Void> updateOrderStatus(@PathVariable("id") UUID id, @RequestBody @Valid UpdateOrderStatusRequestV1 request) {
+    public BaseResponse<Void> updateOrderStatus(@PathVariable("id") UUID id, @RequestBody @Valid UpdateOrderStatusRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         UpdateOrderStatusCommandV1 commandV1 = new UpdateOrderStatusCommandV1(
                 id,
                 request.status(),
-                UUID.randomUUID() // todo: 수정자 ID
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
         orderService.updateOrderStatus(commandV1);
@@ -125,11 +132,11 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}/cancel")
-    public BaseResponse<Void> cancelOrder(@PathVariable("id") UUID id) {
+    public BaseResponse<Void> cancelOrder(@PathVariable("id") UUID id, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         DeleteOrderCommandV1 commandV1 = new DeleteOrderCommandV1(
                 id,
-                UUID.randomUUID() // todo: 삭제자 ID
+                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
         orderService.cancelOrder(commandV1);

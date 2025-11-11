@@ -7,7 +7,7 @@ import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderSummaryResultV1;
 import com.cargohub.order_service.application.exception.OrderErrorCode;
 import com.cargohub.order_service.application.exception.OrderException;
-import com.cargohub.order_service.application.service.ProductClient;
+import com.cargohub.order_service.application.service.product.ProductClient;
 import com.cargohub.order_service.application.service.product.BilkProductQueryRequestV1;
 import com.cargohub.order_service.application.service.product.BulkProductQueryResponseV1;
 import com.cargohub.order_service.application.service.product.UpdateProductStockRequestV1;
@@ -18,13 +18,11 @@ import com.cargohub.order_service.domain.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,8 +40,7 @@ public class OrderService {
         // todo: 1. 권한 체크 - 마스터, 업체 담당자가 아닐경우 403
 
 
-
-        // todo: 재고 차감 로직 분리
+        // todo: 재고 차감 로직 분리 - 실패시 재고 차감되는 문제
         BilkProductQueryRequestV1 requestV1 = new BilkProductQueryRequestV1(
                 createOrderCommandV1.products().stream()
                 .map(OrderProductCommandV1::productId)
@@ -83,7 +80,7 @@ public class OrderService {
                 supplierId,
                 receiverId,
                 createOrderCommandV1.requestNote(),
-                createOrderCommandV1.createdBy()
+                createOrderCommandV1.user().id()
         );
 
         Order newOrder = orderRepository.save(order);
@@ -98,11 +95,11 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReadOrderSummaryResultV1> readOrderPage(SearchOrderCommandV1 searchOrderCommandV1, Pageable pageable, UserInfo userInfo) {
+    public Page<ReadOrderSummaryResultV1> readOrderPage(SearchOrderCommandV1 searchOrderCommandV1, Pageable pageable) {
 
         Page<Order> orderPage;
 
-        switch (userInfo.role()) {
+        switch (searchOrderCommandV1.user().role()) {
             case MASTER -> orderPage = orderRepository.findOrderPage(searchOrderCommandV1, pageable);
             case HUB_MANAGER -> {
                 /**
@@ -159,7 +156,7 @@ public class OrderService {
         Order order = findOrder(updateOrderStatusCommandV1.id());
         // todo: 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
 
-        order.updateStatus(updateOrderStatusCommandV1.status(), updateOrderStatusCommandV1.updatedBy());
+        order.updateStatus(updateOrderStatusCommandV1.status(), updateOrderStatusCommandV1.user().id());
     }
 
     public void cancelOrder(DeleteOrderCommandV1 deleteOrderCommandV1) {
@@ -184,7 +181,7 @@ public class OrderService {
 
         UpdateProductStockRequestV1 requestV1 = new UpdateProductStockRequestV1(stockUpdateItems);
         productClient.increaseStock(requestV1);
-        order.delete(deleteOrderCommandV1.deletedBy());
+        order.delete(deleteOrderCommandV1.user().id());
 
     }
 

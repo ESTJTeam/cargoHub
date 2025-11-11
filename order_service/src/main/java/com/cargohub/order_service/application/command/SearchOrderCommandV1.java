@@ -24,7 +24,9 @@ public record SearchOrderCommandV1(
 
         LocalDateTime startDate,
 
-        LocalDateTime endDate
+        LocalDateTime endDate,
+
+        UserInfo user
 ) {
 
 }
