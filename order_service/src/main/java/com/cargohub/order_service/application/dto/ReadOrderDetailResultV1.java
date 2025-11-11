@@ -10,8 +10,6 @@ public record ReadOrderDetailResultV1(
         UUID id,
         FirmInfoResultV1 supplier,
         FirmInfoResultV1 receiver,
-        UUID hubDeliveryId,
-        UUID firmDeliveryId,
         List<OrderProductResultV1> products,
         OrderStatusResultV1 status,
         String requestNote,
@@ -28,8 +26,6 @@ public record ReadOrderDetailResultV1(
                 order.getId(),
                 supplier,
                 receiver,
-                order.getHubDeliveryId().getId(),
-                order.getFirmDeliveryId().getId(),
                 order.getOrderProducts().stream()
                         .map(OrderProductResultV1::from)
                         .toList(),
