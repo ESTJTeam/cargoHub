@@ -1,5 +1,8 @@
 package com.cargohub.product_service.common.error;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -70,6 +73,36 @@ public class GlobalExceptionHandler {
                 .path(path)
                 .build());
     }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse> handlerFeignException(FeignException e, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.resolve(e.status());
+
+        String path = request.getMethod() + " " + request.getRequestURI();
+        String message = e.getMessage();
+
+        String responseBody = null;
+        try {
+            responseBody = e.contentUTF8();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(responseBody);
+            if (rootNode.has("message")) {
+                message = rootNode.get("message").asText();
+            }
+        } catch (Exception ex) {
+            // 파싱 실패 시 기존 메시지 유지
+        }
+
+        return ResponseEntity.status(status)
+                .body(ErrorResponse.builder()
+                        .status(status.value())
+                        .code("FEIGN_CLIENT_FAILED")
+                        .message(message)
+                        .path(path)
+                        .build());
+    }
+
     // 기타 모든 예외 처리 (최종 방어선)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {

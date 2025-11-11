@@ -145,6 +145,7 @@ public class ProductService {
         updateStock(command, true);
     }
 
+    @Transactional(readOnly = true)
     public List<ReadProductSummaryResultV1> bulkProduct(BulkProductQueryCommandV1 bulkProductQueryCommandV1) {
         List<UUID> uniqueIds = bulkProductQueryCommandV1.ids().stream()
                 .distinct()
