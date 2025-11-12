@@ -4,6 +4,7 @@ import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
 import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
 import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
+import com.cargohub.product_service.application.service.UserInfoResponse;
 import com.cargohub.product_service.application.service.firm.FirmClient;
 import com.cargohub.product_service.application.service.firm.FirmResponseV1;
 import com.cargohub.product_service.application.service.hub.HubClient;
@@ -53,13 +54,10 @@ public class ProductService {
         // 권한 체크
         checkPermission(createProductCommandV1.user().role());
 
-        if(createProductCommandV1.user().role().equals(UserRole.HUB_MANAGER)) {
-            HubManagerCheckResponseV1 supplierHub =  hubClient.checkHubManager(createProductCommandV1.hubId(), createProductCommandV1.user().id());
-            if(!supplierHub.isManager()){
-                throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
-            }
-        }
+        // 허브 담당자일 경우 담당 허브인지 확인
+        validateHubManagerAuthority(createProductCommandV1.hubId(), createProductCommandV1.user());
 
+        // 상품 생성
         Product product = Product.ofNewProduct(
                 createProductCommandV1.name(),
                 firmId,
@@ -121,13 +119,13 @@ public class ProductService {
 
     @Transactional
     public void updateProduct(UpdateProductCommandV1 updateProductCommandV1) {
+        Product product = findProduct(updateProductCommandV1.id());
 
         // 권한 체크
         checkPermission(updateProductCommandV1.user().role());
 
-        Product product = findProduct(updateProductCommandV1.id());
-
-        //todo: 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
+        // 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
+        validateHubManagerAuthority(product.getHubId().getId(), updateProductCommandV1.user());
 
         product.update(
                 updateProductCommandV1.name(),
@@ -140,19 +138,19 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(DeleteProductCommandV1 deleteProductCommandV1) {
+        Product product = findProduct(deleteProductCommandV1.id());
+
         // 권한 체크
         checkPermission(deleteProductCommandV1.user().role());
 
-        Product product = findProduct(deleteProductCommandV1.id());
-
         // 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
-        if(deleteProductCommandV1.user().role() == UserRole.HUB_MANAGER) {
-            hubClient.checkHubManager(product.getHubId().getId(), deleteProductCommandV1.user().id());
-        }
+        validateHubManagerAuthority(product.getHubId().getId(), deleteProductCommandV1.user());
 
         product.delete(deleteProductCommandV1.user().id());
     }
 
+    // 재고 확인
+    @Transactional(readOnly = true)
     public void checkStock(CheckProductStockCommandV1 checkProductStockCommandV1) {
         List<UUID> productIds = checkProductStockCommandV1.products().stream()
                 .map(CheckProductStockCommandV1.ProductStockItem::id)
@@ -237,6 +235,15 @@ public class ProductService {
                 && role != UserRole.HUB_MANAGER) {
             throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
         }
+    }
 
+    private void validateHubManagerAuthority(UUID hubId, UserInfo user) {
+
+        if(user.role().equals(UserRole.HUB_MANAGER)) {
+            HubManagerCheckResponseV1 supplierHub =  hubClient.checkHubManager(hubId, user.id());
+            if(!supplierHub.isManager()){
+                throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
+            }
+        }
     }
 }
