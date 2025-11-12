@@ -1,7 +1,7 @@
 package ai_service.application;
 
-import ai_service.application.dto.request.AiDeadlineRequestV1;
-import ai_service.application.dto.response.AiDeadlineResponseV1;
+import ai_service.presentation.request.AiDeadlineRequestV1;
+import ai_service.presentation.response.AiDeadlineResponseV1;
 import ai_service.domain.entity.AiCallLog;
 import ai_service.domain.repository.AiCallLogRepository;
 import ai_service.infra.client.hub.HubClient;

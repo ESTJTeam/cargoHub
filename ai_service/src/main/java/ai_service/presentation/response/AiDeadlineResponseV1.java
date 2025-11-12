@@ -1,4 +1,4 @@
-package ai_service.application.dto.response;
+package ai_service.presentation.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

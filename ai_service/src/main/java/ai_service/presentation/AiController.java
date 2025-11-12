@@ -1,8 +1,8 @@
 package ai_service.presentation;
 
 import ai_service.application.AiService;
-import ai_service.application.dto.request.AiDeadlineRequestV1;
-import ai_service.application.dto.response.AiDeadlineResponseV1;
+import ai_service.presentation.request.AiDeadlineRequestV1;
+import ai_service.presentation.response.AiDeadlineResponseV1;
 import ai_service.common.success.BaseResponse;
 import ai_service.common.success.BaseStatus;
 import java.util.UUID;
