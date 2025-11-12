@@ -34,4 +34,7 @@ public interface ProductRepository {
     // 허브 관리자 조회 - 담당 허브 상품 조회
     Page<Product> findProductPageByHubId(HubId hubId, SearchProductCommandV1 search, Pageable pageable);
 
+    Page<Product> findProductPageByHubIdIn(Collection<UUID> hubId, SearchProductCommandV1 search, Pageable pageable);
+
+
 }

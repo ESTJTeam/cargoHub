@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class ProductService {
 
         // 허브 존재 확인
         HubResponseV1 hubInfo = hubClient.getHub(createProductCommandV1.hubId());
-        HubId hubId = HubId.of(hubInfo.hubId());
+        HubId hubId = HubId.of(hubInfo.id());
 
         // 권한 체크
         checkPermission(user.role());
@@ -92,13 +93,18 @@ public class ProductService {
                     productPage = productRepository.findProductPage(searchProductCommandV1, pageable);
 
             case HUB_MANAGER -> {
-                // todo: userId를 통한 hubId 조회 -> hubClient 단건 조회
-                HubId hubId = HubId.of(UUID.randomUUID());
-                if(hubId == null) {
+                // userId를 통한 hubId 조회
+                Page<HubResponseV1> hubInfo = hubClient.getHubsByManager(searchProductCommandV1.user().id(), 100);
+                Set<UUID> hubIdSet = hubInfo.getContent().stream()
+                        .map(HubResponseV1::id)
+                        .collect(Collectors.toSet());
+
+                if (hubIdSet.isEmpty()) {
                     throw new ProductException(ProductErrorCode.HUB_ID_REQUIRED);
                 }
-                productPage = productRepository.findProductPageByHubId(hubId, searchProductCommandV1, pageable);
+                productPage = productRepository.findProductPageByHubIdIn(hubIdSet, searchProductCommandV1, pageable);
             }
+
             case SUPPLIER_MANAGER -> {
                 // todo: firmId 조회 -> firmClient 단건 조회
                 FirmId firmId = FirmId.of(UUID.randomUUID());

@@ -48,4 +48,9 @@ public class ProductRepositoryAdaptor implements ProductRepository {
     public Page<Product> findProductPageByHubId(HubId hubId, SearchProductCommandV1 search, Pageable pageable) {
         return jpaProductRepository.findProductPageByHubId(hubId, search, pageable);
     }
+
+    @Override
+    public Page<Product> findProductPageByHubIdIn(Collection<UUID> hubId, SearchProductCommandV1 search, Pageable pageable) {
+        return jpaProductRepository.findProductPageByHubIdIn(hubId, search, pageable);
+    }
 }
