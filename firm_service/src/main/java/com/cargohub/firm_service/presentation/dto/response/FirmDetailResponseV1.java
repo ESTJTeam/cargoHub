@@ -11,6 +11,7 @@ import java.util.UUID;
 public record FirmDetailResponseV1(
         UUID id,
         UUID hubId,
+        UUID userId,
         String name,
         FirmType type,
         LocalDateTime createdAt,
@@ -26,6 +27,7 @@ public record FirmDetailResponseV1(
         return new FirmDetailResponseV1(
                 firm.getId(),
                 firm.getHubId().getHubId(),   // VO → UUID
+                firm.getUserId().getUserId(),
                 firm.getName(),
                 firm.getType(),
                 firm.getCreatedAt(),
