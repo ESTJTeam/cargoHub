@@ -8,6 +8,12 @@ public enum ErrorCode {
 
     // 사용 예시이므로 추가로 작성 해주시면 찡긋
 
+    // USER
+    INVALID_HUB_ID(HttpStatus.BAD_REQUEST,  "유효하지 않은 허브 ID입니다."),
+    INVALID_SLACK_ID(HttpStatus.BAD_REQUEST,  "유효하지 않은 슬랙 ID입니다."),
+    INVALID_USER_ROLE(HttpStatus.BAD_REQUEST,  "유효하지 않은 사용자 역할입니다."),
+    TOO_MANY_DELIVERY_MANAGERS(HttpStatus.CONFLICT, "허용된 배송담당자 수를 초과했습니다."),
+
     // JWT) 관련
     INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
     EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "액세스 토큰이 만료되었습니다."),
