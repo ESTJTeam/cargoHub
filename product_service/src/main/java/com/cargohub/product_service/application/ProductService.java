@@ -172,9 +172,15 @@ public class ProductService {
 
         for (var item : checkProductStockCommandV1.products()) {
             Product product = productMap.get(item.id());
+
             if (product == null) {
                 throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
             }
+
+            if(!product.getSellable()) {
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOR_SALE);
+            }
+
             if (product.getStockQuantity() < item.quantity()) {
                 throw new ProductException(ProductErrorCode.INVALID_DECREASE_QUANTITY);
             }
