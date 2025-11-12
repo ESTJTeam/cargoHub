@@ -19,12 +19,25 @@ public class HubRouteLogStop extends BaseEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hub_route_log_id")
+    @JoinColumn(name = "hub_route_log_id", nullable = false)
     private HubRouteLog hubRouteLog;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hub_id")
+    @JoinColumn(name = "hub_id", nullable = false)
     private Hub hub;
 
+    @Column(nullable = false)
     private Integer sequenceOrder;
+
+    public static HubRouteLogStop create(HubRouteLog hubRouteLog, Hub hub, Integer sequenceOrder) {
+        HubRouteLogStop stop = new HubRouteLogStop();
+        stop.hubRouteLog = hubRouteLog;
+        stop.hub = hub;
+        stop.sequenceOrder = sequenceOrder;
+        return stop;
+    }
+
+    public void delete(UUID deletedBy) {
+        super.delete(deletedBy);
+    }
 }
