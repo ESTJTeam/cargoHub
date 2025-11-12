@@ -21,6 +21,8 @@ import slack_service.common.error.BusinessException;
 import slack_service.common.error.ErrorCode;
 import slack_service.domain.entity.SlackLog;
 import slack_service.domain.repository.SlackLogRepository;
+import slack_service.infrastructure.client.ai.AiClient;
+import slack_service.infrastructure.client.ai.response.AiDeadlineResponseV1;
 import slack_service.presentation.dto.response.SlackLogListResponseV1;
 import slack_service.presentation.dto.response.SlackLogResponseV1;
 
@@ -40,6 +42,7 @@ public class SlackService {
 
     private final RestClient restClient;
     private final SlackLogRepository slackLogRepository;
+    private final AiClient aiClient;
 
     /**
      * [Slack DM 채널 생성] 특정 사용자(userSlackId)와의 1:1 DM 채널을 개설하거나 기존 채널을 반환한다.
@@ -108,8 +111,6 @@ public class SlackService {
         slackLogRepository.save(slackLog);
     }
 
-    // TODO - Order 가져와서 수정 예정
-
     /**
      * [Ai 연동 - 최종 발송 시한 메시지 자동 전송] AI가 생성한 Slack 메시지를 담당자에게 자동으로 전송한다. slackFormattedText 있으면 그대로
      * 전송 없으면 orderInfo + finalDeadline 으로 폴백 메시지 생성 후 전송
@@ -145,6 +146,31 @@ public class SlackService {
         text = appendMetaLine(text, request.getAiLogId());
 
         sendDmToUser(request.getReceiverSlackId(), text);
+    }
+
+    /**
+     * [주문 정보 기반 Slack 전송 메서드]
+     *
+     * @param orderId UUID orderId
+     * @param receiverSlackId 수신자의 Slack 아이디
+     */
+    @Transactional
+    public void sendDeadlineNoticeByOrderId(UUID orderId, String receiverSlackId) {
+
+        // 1. AI 서비스 호출
+        AiDeadlineResponseV1 ai = aiClient.generateDeadlineByOrderId(orderId);
+
+        // 2. Slack 요청 DTO 구성
+        SlackDeadlineRequestV1 request = SlackDeadlineRequestV1.builder()
+            // TODO receiverSlackId 매핑 필요
+            .receiverSlackId(receiverSlackId)
+            .slackFormattedText(ai.getSlackFormattedText())
+            .orderInfo(ai.getOrderInfo())
+            .finalDeadline(ai.getFinalDeadline())
+            .aiLogId(ai.getAiLogId())
+            .build();
+
+        sendDeadlineNotice(request);
     }
 
     /**
