@@ -40,21 +40,23 @@ public class Firm extends BaseEntity {
     @Column(name = "type", length = 15)
     private FirmType type;                 // 업체 타입
 
-    public Firm(String name, String type, HubId hubId, FirmAddress address) {
+    public Firm(String name, String type, HubId hubId, UserId userId, FirmAddress address) {
         this.name = name;
         this.address = address;
         this.hubId = hubId;
+        this.userId = userId;
         this.type = FirmType.valueOf(type);
     }
 
-    public static Firm ofNewFirm(String name, String type, HubId hubId, FirmAddress address) {
-        return new Firm(name, type, hubId, address);
+    public static Firm ofNewFirm(String name, String type, HubId hubId, UserId userId, FirmAddress address) {
+        return new Firm(name, type, hubId,userId, address);
     }
 
-    public void update(String name, String type, HubId hubId, FirmAddress address) {
+    public void update(String name, String type, HubId hubId, UserId userId, FirmAddress address) {
         this.name = name;
         this.address = address;
         this.hubId = hubId;
+        this.userId = userId;
         this.type = FirmType.valueOf(type);
     }
 
