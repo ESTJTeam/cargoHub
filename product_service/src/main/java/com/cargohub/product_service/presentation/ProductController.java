@@ -46,7 +46,11 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<CreateProductResponseV1> createProduct(@RequestBody @Valid CreateProductRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse){
+    public BaseResponse<CreateProductResponseV1> createProduct(
+            @RequestBody @Valid CreateProductRequestV1 request,
+            @ModelAttribute("userInfo") UserInfoResponse userInfoResponse,
+            @RequestHeader(value = "Authorization") String accessToken
+    ){
 
         CreateProductCommandV1 commandV1 = new CreateProductCommandV1(
                 request.name(),
@@ -54,11 +58,10 @@ public class ProductController {
                 request.hubId(),
                 request.stockQuantity(),
                 request.price(),
-                request.sellable(),
-                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
+                request.sellable()
         );
 
-        CreateProductResultV1 result = productService.createProduct(commandV1);
+        CreateProductResultV1 result = productService.createProduct(commandV1, accessToken);
 
         return BaseResponse.ok(
                 CreateProductResponseV1.from(result),
@@ -101,7 +104,7 @@ public class ProductController {
     public BaseResponse<Void> updateProduct(
             @PathVariable("id") UUID id,
             @RequestBody @Valid UpdateProductRequestV1 request,
-            @ModelAttribute("userInfo") UserInfoResponse userInfoResponse
+            @RequestHeader(value = "Authorization") String accessToken
     ) {
 
         UpdateProductCommandV1 commandV1 = new UpdateProductCommandV1(
@@ -109,25 +112,23 @@ public class ProductController {
                 request.name(),
                 request.stockQuantity(),
                 request.price(),
-                request.sellable(),
-                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
+                request.sellable()
         );
 
-        productService.updateProduct(commandV1);
+        productService.updateProduct(commandV1, accessToken);
 
         return BaseResponse.ok(BaseStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> deleteProduct(@PathVariable("id") UUID id, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
+    public BaseResponse<Void> deleteProduct(@PathVariable("id") UUID id, @RequestHeader(value = "Authorization") String accessToken) {
 
         DeleteProductCommandV1 commandV1 = new DeleteProductCommandV1(
-                id,
-                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
+                id
         );
 
-        productService.deleteProduct(commandV1);
+        productService.deleteProduct(commandV1, accessToken);
 
         return BaseResponse.ok(BaseStatus.OK);
     }

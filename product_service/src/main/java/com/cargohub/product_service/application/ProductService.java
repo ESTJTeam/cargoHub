@@ -10,6 +10,7 @@ import com.cargohub.product_service.application.service.firm.FirmResponseV1;
 import com.cargohub.product_service.application.service.hub.HubClient;
 import com.cargohub.product_service.application.service.hub.HubManagerCheckResponseV1;
 import com.cargohub.product_service.application.service.hub.HubResponseV1;
+import com.cargohub.product_service.common.JwtUtil;
 import com.cargohub.product_service.domain.entity.Product;
 import com.cargohub.product_service.application.exception.ProductErrorCode;
 import com.cargohub.product_service.application.exception.ProductException;
@@ -36,12 +37,15 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final JwtUtil jwtUtil;
 
     private final FirmClient firmClient;
     private final HubClient hubClient;
 
     @Transactional
-    public CreateProductResultV1 createProduct(CreateProductCommandV1 createProductCommandV1) {
+    public CreateProductResultV1 createProduct(CreateProductCommandV1 createProductCommandV1, String accessToken) {
+
+        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
         // 업체 존재 확인
         FirmResponseV1 firmInfo = firmClient.getFirm(createProductCommandV1.firmId());
@@ -52,10 +56,10 @@ public class ProductService {
         HubId hubId = HubId.of(hubInfo.hubId());
 
         // 권한 체크
-        checkPermission(createProductCommandV1.user().role());
+        checkPermission(user.role());
 
         // 허브 담당자일 경우 담당 허브인지 확인
-        validateHubManagerAuthority(createProductCommandV1.hubId(), createProductCommandV1.user());
+        validateHubManagerAuthority(createProductCommandV1.hubId(), user, accessToken);
 
         // 상품 생성
         Product product = Product.ofNewProduct(
@@ -65,7 +69,7 @@ public class ProductService {
                 createProductCommandV1.stockQuantity(),
                 createProductCommandV1.price(),
                 createProductCommandV1.sellable(),
-                createProductCommandV1.user().id()
+                user.userId()
         );
 
         Product newProduct = productRepository.save(product);
@@ -118,40 +122,45 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateProduct(UpdateProductCommandV1 updateProductCommandV1) {
+    public void updateProduct(UpdateProductCommandV1 updateProductCommandV1, String accessToken) {
+
         Product product = findProduct(updateProductCommandV1.id());
+        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
         // 권한 체크
-        checkPermission(updateProductCommandV1.user().role());
+        checkPermission(user.role());
 
         // 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
-        validateHubManagerAuthority(product.getHubId().getId(), updateProductCommandV1.user());
+        validateHubManagerAuthority(product.getHubId().getId(), user, accessToken);
 
         product.update(
                 updateProductCommandV1.name(),
                 updateProductCommandV1.stockQuantity(),
                 updateProductCommandV1.price(),
                 updateProductCommandV1.sellable(),
-                updateProductCommandV1.user().id()
+                user.userId()
         );
     }
 
     @Transactional
-    public void deleteProduct(DeleteProductCommandV1 deleteProductCommandV1) {
+    public void deleteProduct(DeleteProductCommandV1 deleteProductCommandV1, String accessToken) {
+
         Product product = findProduct(deleteProductCommandV1.id());
+        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
         // 권한 체크
-        checkPermission(deleteProductCommandV1.user().role());
+        checkPermission(user.role());
 
         // 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
-        validateHubManagerAuthority(product.getHubId().getId(), deleteProductCommandV1.user());
+        validateHubManagerAuthority(product.getHubId().getId(), user, accessToken);
 
-        product.delete(deleteProductCommandV1.user().id());
+        product.delete(user.userId());
     }
 
     // 재고 확인
     @Transactional(readOnly = true)
     public void checkStock(CheckProductStockCommandV1 checkProductStockCommandV1) {
+
         List<UUID> productIds = checkProductStockCommandV1.products().stream()
                 .map(CheckProductStockCommandV1.ProductStockItem::id)
                 .toList();
@@ -185,6 +194,7 @@ public class ProductService {
     }
 
     public List<ReadProductSummaryResultV1> bulkProduct(BulkProductQueryCommandV1 bulkProductQueryCommandV1) {
+
         List<UUID> uniqueIds = bulkProductQueryCommandV1.ids().stream()
                 .distinct()
                 .toList();
@@ -195,6 +205,7 @@ public class ProductService {
     }
 
     private void updateStock(UpdateProductStockCommandV1 command, boolean increase) {
+
         List<Product> products = findProductList(command.items().keySet().stream().toList());
 
         Map<UUID, Product> productMap = products.stream()
@@ -237,10 +248,10 @@ public class ProductService {
         }
     }
 
-    private void validateHubManagerAuthority(UUID hubId, UserInfo user) {
+    private void validateHubManagerAuthority(UUID hubId, UserInfoResponse user, String accessToken) {
 
         if(user.role().equals(UserRole.HUB_MANAGER)) {
-            HubManagerCheckResponseV1 supplierHub =  hubClient.checkHubManager(hubId, user.id());
+            HubManagerCheckResponseV1 supplierHub =  hubClient.checkHubManager(hubId, accessToken);
             if(!supplierHub.isManager()){
                 throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
             }

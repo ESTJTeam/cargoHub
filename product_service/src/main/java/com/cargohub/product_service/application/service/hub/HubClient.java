@@ -3,6 +3,7 @@ package com.cargohub.product_service.application.service.hub;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.UUID;
 
@@ -14,6 +15,6 @@ public interface HubClient {
 
 
     // 담당하는 허브 조회
-    @GetMapping("/{hubId}/manager/{userId}")
-    HubManagerCheckResponseV1 checkHubManager(@PathVariable UUID hubId, @PathVariable("userId") UUID userId);
+    @GetMapping("/{hubId}/manager")
+    HubManagerCheckResponseV1 checkHubManager(@PathVariable UUID hubId, @RequestHeader("Authorization") String accessToken);
 }

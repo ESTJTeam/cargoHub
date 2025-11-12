@@ -8,7 +8,7 @@ public record UpdateProductCommandV1(
         String name,
         Integer stockQuantity,
         BigDecimal price,
-        Boolean sellable,
-        UserInfo user
+        Boolean sellable
+//        UserInfo user
 ) {
 }
