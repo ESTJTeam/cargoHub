@@ -7,6 +7,7 @@ public record CreateFirmRequestV1(
         String name,
         String type,
         UUID hubId,
+        UUID userId,
         AddressRequestV1 address
 ) {
     public record AddressRequestV1(
