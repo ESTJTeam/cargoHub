@@ -21,6 +21,9 @@ spring:
   slack:
     bot-token: ${SLACK_BOT_TOKEN}
 
+custom:
+  service-url: ${SLACK_SERVICE_URL}
+
 server:
   port: ${SLACK_SERVER_PORT}
 

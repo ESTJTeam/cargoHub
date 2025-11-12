@@ -17,7 +17,7 @@ spring:
         format_sql: true
     generate-ddl: true
 
-  # OpenAI
+  # Spring AI (OpenAI)
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -29,6 +29,9 @@ spring:
       max-attempts: 2
       backoff:
         initial-interval: 500ms
+
+custom:
+  service-url: ${AI_SERVICE_URL}
 
 server:
   port: ${AI_SERVER_PORT}
