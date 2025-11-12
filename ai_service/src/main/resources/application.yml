@@ -37,3 +37,18 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVICE_URL}
+
+clients:
+  order:
+    url: ${ORDER_SERVICE_URL}
+  hub:
+    url: ${HUB_SERVICE_URL}
+
+# Spring Cloud OpenFeign 설정
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 3000
+        loggerLevel: basic
