@@ -2,6 +2,7 @@ package com.cargohub.firm_service.domain.entity;
 
 import com.cargohub.firm_service.common.BaseEntity;
 import com.cargohub.firm_service.domain.vo.HubId;
+import com.cargohub.firm_service.domain.vo.UserId;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,6 +32,9 @@ public class Firm extends BaseEntity {
 
     @Embedded
     private HubId hubId;                    // 허브 id
+
+    @Embedded
+    private UserId userId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", length = 15)
