@@ -38,7 +38,7 @@ public class OrderForAiResponseV1 {
         String requestNote,
         String shipFromHubId,
         List<String> viaHubIds,
-        String destination,
+        String destinationId,
         String requesterName,
         String requesterEmail,
         String productName,
@@ -51,7 +51,7 @@ public class OrderForAiResponseV1 {
         this.requestNote = requestNote;
         this.shipFromHubId = shipFromHubId;
         this.viaHubIds = viaHubIds;
-        this.destinationId = destination;
+        this.destinationId = destinationId;
         this.requesterName = requesterName;
         this.requesterEmail = requesterEmail;
         this.productName = productName;

@@ -192,7 +192,7 @@ public class AiService {
             .requestNote(safe(order.getRequestNote()))
             .shipFromHub(safe(shipFromHubAddress))
             .viaHubs(viaHubAddressList)
-            .destination(destination)
+            .destination(safe(destination))
             .handlerName(safe(order.getHandlerName()))
             .handlerEmail(safe(order.getHandlerEmail()))
             .build();
