@@ -50,11 +50,17 @@ public class ProductService {
 
         // 업체 존재 확인
         FirmResponseV1 firmInfo = firmClient.getFirm(createProductCommandV1.firmId());
-        FirmId firmId = FirmId.of(firmInfo.id());
+        if(firmInfo == null) {
+            throw new ProductException(ProductErrorCode.FIRM_NOT_FOUND);
+        }
+        FirmId firmId = FirmId.of(createProductCommandV1.firmId());
 
         // 허브 존재 확인
-        HubResponseV1 hubInfo = hubClient.getHub(createProductCommandV1.hubId());
-        HubId hubId = HubId.of(hubInfo.id());
+        boolean hubInfo = hubClient.validateHub(createProductCommandV1.hubId());
+        if(!hubInfo) {
+            throw new ProductException(ProductErrorCode.HUB_NOT_FOUND);
+        }
+        HubId hubId = HubId.of(createProductCommandV1.hubId());
 
         // 권한 체크
         checkPermission(user.role());

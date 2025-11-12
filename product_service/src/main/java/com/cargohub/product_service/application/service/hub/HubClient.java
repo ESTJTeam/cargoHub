@@ -11,9 +11,9 @@ import java.util.UUID;
 
 @FeignClient(name = "hub-service", url = "${clients.hub.url}", path = "/v1/hubs")
 public interface HubClient {
-    // todo: Hub 조회 - 필요정보(id, name)
+
     @GetMapping("/{hubId}")
-    HubResponseV1 getHub(@PathVariable UUID hubId);
+    boolean validateHub(@PathVariable UUID hubId);
 
     // 담당하는 허브 조회
     @GetMapping("/manager/{hubManagerId}")

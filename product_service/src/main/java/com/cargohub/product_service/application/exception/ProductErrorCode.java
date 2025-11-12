@@ -17,6 +17,8 @@ public enum ProductErrorCode implements ErrorCode {
 
     PRODUCT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 상품에 접근할 권한이 없습니다."),
 
+    FIRM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 업체가 존재하지 않습니다."),
+    HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 허브가 존재하지 않습니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상품이 존재하지 않습니다."),
 
     OUT_OF_STOCK(HttpStatus.CONFLICT, "해당 상품의 재고가 부족합니다."),
