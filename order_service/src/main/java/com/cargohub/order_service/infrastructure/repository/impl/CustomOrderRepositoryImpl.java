@@ -22,7 +22,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class CustomOrderRepositoryImpl extends QuerydslRepositorySupport implements CustomOrderRepository {
 
@@ -50,6 +52,11 @@ public class CustomOrderRepositoryImpl extends QuerydslRepositorySupport impleme
     @Override
     public Page<Order> findOrderPageBySupplierId(SupplierId supplierId, SearchOrderCommandV1 param, Pageable pageable) {
         return findOrderPageByCondition(param, pageable, qOrder.supplierId.eq(supplierId));
+    }
+
+    @Override
+    public Page<Order> findOrderPageByFirmIdIn(Collection<UUID> firmId, SearchOrderCommandV1 param, Pageable pageable) {
+        return findOrderPageByCondition(param, pageable, qOrder.supplierId.id.in(firmId).or(qOrder.receiverId.id.in(firmId)));
     }
 
     @Override

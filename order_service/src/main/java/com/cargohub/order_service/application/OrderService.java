@@ -7,7 +7,15 @@ import com.cargohub.order_service.application.dto.ReadOrderDetailResultV1;
 import com.cargohub.order_service.application.dto.ReadOrderSummaryResultV1;
 import com.cargohub.order_service.application.exception.OrderErrorCode;
 import com.cargohub.order_service.application.exception.OrderException;
+import com.cargohub.order_service.application.service.firm.FirmClient;
+import com.cargohub.order_service.application.service.firm.FirmListResponseV1;
+import com.cargohub.order_service.application.service.firm.FirmResponseV1;
+import com.cargohub.order_service.application.service.hub.HubClient;
+import com.cargohub.order_service.application.service.hub.HubManagerCheckResponseDto;
+import com.cargohub.order_service.application.service.hub.HubResponseV1;
 import com.cargohub.order_service.application.service.product.*;
+import com.cargohub.order_service.application.service.user.UserInfoResponse;
+import com.cargohub.order_service.common.JwtUtil;
 import com.cargohub.order_service.domain.entity.Order;
 import com.cargohub.order_service.domain.entity.OrderProduct;
 import com.cargohub.order_service.domain.repository.OrderRepository;
@@ -30,7 +38,12 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+
+    private final JwtUtil jwtUtil;
+
     private final ProductClient productClient;
+    private final HubClient hubClient;
+    private final FirmClient firmClient;
 
     @Transactional
     public CreateOrderResultV1 createOrder(CreateOrderCommandV1 createOrderCommandV1) {
@@ -86,21 +99,13 @@ public class OrderService {
 
         Order newOrder = orderRepository.save(order);
 
-        // todo: 재고 차감 로직 분리
-        List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = createOrderCommandV1.products().stream()
-                .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(
-                        p.productId(),
-                        p.quantity()
-                ))
-                .collect(Collectors.toList());
-
-        productClient.decreaseStock(new UpdateProductStockRequestV1(stockUpdateItems));
+        decreaseStock(createOrderCommandV1.products());
 
         // todo: 배송 생성
 
-        HubDeliveryId hubDeliveryId = HubDeliveryId.of(UUID.randomUUID());
-        FirmDeliveryId firmDeliveryId = FirmDeliveryId.of(UUID.randomUUID());
-        newOrder.ship(hubDeliveryId, firmDeliveryId);
+//        HubDeliveryId hubDeliveryId = HubDeliveryId.of(UUID.randomUUID());
+//        FirmDeliveryId firmDeliveryId = FirmDeliveryId.of(UUID.randomUUID());
+//        newOrder.ship(hubDeliveryId, firmDeliveryId);
 
         return CreateOrderResultV1.from(newOrder);
     }
@@ -113,24 +118,23 @@ public class OrderService {
         switch (searchOrderCommandV1.user().role()) {
             case MASTER -> orderPage = orderRepository.findOrderPage(searchOrderCommandV1, pageable);
             case HUB_MANAGER -> {
-                /**
-                 * todo:
-                 * 1. hub client에서 담당자가 userId인 허브 찾기
-                 * 2. firm client에서 hubId로 업체 찾기 -> 예) v1/hubs/{hubId}/firms
-                 * 3. firm List??로 주문 찾기
-                 */
+                // todo: hub client에서 담당자가 userId인 허브 찾기
+                HubResponseV1 hubInfo = hubClient.getHubByManger(searchOrderCommandV1.user().id());
+                FirmListResponseV1 firmInfoList = firmClient.getFirmList(hubInfo.hubId());
+                Set<UUID> firmIdList = firmInfoList.firms().stream()
+                        .map(FirmListResponseV1.FirmResponse::id)
+                        .collect(Collectors.toSet());
 
-                SupplierId receiverId = SupplierId.of(UUID.randomUUID());
-                orderPage = orderRepository.findOrderPageBySupplierId(receiverId, searchOrderCommandV1, pageable);
+                orderPage = orderRepository.findOrderPageByFirmIdIn(firmIdList, searchOrderCommandV1, pageable);
             }
             case SUPPLIER_MANAGER -> {
                 // todo: firm client에서 userId로 업체 찾기
-
                 ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
                 orderPage = orderRepository.findOrderPageByReceiverId(receiverId, searchOrderCommandV1, pageable);
             }
             case DELIVERY_MANAGER -> {
                 // todo 배송 담당자 조회(업체 배송, 허브 배송)
+
                 orderPage = null;
             }
             default ->
@@ -144,35 +148,44 @@ public class OrderService {
     public ReadOrderDetailResultV1 readOrder(UUID orderId) {
         Order order = findOrder(orderId);
 
-        // todo 수령업체, 공급업체 정보 필요 - 이름, 주소
+        // 공급업체 정보 필요
+        FirmResponseV1 supplierInfo = firmClient.getFirm(order.getSupplierId().getId());
         FirmInfoResultV1 supplier = new FirmInfoResultV1(
-                UUID.randomUUID(),
-                "공급 업체 명",
-                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
+                supplierInfo.id(),
+                supplierInfo.name(),
+                supplierInfo.address().fullAddress()
         );
 
+        // 수령 업체 정보
+        FirmResponseV1 receiverInfo = firmClient.getFirm(order.getSupplierId().getId());
         FirmInfoResultV1 receiver = new FirmInfoResultV1(
-                UUID.randomUUID(),
-                "수령 업체 명",
-                "인천광역시 연수구 테크노파크로 110 우지타워 2층"
+                receiverInfo.id(),
+                receiverInfo.name(),
+                receiverInfo.address().fullAddress()
         );
 
         return ReadOrderDetailResultV1.from(order, supplier, receiver);
     }
 
     @Transactional
-    public void updateOrderStatus(UpdateOrderStatusCommandV1 updateOrderStatusCommandV1) {
+    public void updateOrderStatus(UpdateOrderStatusCommandV1 updateOrderStatusCommandV1, String accessToken) {
         // todo: 권한체크 - 분리
-        UserRole role = updateOrderStatusCommandV1.user().role();
+        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
+
+        UserRole role = user.role();
         if(role != UserRole.MASTER
                 && role != UserRole.HUB_MANAGER) {
             throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
         }
 
         Order order = findOrder(updateOrderStatusCommandV1.id());
-        // todo: 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
 
-        order.updateStatus(updateOrderStatusCommandV1.status(), updateOrderStatusCommandV1.user().id());
+        // todo: 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
+        if (user.role() == UserRole.HUB_MANAGER) {
+            validateHubOrderOwnership(order, accessToken);
+        }
+
+        order.updateStatus(updateOrderStatusCommandV1.status(), user.userId());
     }
 
     public void cancelOrder(DeleteOrderCommandV1 deleteOrderCommandV1) {
@@ -231,5 +244,33 @@ public class OrderService {
                 product.price(),
                 request.quantity()
         );
+    }
+
+    // 재고 차감
+    private void decreaseStock(List<OrderProductCommandV1> products) {
+        List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = products.stream()
+                .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(
+                        p.productId(),
+                        p.quantity()
+                ))
+                .collect(Collectors.toList());
+
+        productClient.decreaseStock(new UpdateProductStockRequestV1(stockUpdateItems));
+    }
+    // 주문 내 상품들의 공급업체/수령업체가 허브 소속인지 확인
+    private void validateHubOrderOwnership(Order order, String accessToken) {
+        SupplierId supplierId = order.getSupplierId();
+        ReceiverId receiverId = order.getReceiverId();
+        // 공급 업체/수령업체 찾기
+        FirmResponseV1 supplierInfo = firmClient.getFirm(supplierId.getId());
+        FirmResponseV1 receiverInfo = firmClient.getFirm(receiverId.getId());
+
+        // 공급 업체/수령 업체 허브 담당자 확인
+        HubManagerCheckResponseDto supplierHub =  hubClient.checkHubManager(supplierInfo.hubId(), accessToken);
+        HubManagerCheckResponseDto receiverHub =  hubClient.checkHubManager(receiverInfo.hubId(), accessToken);
+
+        if(!supplierHub.isManager() && !receiverHub.isManager()){
+            throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
+        }
     }
 }

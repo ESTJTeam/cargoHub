@@ -9,7 +9,7 @@ import com.cargohub.order_service.common.JwtUtil;
 import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
 import com.cargohub.order_service.domain.vo.OrderStatus;
-import com.cargohub.order_service.application.service.UserInfoResponse;
+import com.cargohub.order_service.application.service.user.UserInfoResponse;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
 import com.cargohub.order_service.presentation.dto.request.SearchOrderRequestV1;
@@ -120,15 +120,14 @@ public class OrderController {
 
 
     @PatchMapping("/{id}/status")
-    public BaseResponse<Void> updateOrderStatus(@PathVariable("id") UUID id, @RequestBody @Valid UpdateOrderStatusRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
+    public BaseResponse<Void> updateOrderStatus(@PathVariable("id") UUID id, @RequestBody @Valid UpdateOrderStatusRequestV1 request, @RequestHeader(value = "Authorization") String accessToken) {
 
         UpdateOrderStatusCommandV1 commandV1 = new UpdateOrderStatusCommandV1(
                 id,
-                request.status(),
-                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
+                request.status()
         );
 
-        orderService.updateOrderStatus(commandV1);
+        orderService.updateOrderStatus(commandV1, accessToken);
 
         return BaseResponse.ok(BaseStatus.OK);
     }

@@ -1,4 +1,4 @@
-package com.cargohub.order_service.application.service;
+package com.cargohub.order_service.application.service.user;
 
 import com.cargohub.order_service.domain.vo.UserRole;
 

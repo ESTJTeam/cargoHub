@@ -1,6 +1,6 @@
 package com.cargohub.order_service.common;
 
-import com.cargohub.order_service.application.service.UserInfoResponse;
+import com.cargohub.order_service.application.service.user.UserInfoResponse;
 import com.cargohub.order_service.domain.vo.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

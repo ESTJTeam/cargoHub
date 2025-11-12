@@ -9,6 +9,8 @@ import com.cargohub.order_service.domain.vo.SupplierId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +33,7 @@ public interface OrderRepository {
 
     // 허브 관리자 - 담당 공급 업체 주문 조회
     Page<Order> findOrderPageBySupplierId(SupplierId supplierId, SearchOrderCommandV1 search, Pageable pageable);
+    Page<Order> findOrderPageByFirmIdIn(Collection<UUID> firmIds, SearchOrderCommandV1 search, Pageable pageable);
 
     // 업체 담당자
     Page<Order> findOrderPageByReceiverId(ReceiverId receiverId, SearchOrderCommandV1 search, Pageable pageable);
