@@ -1,7 +1,5 @@
 package ai_service.application;
 
-import ai_service.presentation.request.AiDeadlineRequestV1;
-import ai_service.presentation.response.AiDeadlineResponseV1;
 import ai_service.domain.entity.AiCallLog;
 import ai_service.domain.repository.AiCallLogRepository;
 import ai_service.infra.client.hub.HubClient;
@@ -9,6 +7,8 @@ import ai_service.infra.client.hub.response.HubAddressForAiResponseV1;
 import ai_service.infra.client.order.OrderClient;
 import ai_service.infra.client.order.response.OrderForAiResponseV1;
 import ai_service.infra.config.OpenAiConstants;
+import ai_service.presentation.request.CalculateAiDeadlineRequestV1;
+import ai_service.presentation.response.AiDeadlineResponseV1;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -42,12 +42,12 @@ public class AiService {
      * 입력 받은 데이터를 기반으로 최종 발송 시한을 계산하고, Slack 메시지 형식의 텍스트를 반환
      * 발송 시한과 orderInfo를 파싱하여 Slack 전송용 데이터로 가공
      *
-     * @param request AiDeadlineRequestV1 DTO (주문번호, 주문자 정보, 상품명, 수량, 출발 허브, 경유지, 목적지, 배송자 정보)
+     * @param request CalculateAiDeadlineRequestV1 DTO (주문번호, 주문자 정보, 상품명, 수량, 출발 허브, 경유지, 목적지, 배송자 정보)
      * @return AI가 계산한 발송 시한과 Slack 메시지 원문, 주문 정보 요약을 담은 응답 DTO
      */
     @Transactional
     public AiDeadlineResponseV1 calculateDeadlineWithPromptData(
-        AiDeadlineRequestV1 request) {
+        CalculateAiDeadlineRequestV1 request) {
 
         final String provider = OpenAiConstants.PROVIDER_OPENAI;
         final String model = OpenAiConstants.MODEL_GPT_4O_MINI;
@@ -116,14 +116,14 @@ public class AiService {
      * [AI 발송 시한 계산 - 주문번호 기반 자동 생성 버전]
      * AI 프롬프트에 필요한 주문&배송 정보를 자동으로 구성해서 최종 발송 시한 계산
      *
-     * @param orderNum 발송 시한 계산 대상 Order의 UUID
+     * @param request 발송 시한 계산 대상 Order 정보 담은 DTO
      * @return AI가 계산한 발송 시한과 Slack 메시지 원문, 주문 요약이 포함된 응답 DTO
      */
     @Transactional
-    public AiDeadlineResponseV1 generateDeadlineByOrderId(UUID orderNum) {
+    public AiDeadlineResponseV1 generateDeadlineByOrder(CalculateAiDeadlineRequestV1 request) {
 
         // 1. Order 서비스에서 AI 발송시한 계산 위한 Order 정보 수집
-        OrderForAiResponseV1 order = orderClient.getOrderForAi(orderNum);
+        OrderForAiResponseV1 order = orderClient.getOrderForAi(request.getOrderNum());
 
         // 2. 허브 주소 UUID 리스트 수집 (shipFromHub, viaHubs, destination)
         List<UUID> addressIdList = new ArrayList<>();
@@ -182,7 +182,7 @@ public class AiService {
         String destination = addressMap.get(destinationAddressId);
 
         // 4. 요청 DTO로 변환
-        AiDeadlineRequestV1 aiDeadlineRequest = AiDeadlineRequestV1.builder()
+        CalculateAiDeadlineRequestV1 aiDeadlineRequest = CalculateAiDeadlineRequestV1.builder()
             .orderNum(order.getOrderNum())
             .requesterName(safe(order.getRequesterName()))
             .requesterEmail(safe(order.getRequesterEmail()))

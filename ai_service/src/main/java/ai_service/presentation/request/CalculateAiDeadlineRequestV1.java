@@ -15,7 +15,7 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
-public class AiDeadlineRequestV1 {
+public class CalculateAiDeadlineRequestV1 {
 
     @NotNull
     private UUID orderNum;
@@ -55,7 +55,7 @@ public class AiDeadlineRequestV1 {
     private String handlerEmail;
 
     @Builder
-    private AiDeadlineRequestV1(
+    private CalculateAiDeadlineRequestV1(
         UUID orderNum,
         String requesterName,
         String requesterEmail,
