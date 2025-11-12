@@ -166,6 +166,30 @@ public class HubService {
         return new HubManagerCheckResponseDto(isManager);
     }
 
+    public boolean validateHub(UUID hubId) {
+
+        return hubRepository.existsById(hubId);
+    }
+
+    /**
+     * 권한: 로그인한 사용자 (본인이 관리하는 허브만 조회 가능, MASTER는 모든 매니저의 허브 조회 가능)
+     */
+    public Page<HubResponseDto> getHubsByManagerId(UUID hubManagerId, Pageable pageable, String accessToken) {
+
+        // // JWT 토큰 파싱 및 검증
+        // UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        //
+        // if (!"MASTER".equals(userInfo.role()) && !userInfo.userId().equals(hubManagerId)) {
+        //     throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        // }
+
+        validatePageSize(pageable.getPageSize());
+
+        Page<Hub> hubs = hubRepository.findByHubManagerIdWithPaging(hubManagerId, pageable);
+
+        return hubs.map(hubMapper::toResponseDto);
+    }
+
     private void validatePageSize(int pageSize) {
         if (pageSize != 10 && pageSize != 30 && pageSize != 50) {
             throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE);

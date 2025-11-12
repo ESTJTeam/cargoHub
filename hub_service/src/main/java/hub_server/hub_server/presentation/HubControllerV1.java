@@ -95,4 +95,24 @@ public class HubControllerV1 {
 
         return BaseResponse.ok(response, BaseStatus.OK);
     }
+
+    @GetMapping("/{hubId}")
+    public boolean validateHub(@PathVariable UUID hubId) {
+
+        return hubService.validateHub(hubId);
+    }
+
+    @GetMapping("/manager/{hubManagerId}")
+    public BaseResponse<Page<HubResponseDto>> getHubsByManagerId(
+            @PathVariable UUID hubManagerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader("Authorization") String accessToken
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<HubResponseDto> response = hubService.getHubsByManagerId(hubManagerId, pageable, accessToken);
+
+        return BaseResponse.ok(response, BaseStatus.OK);
+    }
 }
