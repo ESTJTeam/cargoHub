@@ -1,6 +1,5 @@
 package slack_service.presentation;
 
-import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import slack_service.application.SlackService;
-import slack_service.application.dto.request.SlackDeadlineRequestV1;
 import slack_service.application.dto.request.SlackMessageRequestV1;
 import slack_service.common.success.BaseResponse;
 import slack_service.common.success.BaseStatus;
@@ -86,7 +84,7 @@ public class SlackController {
      * @param pageSize 페이지당 데이터 개수
      * @return SlackLogListResponseV1 (검색 또는 전체 로그 목록 반환)
      */
-    @GetMapping("/logs")
+    @GetMapping("/logs/search")
     public BaseResponse<Page<SlackLogListResponseV1>> searchSlackLogs(
         @RequestParam(name = "receiverSlackId", required = false) String receiverSlackId,
         @RequestParam(name = "keyword", required = false) String keyword,

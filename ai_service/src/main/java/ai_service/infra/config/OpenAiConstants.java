@@ -63,5 +63,3 @@ public class OpenAiConstants {
         - 배송 담당자: %s / %s
         """;
 }
-
-// TODO - Few-shot Prompting 으로 수정 필요
