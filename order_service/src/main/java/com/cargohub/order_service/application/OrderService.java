@@ -231,7 +231,7 @@ public class OrderService {
 
         UpdateProductStockRequestV1 requestV1 = new UpdateProductStockRequestV1(stockUpdateItems);
         productClient.increaseStock(requestV1);
-        order.delete(deleteOrderCommandV1.user().id());
+        order.cancel(deleteOrderCommandV1.user().id());
 
     }
 
