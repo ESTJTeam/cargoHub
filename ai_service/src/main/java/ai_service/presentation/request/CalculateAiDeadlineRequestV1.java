@@ -1,4 +1,4 @@
-package ai_service.application.dto.request;
+package ai_service.presentation.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,10 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
-public class AiDeadlineRequestV1 {
+public class CalculateAiDeadlineRequestV1 {
 
     @NotNull
-    private Long orderNum;
+    private UUID orderNum;
 
     @NotBlank
     private String requesterName;
@@ -54,8 +55,8 @@ public class AiDeadlineRequestV1 {
     private String handlerEmail;
 
     @Builder
-    private AiDeadlineRequestV1(
-        Long orderNum,
+    private CalculateAiDeadlineRequestV1(
+        UUID orderNum,
         String requesterName,
         String requesterEmail,
         LocalDateTime orderAt,
