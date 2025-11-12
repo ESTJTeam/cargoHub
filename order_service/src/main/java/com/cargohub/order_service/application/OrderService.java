@@ -49,8 +49,8 @@ public class OrderService {
     public CreateOrderResultV1 createOrder(CreateOrderCommandV1 createOrderCommandV1) {
         // todo: 권한 체크 - 분리
         UserRole role = createOrderCommandV1.user().role();
-        if(role != UserRole.MASTER
-                && role != UserRole.SUPPLIER_MANAGER) {
+        if(!UserRole.MASTER.equals(role)
+                && !UserRole.SUPPLIER_MANAGER.equals(role)) {
             throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
         }
 
@@ -134,6 +134,11 @@ public class OrderService {
             }
             case DELIVERY_MANAGER -> {
                 // todo 배송 담당자 조회(업체 배송, 허브 배송)
+                /**
+                 * 1. 허브 배송인지, 업체 배송인지 확인
+                 * 2. UserId로 업체 배송, 허브 배송 Client에서 배송 ID 조회
+                 * 3. 업체 배송, 허브 배송 ID로 Page 조회
+                 */
 
                 orderPage = null;
             }
@@ -173,18 +178,17 @@ public class OrderService {
         UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
         UserRole role = user.role();
-        if(role != UserRole.MASTER
-                && role != UserRole.HUB_MANAGER) {
+        if(!UserRole.MASTER.equals(role)
+                && !UserRole.HUB_MANAGER.equals(role)) {
             throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
         }
 
         Order order = findOrder(updateOrderStatusCommandV1.id());
 
-        // todo: 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
-        if (user.role() == UserRole.HUB_MANAGER) {
+        // 허브 담당자일 경우 담당 허브 주문이 맞는지 체크
+        if (UserRole.HUB_MANAGER.equals(user.role())) {
             validateHubOrderOwnership(order, accessToken);
         }
-
         order.updateStatus(updateOrderStatusCommandV1.status(), user.userId());
     }
 
@@ -194,13 +198,14 @@ public class OrderService {
 
         UserRole role = deleteOrderCommandV1.user().role();
 
-        if(role.equals(UserRole.DELIVERY_MANAGER)) {
+        if(UserRole.DELIVERY_MANAGER.equals(role)) {
             throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
         }
 
         // 업체 담당자일 경우
-        if(role.equals(UserRole.SUPPLIER_MANAGER)) {
+        if(UserRole.SUPPLIER_MANAGER.equals(role)) {
             // todo: 업체 담당자(createdBY)의 업체 ID 필요
+
             ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
             if(order.getReceiverId().equals(receiverId)) {
                 throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
@@ -226,6 +231,7 @@ public class OrderService {
     }
 
     private OrderProduct createOrderProduct(OrderProductCommandV1 request, BulkProductQueryResponseV1 productMap) {
+
         ProductId productId = ProductId.of(request.productId());
 
         BulkProductQueryResponseV1.ProductInfo product = productMap.products().get(request.productId());
@@ -248,6 +254,7 @@ public class OrderService {
 
     // 재고 차감
     private void decreaseStock(List<OrderProductCommandV1> products) {
+
         List<UpdateProductStockRequestV1.StockUpdateItemRequest> stockUpdateItems = products.stream()
                 .map(p -> new UpdateProductStockRequestV1.StockUpdateItemRequest(
                         p.productId(),
@@ -259,6 +266,7 @@ public class OrderService {
     }
     // 주문 내 상품들의 공급업체/수령업체가 허브 소속인지 확인
     private void validateHubOrderOwnership(Order order, String accessToken) {
+
         SupplierId supplierId = order.getSupplierId();
         ReceiverId receiverId = order.getReceiverId();
         // 공급 업체/수령업체 찾기
