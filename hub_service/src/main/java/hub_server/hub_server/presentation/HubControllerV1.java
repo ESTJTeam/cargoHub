@@ -115,4 +115,18 @@ public class HubControllerV1 {
 
         return BaseResponse.ok(response, BaseStatus.OK);
     }
+
+    @GetMapping("/{startHubId}/routes/{endHubId}")
+    public BaseResponse<hub_server.hub_server.application.dto.query.HubRouteResponseDto> getRouteBetweenHubs(
+            @PathVariable UUID startHubId,
+            @PathVariable UUID endHubId,
+            @RequestHeader(value = "Authorization", required = false) String accessToken
+    ) {
+
+        // HubRouteService를 통해 경로 조회
+        hub_server.hub_server.application.dto.query.HubRouteResponseDto response =
+                hubService.getRouteBetweenHubs(startHubId, endHubId, accessToken);
+
+        return BaseResponse.ok(response, BaseStatus.OK);
+    }
 }
