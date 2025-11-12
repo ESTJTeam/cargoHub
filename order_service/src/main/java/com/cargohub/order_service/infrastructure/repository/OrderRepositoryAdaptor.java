@@ -54,6 +54,11 @@ public class OrderRepositoryAdaptor implements OrderRepository {
     }
 
     @Override
+    public Page<Order> findOrderPageByFirmId(UUID firmId, SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPageByFirmId(firmId, search, pageable);
+    }
+
+    @Override
     public Page<Order> findOrderPageByHubDeliveryId(HubDeliveryId hubDeliveryId, SearchOrderCommandV1 search, Pageable pageable) {
         return jpaOrderRepository.findOrderPageByHubDeliveryId(hubDeliveryId, search, pageable);
     }

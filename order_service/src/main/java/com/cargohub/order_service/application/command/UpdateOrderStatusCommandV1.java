@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public record UpdateOrderStatusCommandV1(
         UUID id,
-        OrderStatus status,
-        UserInfo user
+        OrderStatus status
+//        UserInfo user
 ) {
 }

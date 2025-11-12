@@ -39,14 +39,7 @@ public class CustomOrderRepositoryImpl extends QuerydslRepositorySupport impleme
 
     @Override
     public Page<Order> findOrderPage(SearchOrderCommandV1 param, Pageable pageable) {
-
-        BooleanBuilder where = new BooleanBuilder();
-
-        if (param.supplierId() != null) {
-            where.and(qOrder.supplierId.id.eq(param.supplierId()));
-        }
-
-        return findOrderPageByCondition(param, pageable, where);
+        return findOrderPageByCondition(param, pageable, null);
     }
 
     @Override
@@ -57,6 +50,11 @@ public class CustomOrderRepositoryImpl extends QuerydslRepositorySupport impleme
     @Override
     public Page<Order> findOrderPageByFirmIdIn(Collection<UUID> firmId, SearchOrderCommandV1 param, Pageable pageable) {
         return findOrderPageByCondition(param, pageable, qOrder.supplierId.id.in(firmId).or(qOrder.receiverId.id.in(firmId)));
+    }
+
+    @Override
+    public Page<Order> findOrderPageByFirmId(UUID firmId, SearchOrderCommandV1 param, Pageable pageable) {
+        return findOrderPageByCondition(param, pageable, qOrder.supplierId.id.eq(firmId).or(qOrder.receiverId.id.eq(firmId)));
     }
 
     @Override
@@ -109,6 +107,10 @@ public class CustomOrderRepositoryImpl extends QuerydslRepositorySupport impleme
     private BooleanBuilder whereExpression(SearchOrderCommandV1 search) {
 
         BooleanBuilder where = new BooleanBuilder();
+
+        if (search.supplierId() != null) {
+            where.and(qOrder.supplierId.id.eq(search.supplierId()));
+        }
 
         if (search.receiverId() != null) {
             where.and(qOrder.receiverId.id.eq(search.receiverId()));

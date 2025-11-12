@@ -129,8 +129,8 @@ public class OrderService {
             }
             case SUPPLIER_MANAGER -> {
                 // todo: firm client에서 userId로 업체 찾기
-                ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
-                orderPage = orderRepository.findOrderPageByReceiverId(receiverId, searchOrderCommandV1, pageable);
+                UUID firmId = UUID.randomUUID();
+                orderPage = orderRepository.findOrderPageByFirmId(firmId, searchOrderCommandV1, pageable);
             }
             case DELIVERY_MANAGER -> {
                 // todo 배송 담당자 조회(업체 배송, 허브 배송)

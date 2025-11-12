@@ -1,4 +1,4 @@
-package com.cargohub.order_service.application.service.hub;//package com.cargohub.product_service.application.service;
+package com.cargohub.order_service.application.service.hub;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.UUID;
 
-@FeignClient
+@FeignClient(name = "hub-service", url = "${clients.hub.url}", path = "/v1/hubs")
 public interface HubClient {
     // todo: Hub 조회 - 필요정보(id, name)
     @GetMapping("/{hubId}")

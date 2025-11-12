@@ -21,6 +21,8 @@ public interface CustomOrderRepository {
 
     Page<Order> findOrderPageByFirmIdIn(Collection<UUID> firmIds, SearchOrderCommandV1 searchOrder, Pageable pageable);
 
+    Page<Order> findOrderPageByFirmId(UUID firmId, SearchOrderCommandV1 search, Pageable pageable);
+
     Page<Order> findOrderPageByReceiverId(ReceiverId receiverId, SearchOrderCommandV1 searchOrder, Pageable pageable);
 
     Page<Order> findOrderPageByHubDeliveryId(HubDeliveryId hubDeliveryId, SearchOrderCommandV1 searchOrder, Pageable pageable);

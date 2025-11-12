@@ -37,6 +37,7 @@ public interface OrderRepository {
 
     // 업체 담당자
     Page<Order> findOrderPageByReceiverId(ReceiverId receiverId, SearchOrderCommandV1 search, Pageable pageable);
+    Page<Order> findOrderPageByFirmId(UUID firmId, SearchOrderCommandV1 search, Pageable pageable);
 
     // 허브 배송 담당자
     Page<Order> findOrderPageByHubDeliveryId(HubDeliveryId hubDeliveryId, SearchOrderCommandV1 search, Pageable pageable);

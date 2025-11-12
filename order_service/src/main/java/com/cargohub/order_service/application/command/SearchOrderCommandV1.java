@@ -10,10 +10,8 @@ import java.util.UUID;
 
 public record SearchOrderCommandV1(
 
-        // 허브 관리자 or 마스터가 조회 시
         UUID supplierId,
 
-        // 업체 담당자나 배송 담당자 기준
         UUID receiverId,
 
         OrderStatus status,
