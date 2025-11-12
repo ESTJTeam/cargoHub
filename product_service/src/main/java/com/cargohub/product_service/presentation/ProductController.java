@@ -68,7 +68,11 @@ public class ProductController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(@ModelAttribute SearchProductRequestV1 search, @PageableDefault(size = 10) Pageable pageable, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
+    public BaseResponse<Page<ReadProductSummaryResponseV1>> readProductPage(
+            @ModelAttribute SearchProductRequestV1 search,
+            @PageableDefault(size = 10) Pageable pageable,
+            @ModelAttribute("userInfo") UserInfoResponse userInfoResponse
+    ) {
 
         SearchProductCommandV1 searchCommand = new SearchProductCommandV1(
                 search.name(),
@@ -94,7 +98,11 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> updateProduct(@PathVariable("id") UUID id, @RequestBody @Valid UpdateProductRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
+    public BaseResponse<Void> updateProduct(
+            @PathVariable("id") UUID id,
+            @RequestBody @Valid UpdateProductRequestV1 request,
+            @ModelAttribute("userInfo") UserInfoResponse userInfoResponse
+    ) {
 
         UpdateProductCommandV1 commandV1 = new UpdateProductCommandV1(
                 id,
