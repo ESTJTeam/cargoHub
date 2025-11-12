@@ -37,3 +37,7 @@ custom:
 clients:
   product:
     url: ${PRODUCT_SERVICE_URL}
+  hub:
+    url: ${HUB_SERVICE_URL}
+  firm:
+    url: ${FIRM_SERVICE_URL}
