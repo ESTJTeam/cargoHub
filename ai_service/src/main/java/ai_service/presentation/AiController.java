@@ -27,7 +27,7 @@ public class AiController {
      * @param request CalculateAiDeadlineRequestV1 DTO
      * @return AI가 계산한 발송 시한과 Slack 메시지 원문, 주문 정보 요약을 담은 응답 DTO
      */
-    @PostMapping("/deadline/prediction")
+    @PostMapping("/deadline/calculate")
     public BaseResponse<AiDeadlineResponseV1> calculateDeadlineWithPromptData(
         @RequestBody CalculateAiDeadlineRequestV1 request) {
 
@@ -42,7 +42,7 @@ public class AiController {
      * @param request 발송 시한 계산 대상 Order 정보 담은 DTO
      * @return AI가 계산한 발송 시한과 Slack 메시지 원문, 주문 요약이 포함된 응답 DTO
      */
-    @PostMapping("/deadline/{orderId}")
+    @PostMapping("/deadline/generate")
     public AiDeadlineResponseV1 generateDeadlineByOrder(@RequestBody @Valid CalculateAiDeadlineRequestV1 request) {
 
         // 내부에서 Order+Hub 조회 → 프롬프트 생성 → AI 계산

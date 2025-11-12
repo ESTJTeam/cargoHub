@@ -155,7 +155,7 @@ public class AiService {
             ? List.of()
             : hubClient.getAddresses(addressIdList);
 
-        // 주소 목록을 주소ID → 주소문자열 형태로 변환할 Map 구성
+        // 4. 주소 목록을 주소ID → 주소문자열 형태로 변환할 Map 구성
         Map<UUID, String> addressMap = new LinkedHashMap<>();
 
         if (hubAddressResponseList != null) {
@@ -181,7 +181,7 @@ public class AiService {
         // 도착지 주소 문자열로 매핑
         String destination = addressMap.get(destinationAddressId);
 
-        // 4. 요청 DTO로 변환
+        // 5. 요청 DTO로 변환
         CalculateAiDeadlineRequestV1 aiDeadlineRequest = CalculateAiDeadlineRequestV1.builder()
             .orderNum(order.getOrderNum())
             .requesterName(safe(order.getRequesterName()))
@@ -197,7 +197,7 @@ public class AiService {
             .handlerEmail(safe(order.getHandlerEmail()))
             .build();
 
-        // 5. 프롬프트 파싱
+        // 6. 프롬프트 파싱
         return calculateDeadlineWithPromptData(aiDeadlineRequest);
     }
 
