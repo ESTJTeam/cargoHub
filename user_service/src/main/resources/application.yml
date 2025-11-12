@@ -27,6 +27,8 @@ custom:
       originkey: ${SECRET_ORIGIN_KEY}
       appkey: ${SECRET_APP_KEY}
 
+  service-url: ${USER_SERVICE_URL}
+
 server:
   port: ${USER_SERVER_PORT}
 
