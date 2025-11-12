@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -61,7 +62,7 @@ public class OrderService {
 
         BulkProductQueryResponseV1 productMap = productClient.getProducts(requestV1);
 
-        // 3. 같은 공급 업체인지
+        // 같은 공급 업체인지
         Set<SupplierId> supplierIds = productMap.products().values().stream()
                 .map(product -> SupplierId.of(product.firmId()))
                 .collect(Collectors.toSet());
@@ -81,7 +82,7 @@ public class OrderService {
 
         productClient.checkStock(stockRequest);
 
-        // 5. 주문 상품 생성
+        // 주문 상품 생성
         List<OrderProduct> productList = createOrderCommandV1.products().stream()
                 .map(request -> createOrderProduct(request, productMap))
                 .toList();
@@ -118,12 +119,21 @@ public class OrderService {
         switch (searchOrderCommandV1.user().role()) {
             case MASTER -> orderPage = orderRepository.findOrderPage(searchOrderCommandV1, pageable);
             case HUB_MANAGER -> {
-                // todo: hub client에서 담당자가 userId인 허브 찾기
-                HubResponseV1 hubInfo = hubClient.getHubByManger(searchOrderCommandV1.user().id());
-                FirmListResponseV1 firmInfoList = firmClient.getFirmList(hubInfo.hubId());
-                Set<UUID> firmIdList = firmInfoList.firms().stream()
-                        .map(FirmListResponseV1.FirmResponse::id)
+                //  userId로 허브 찾기
+                Page<HubResponseV1> hubInfo = hubClient.getHubByManger(searchOrderCommandV1.user().id(), 100);
+                Set<UUID> hubIds = hubInfo.getContent().stream()
+                        .map(HubResponseV1::id)
                         .collect(Collectors.toSet());
+
+                Set<UUID> firmIdList = new HashSet<>();
+                for (UUID hubId : hubIds) {
+                    FirmListResponseV1 firmInfoList = firmClient.getFirmList(hubId, 1, 100);
+                    firmIdList.addAll(
+                            firmInfoList.firms().stream()
+                                    .map(FirmListResponseV1.FirmResponse::id)
+                                    .collect(Collectors.toSet())
+                    );
+                }
 
                 orderPage = orderRepository.findOrderPageByFirmIdIn(firmIdList, searchOrderCommandV1, pageable);
             }

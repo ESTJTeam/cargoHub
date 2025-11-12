@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.UUID;
 
 public record FirmListResponseV1(
+        UUID hubId,
+        int page,
+        int size,
+        long totalCount,
         List<FirmResponse> firms
 
 ) {
