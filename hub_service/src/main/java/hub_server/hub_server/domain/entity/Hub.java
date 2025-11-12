@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -25,7 +26,21 @@ public class Hub extends BaseEntity {
     @Column(nullable = false)
     private UUID hubManagerId;
 
-
+    @Setter
     @OneToOne(mappedBy = "hub", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private HubAddress hubAddress;
+
+    public static Hub create(String name, UUID hubManagerId) {
+
+        Hub hub = new Hub();
+        hub.name = name;
+        hub.hubManagerId = hubManagerId;
+        return hub;
+    }
+
+    public void update(String name, UUID hubManagerId) {
+
+        this.name = name;
+        this.hubManagerId = hubManagerId;
+    }
 }

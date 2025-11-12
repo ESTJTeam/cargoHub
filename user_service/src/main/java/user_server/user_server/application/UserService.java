@@ -3,6 +3,7 @@ package user_server.user_server.application;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,10 @@ import user_server.user_server.application.dto.command.LoginCommandV1;
 import user_server.user_server.application.dto.command.SignupCommandV1;
 import user_server.user_server.application.dto.command.UpdateMyInfoCommandV1;
 import user_server.user_server.application.dto.query.MyInfoQueryV1;
+import user_server.user_server.application.dto.query.UserResultQueryV1;
 import user_server.user_server.domain.entity.User;
 import user_server.user_server.domain.repository.UserRepository;
+import user_server.user_server.infra.external.UserClientImpl;
 import user_server.user_server.libs.error.BusinessException;
 import user_server.user_server.libs.error.ErrorCode;
 import user_server.user_server.libs.sercurity.BCryptPasswordEncoderAdapter;
@@ -30,11 +33,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoderAdapter passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserClientImpl userClient;
 
     @Transactional
     public void create(SignupCommandV1 signupRequest) {
         userRepository.findByUsernameAndEmail(signupRequest.username(), signupRequest.email()).ifPresent(finduser -> {
                 throw new BusinessException(ErrorCode.DUPLICATE_USER);});
+
+        userClient.deliveryAdminCreate(signupRequest.slackId(),
+            signupRequest.hubId(), String.valueOf(signupRequest.role()));
+
         String password = passwordEncoder.encode(signupRequest.password());
         User user = User.createUser(signupRequest.slackId(), password, signupRequest.username(),
             signupRequest.role(), signupRequest.nickname(), signupRequest.email());
@@ -120,11 +128,18 @@ public class UserService {
         userValidationService.validateRoleUpdate(user, request.role());
     }
 
+    public UserResultQueryV1 readUser(UUID userId) {
+        User user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        return UserResultQueryV1.from(user);
+    }
+
 
     private Duration ttlTime(String jwt) {
         long millis = jwtTokenProvider.getExpiration(jwt).getTime() - System.currentTimeMillis();
         return millis <= 0 ? Duration.ZERO : Duration.ofMillis(millis);
     }
+
 
 }
 

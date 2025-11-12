@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import user_server.user_server.domain.vo.UserRole;
 
 @Getter
 @Entity
@@ -32,15 +33,19 @@ public class DeliveryAdmin extends BaseEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private UserRole userRole;
 
     int deliverySequenceNum;
 
 
-    public DeliveryAdmin(String slackId, UUID hubId, Role role, int deliverySequenceNum) {
+    public DeliveryAdmin(String slackId, UUID hubId, UserRole role, int deliverySequenceNum) {
         this.slackId = slackId;
         this.hubId = hubId;
-        this.role = role;
+        this.userRole = role;
         this.deliverySequenceNum = deliverySequenceNum;
+    }
+
+    public static DeliveryAdmin create(String slackId, UUID hubId, UserRole role, int deliverySequenceNum) {
+        return new DeliveryAdmin(slackId, hubId, role, deliverySequenceNum);
     }
 }
