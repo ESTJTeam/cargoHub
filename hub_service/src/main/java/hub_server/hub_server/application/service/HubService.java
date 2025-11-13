@@ -10,7 +10,7 @@ import hub_server.hub_server.application.dto.query.HubSimpleResponseDto;
 import hub_server.hub_server.application.mapper.HubMapper;
 import hub_server.hub_server.common.error.BusinessException;
 import hub_server.hub_server.common.error.ErrorCode;
-import hub_server.hub_server.common.security.JwtTokenProvider;
+import hub_server.hub_server.common.security.JwtUtil;
 import hub_server.hub_server.common.security.UserInfo;
 import hub_server.hub_server.domain.entity.Hub;
 import hub_server.hub_server.domain.repository.HubRepository;
@@ -31,17 +31,19 @@ public class HubService {
 
     private final HubRepository hubRepository;
     private final HubMapper hubMapper;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtUtil jwtUtil;
     private final HubRouteService hubRouteService;
 
     @Transactional
     public HubResponseDto createHub(CreateHubCommandV1 command, String accessToken) {
 
         // JWT 토큰 파싱 및 검증 (Access Token만 허용)
-        UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        UserInfo userInfo = jwtUtil.parseJwt(accessToken);
 
         // 권한 검증: MASTER만 허브 생성 가능
         if (!"MASTER".equals(userInfo.role())) {
+            log.warn(userInfo.role());
+
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
@@ -85,7 +87,7 @@ public class HubService {
     public HubResponseDto updateHub(UpdateHubCommandV1 command, String accessToken) {
 
         // JWT 토큰 파싱 및 검증 (Access Token만 허용)
-        UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        UserInfo userInfo = jwtUtil.parseJwt(accessToken);
 
         // 허브 조회
         Hub hub = hubRepository.findByIdWithAddress(command.hubId())
@@ -133,7 +135,7 @@ public class HubService {
     public void deleteHub(UUID hubId, String accessToken) {
 
         // JWT 토큰 파싱 및 검증 (Access Token만 허용)
-        UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        UserInfo userInfo = jwtUtil.parseJwt(accessToken);
 
         // 권한 검증: MASTER만 허브 삭제 가능
         if (!"MASTER".equals(userInfo.role())) {
@@ -152,7 +154,7 @@ public class HubService {
     public HubManagerCheckResponseDto checkHubManager(UUID hubId, String accessToken) {
 
         // JWT 토큰 파싱 및 검증 (Access Token만 허용)
-        UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        UserInfo userInfo = jwtUtil.parseJwt(accessToken);
 
         Hub hub = hubRepository.findById(hubId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.HUB_NOT_FOUND));
