@@ -32,9 +32,12 @@ public class DeliveryAdminRepositoryAdapter implements DeliveryAdminRepository {
     }
 
     @Override
-    public List<DeliveryAdmin> readAllHubRoleUser(UUID uuid, UserRole userRole) {
-        return jpaDeliverAdminRepository.
+    public List<DeliveryAdmin> readAllHubRoleUser(UUID hubId, UserRole userRole) {
+        return jpaDeliverAdminRepository.findAllByHubIdAndUserRoleOrderByDeliverySequenceNumAsc(hubId, userRole);
     }
 
-
+    @Override
+    public Optional<DeliveryAdmin> readFirstHubRoleUser(UUID uuid, UserRole userRole) {
+        return jpaDeliverAdminRepository.findFirstByHubIdAndUserRoleOrderByDeliverySequenceNumAsc(uuid, userRole);
+    }
 }

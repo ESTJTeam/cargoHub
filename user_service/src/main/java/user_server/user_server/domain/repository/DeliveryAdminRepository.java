@@ -14,5 +14,7 @@ public interface DeliveryAdminRepository {
 
     Optional<DeliveryAdmin> readUser(String slackId);
 
-    List<DeliveryAdmin> readAllHubRoleUser(UUID uuid, UserRole userRole);
+    List<DeliveryAdmin> readAllHubRoleUser(UUID hubId, UserRole userRole);
+
+    Optional<DeliveryAdmin> readFirstHubRoleUser(UUID uuid, UserRole userRole);
 }

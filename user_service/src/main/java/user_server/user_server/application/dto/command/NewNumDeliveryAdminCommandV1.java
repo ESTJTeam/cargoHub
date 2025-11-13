@@ -6,10 +6,11 @@ import user_server.user_server.infra.external.dto.request.NewNumDeliveryAdminReq
 
 public record NewNumDeliveryAdminCommandV1(
     UUID hubId,
-    UserRole userRole
+    UserRole userRole,
+    Integer sequenceNumber
 ){
     public static NewNumDeliveryAdminCommandV1 from(NewNumDeliveryAdminRequestV1 request) {
-        return new NewNumDeliveryAdminCommandV1(request.hubId(), request.userRole());
+        return new NewNumDeliveryAdminCommandV1(request.hubId(), request.userRole(), request.sequenceNumber());
 
     }
 

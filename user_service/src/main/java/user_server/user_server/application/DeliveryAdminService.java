@@ -1,5 +1,6 @@
 package user_server.user_server.application;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,10 +65,36 @@ public class DeliveryAdminService {
 
     @Transactional
     public NewDeliveryAdminResponseV1 newNumDeliverAdmin(NewNumDeliveryAdminCommandV1 command) {
-        deliveryAdminRepository.readAllHubRoleUser(command.hubId(), command.userRole());
 
+        // 제일 첫번째 경우인 경우 null로 오니
+        if (command.sequenceNumber()== null){
+            DeliveryAdmin deliveryAdmin = deliveryAdminRepository.readFirstHubRoleUser(command.hubId(), command.userRole()).orElseThrow(
+                () -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+            return new NewDeliveryAdminResponseV1(deliveryAdmin.getHubId(),deliveryAdmin.getSlackId(),
+                deliveryAdmin.getUserRole(), deliveryAdmin.getDeliverySequenceNum());
+        }
 
+        List<DeliveryAdmin> deliveryAdmins = deliveryAdminRepository.readAllHubRoleUser(
+            command.hubId(), command.userRole());
 
+        // 마지막 유저인 경우 첫번째 유저 반환
+        int sequenceNum = command.sequenceNumber();
+        DeliveryAdmin lastDeliveryAdmin = deliveryAdmins.get(deliveryAdmins.size() - 1);
+        if ( lastDeliveryAdmin.getDeliverySequenceNum() <= sequenceNum){
+            DeliveryAdmin firstDeliveryAdmin = deliveryAdmins.get(0);
+            return new NewDeliveryAdminResponseV1(firstDeliveryAdmin.getHubId(),firstDeliveryAdmin.getSlackId(),
+                firstDeliveryAdmin.getUserRole(),firstDeliveryAdmin.getDeliverySequenceNum());
+        }
+
+        // 다음 번째 유저 반환
+        for (DeliveryAdmin deliveryAdmin : deliveryAdmins) {
+            if (deliveryAdmin.getDeliverySequenceNum() > sequenceNum){
+                return new NewDeliveryAdminResponseV1(deliveryAdmin.getHubId(),deliveryAdmin.getSlackId(),
+                    deliveryAdmin.getUserRole(), deliveryAdmin.getDeliverySequenceNum());
+            }
+
+        }
+        return null;
     }
 }

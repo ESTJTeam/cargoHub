@@ -6,6 +6,7 @@ import user_server.user_server.domain.vo.UserRole;
 public record NewNumDeliveryAdminRequestV1(
 
     UUID hubId,
-    UserRole userRole
+    UserRole userRole,
+    Integer sequenceNumber
 
 ){}

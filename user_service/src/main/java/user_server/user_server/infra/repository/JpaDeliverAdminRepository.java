@@ -1,7 +1,9 @@
 package user_server.user_server.infra.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import user_server.user_server.domain.entity.DeliveryAdmin;
@@ -14,4 +16,8 @@ public interface JpaDeliverAdminRepository extends JpaRepository<DeliveryAdmin, 
 
 
     Optional<DeliveryAdmin> findBySlackId(String slackId);
+
+    List<DeliveryAdmin> findAllByHubIdAndUserRoleOrderByDeliverySequenceNumAsc(UUID hubId, UserRole userRole);
+
+    Optional<DeliveryAdmin> findFirstByHubIdAndUserRoleOrderByDeliverySequenceNumAsc(UUID uuid, UserRole userRole);
 }

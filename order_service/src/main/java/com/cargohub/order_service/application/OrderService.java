@@ -80,6 +80,7 @@ public class OrderService {
                         .toList()
         );
 
+        // 재고 확인
         productClient.checkStock(stockRequest);
 
         // 주문 상품 생성
@@ -100,6 +101,7 @@ public class OrderService {
 
         Order newOrder = orderRepository.save(order);
 
+        // 재고 차감
         decreaseStock(createOrderCommandV1.products());
 
         // todo: 배송 생성
@@ -214,7 +216,7 @@ public class OrderService {
 
         // 업체 담당자일 경우
         if(UserRole.SUPPLIER_MANAGER.equals(role)) {
-            // todo: 업체 담당자(createdBY)의 업체 ID 필요
+            // todo: 업체 담당자의 업체 ID 필요
 
             ReceiverId receiverId = ReceiverId.of(UUID.randomUUID());
             if(order.getReceiverId().equals(receiverId)) {
