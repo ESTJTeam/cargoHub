@@ -1,5 +1,6 @@
 package user_server.user_server.infra.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,4 +30,11 @@ public class DeliveryAdminRepositoryAdapter implements DeliveryAdminRepository {
     public Optional<DeliveryAdmin> readUser(String slackId) {
         return jpaDeliverAdminRepository.findBySlackId(slackId);
     }
+
+    @Override
+    public List<DeliveryAdmin> readAllHubRoleUser(UUID uuid, UserRole userRole) {
+        return jpaDeliverAdminRepository.
+    }
+
+
 }
