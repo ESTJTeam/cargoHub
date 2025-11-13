@@ -27,5 +27,4 @@ public class BaseResponse<T> {
     public static BaseResponse<Void> ok(BaseStatus status) {
         return new BaseResponse<>(status);
     }
-
 }
