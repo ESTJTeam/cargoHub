@@ -49,12 +49,13 @@ public class OrderController {
     public BaseResponse<CreateOrderResponseV1> createOrder(@RequestBody @Valid CreateOrderRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
 
         CreateOrderCommandV1 commandV1 = new CreateOrderCommandV1(
-                request.receiverId(),
-                request.products().stream()
-                        .map(p -> new OrderProductCommandV1(p.id(), p.quantity()))
-                        .toList(),
-                request.requestNote(),
-                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
+            request.supplierId(),
+            request.receiverId(),
+            request.products().stream()
+                .map(p -> new CreateOrderCommandV1.OrderProductInfo(p.id(), p.name(), p.quantity(), p.price()))
+                .toList(),
+            request.requestNote(),
+            new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
         );
 
         CreateOrderResultV1 result = orderService.createOrder(commandV1);

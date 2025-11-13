@@ -1,8 +1,10 @@
 package gateway.gateway.security.filter;
 
+
 import gateway.gateway.domain.Role;
 import gateway.gateway.security.application.GatewayJwtTokenProvider;
 import gateway.gateway.security.application.dto.TokenBody;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -28,10 +30,19 @@ public class JwtAuthPreFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().toString();
+        String TRACE_ID_HEADER = "Trace-Id";
 
         // 로그인, 회원가입 등 화이트리스트 경로는 통과
         if (path.startsWith("/v1/user/login") || path.startsWith("/v1/user/signup") || path.startsWith("/v1/user/reissue-token")) {
             return chain.filter(exchange);
+        }
+
+        String traceId = exchange.getRequest().getHeaders().getFirst(TRACE_ID_HEADER);
+
+        if (path.startsWith("/v1/orchestrations/orders")) {
+            if (traceId == null || traceId.isBlank()) {
+                traceId = UUID.randomUUID().toString();
+            }
         }
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
@@ -76,10 +87,14 @@ public class JwtAuthPreFilter implements GlobalFilter, Ordered {
 
         // 정규화한 Authorization으로 교체해서 다운스트림으로 전달 + 신뢰 헤더 붙이기도 가능
         final String cleanToken = token;
+        final String traceIdHeaderValue = traceId;
         ServerHttpRequest mutated = exchange.getRequest().mutate()
             .headers(h -> {
                 h.set(HttpHeaders.AUTHORIZATION, cleanToken);
-                // h.set("X-User-Id", tokenBody.getUserId().toString()); // 예시
+
+                if (traceIdHeaderValue!=null && ! traceIdHeaderValue.isBlank()){
+                    h.set(TRACE_ID_HEADER, traceIdHeaderValue);
+                }
             })
             .build();
         return chain.filter(exchange.mutate().request(mutated).build());

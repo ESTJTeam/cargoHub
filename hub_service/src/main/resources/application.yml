@@ -1,6 +1,6 @@
 spring:
   config:
-    import: optional:file:${user.dir}/hub-service/.env[.properties]
+    import: optional:file:${user.dir}/hub_service/.env[.properties]
   application:
     name: hub-service
   datasource:

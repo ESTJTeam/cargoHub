@@ -29,8 +29,7 @@ public class DeliveryAdminService {
     @Transactional
     public boolean create(DeliveryAminCommandV1 deliveryAminCommand) {
 
-        // 허브 검증 서비스
-        //hubClient.validateHub(deliveryAminCommand.hubId());
+        hubClient.validateHub(deliveryAminCommand.hubId());
 
         long userCount = deliveryAdminRepository.getHubUser(deliveryAminCommand.hubId(),
             deliveryAminCommand.userRole());

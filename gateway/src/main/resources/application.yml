@@ -18,6 +18,42 @@ spring:
               predicates:
                 - Path=/v1/user/**,/v1/master/**,/v1/delivery-admin/**
 
+            - id: orchestrator-service
+              uri: lb://orchestrator-service
+              predicates:
+                - Path=/v1/orchestrations/orders
+
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/v1/orders/**
+
+            - id: product-service
+              uri: lb://product-service
+              predicates:
+                - Path=/v1/products/**
+
+            - id: firm-service
+              uri: lb://firm-service
+              predicates:
+                - Path=/v1/firms/**
+
+            - id: hub-service
+              uri: lb://hub-service
+              predicates:
+                - Path=/v1/hubs/**,/v1/hub-infos/**,/v1/hub-routes/**
+
+            - id: ai-service
+              uri: lb://ai-service
+              predicates:
+                - Path=/v1/ai/**
+
+            - id: slack-service
+              uri: lb://slack-service
+              predicates:
+                - Path=/v1/slack/**
+
+
 eureka:
   client:
     service-url:

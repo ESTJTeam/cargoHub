@@ -13,10 +13,10 @@ public record OrderProductResponseV1(
 ) {
     public static OrderProductResponseV1 from(OrderProductResultV1 result) {
         return new OrderProductResponseV1(
-                result.productId(),
+                result.id(),
                 result.name(),
                 result.quantity(),
-                result.productPrice()
+                result.price()
         );
     }
 }

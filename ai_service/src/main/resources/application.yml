@@ -41,12 +41,6 @@ eureka:
     service-url:
       defaultZone: ${EUREKA_SERVICE_URL}
 
-clients:
-  order:
-    url: ${ORDER_SERVICE_URL}
-  hub:
-    url: ${HUB_SERVICE_URL}
-
 # Spring Cloud OpenFeign 설정
 feign:
   client:

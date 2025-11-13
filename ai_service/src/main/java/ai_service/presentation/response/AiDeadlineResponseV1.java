@@ -13,18 +13,22 @@ public class AiDeadlineResponseV1 {
     private UUID aiLogId;
     private String orderInfo;
     private LocalDateTime finalDeadline;
-    private String slackFormattedText;
+//    private String slackFormattedText;
 
     @Builder
     public AiDeadlineResponseV1(
         UUID aiLogId,
         String orderInfo,
-        LocalDateTime finalDeadline,
-        String slackFormattedText
+        LocalDateTime finalDeadline
+//        String slackFormattedText
     ) {
         this.aiLogId = aiLogId;
         this.orderInfo = orderInfo;
         this.finalDeadline = finalDeadline;
-        this.slackFormattedText = slackFormattedText;
+//        this.slackFormattedText = slackFormattedText;
     }
 }
+
+/* TODO
+ * 주석 처리된 미사용 코드 제거
+ */

@@ -83,5 +83,3 @@ public class CalculateAiDeadlineRequestV1 {
         this.handlerEmail = handlerEmail;
     }
 }
-
-// TODO - Order 서비스 받아와서 수정 예정

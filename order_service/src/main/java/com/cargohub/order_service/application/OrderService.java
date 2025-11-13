@@ -51,56 +51,34 @@ public class OrderService {
         // todo: 권한 체크 - 분리
         UserRole role = createOrderCommandV1.user().role();
         if(!UserRole.MASTER.equals(role)
-                && !UserRole.SUPPLIER_MANAGER.equals(role)) {
+            && !UserRole.SUPPLIER_MANAGER.equals(role)) {
             throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
         }
 
-        BulkProductQueryRequestV1 requestV1 = new BulkProductQueryRequestV1(
-                createOrderCommandV1.products().stream()
-                .map(OrderProductCommandV1::productId)
-                .toList());
-
-        BulkProductQueryResponseV1 productMap = productClient.getProducts(requestV1);
-
-        // 같은 공급 업체인지
-        Set<SupplierId> supplierIds = productMap.products().values().stream()
-                .map(product -> SupplierId.of(product.firmId()))
-                .collect(Collectors.toSet());
-
-        if(supplierIds.size() > 1) {
-            throw new OrderException(OrderErrorCode.INVALID_ORDER_SUPPLIER);
-        }
-
-        CheckProductStockRequestV1 stockRequest = new CheckProductStockRequestV1(
-                createOrderCommandV1.products().stream()
-                        .map(product -> new CheckProductStockRequestV1.ProductStockItem(
-                                product.productId(),
-                                product.quantity()
-                        ))
-                        .toList()
-        );
-
-        productClient.checkStock(stockRequest);
-
-        // 주문 상품 생성
         List<OrderProduct> productList = createOrderCommandV1.products().stream()
-                .map(request -> createOrderProduct(request, productMap))
-                .toList();
+            .map(request -> {
+                ProductId productId = ProductId.of(request.id());
+                return new OrderProduct(
+                    productId,
+                    request.name(),
+                    request.price(),
+                    request.quantity()
+                );
+            })
+            .toList();
 
         ReceiverId receiverId = ReceiverId.of(createOrderCommandV1.receiverId());
-        SupplierId supplierId = supplierIds.iterator().next();
+        SupplierId supplierId = SupplierId.of(createOrderCommandV1.supplierId());
 
         Order order = Order.ofNewOrder(
-                productList,
-                supplierId,
-                receiverId,
-                createOrderCommandV1.requestNote(),
-                createOrderCommandV1.user().id()
+            productList,
+            supplierId,
+            receiverId,
+            createOrderCommandV1.requestNote(),
+            createOrderCommandV1.user().id()
         );
 
         Order newOrder = orderRepository.save(order);
-
-        decreaseStock(createOrderCommandV1.products());
 
         // todo: 배송 생성
 
