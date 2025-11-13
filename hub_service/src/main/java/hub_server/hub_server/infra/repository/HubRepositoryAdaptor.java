@@ -136,4 +136,32 @@ public class HubRepositoryAdaptor implements HubRepository {
     public Page<Hub> findAllWithAddress(Pageable pageable) {
         return jpaHubRepository.findAllWithAddress(pageable);
     }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return jpaHubRepository.existsByIdAndDeletedAtIsNull(id);
+    }
+
+    @Override
+    public List<Hub> findAll() {
+        return jpaHubRepository.findAllActive();
+    }
+
+    @Override
+    public List<Hub> findAllById(Iterable<UUID> ids) {
+        List<Hub> allHubs = jpaHubRepository.findAllById(ids);
+        return allHubs.stream()
+                .filter(hub -> hub.getDeletedAt() == null)
+                .toList();
+    }
+
+    @Override
+    public List<Hub> findByHubManagerId(UUID hubManagerId) {
+        return jpaHubRepository.findByHubManagerIdAndDeletedAtIsNull(hubManagerId);
+    }
+
+    @Override
+    public Page<Hub> findByHubManagerIdWithPaging(UUID hubManagerId, Pageable pageable) {
+        return jpaHubRepository.findByHubManagerIdWithAddress(hubManagerId, pageable);
+    }
 }

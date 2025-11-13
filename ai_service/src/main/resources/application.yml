@@ -17,7 +17,7 @@ spring:
         format_sql: true
     generate-ddl: true
 
-  # OpenAI
+  # Spring AI (OpenAI)
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
@@ -30,6 +30,9 @@ spring:
       backoff:
         initial-interval: 500ms
 
+custom:
+  service-url: ${AI_SERVICE_URL}
+
 server:
   port: ${AI_SERVER_PORT}
 
@@ -37,3 +40,18 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVICE_URL}
+
+clients:
+  order:
+    url: ${ORDER_SERVICE_URL}
+  hub:
+    url: ${HUB_SERVICE_URL}
+
+# Spring Cloud OpenFeign 설정
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 3000
+        loggerLevel: basic

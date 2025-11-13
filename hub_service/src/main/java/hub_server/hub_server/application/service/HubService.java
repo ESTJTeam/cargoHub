@@ -4,6 +4,7 @@ import hub_server.hub_server.application.dto.command.CreateHubCommandV1;
 import hub_server.hub_server.application.dto.command.UpdateHubCommandV1;
 import hub_server.hub_server.application.dto.query.HubManagerCheckResponseDto;
 import hub_server.hub_server.application.dto.query.HubResponseDto;
+import hub_server.hub_server.application.dto.query.HubRouteResponseDto;
 import hub_server.hub_server.application.dto.query.HubSearchCondition;
 import hub_server.hub_server.application.dto.query.HubSimpleResponseDto;
 import hub_server.hub_server.application.mapper.HubMapper;
@@ -31,6 +32,7 @@ public class HubService {
     private final HubRepository hubRepository;
     private final HubMapper hubMapper;
     private final JwtTokenProvider jwtTokenProvider;
+    private final HubRouteService hubRouteService;
 
     @Transactional
     public HubResponseDto createHub(CreateHubCommandV1 command, String accessToken) {
@@ -166,9 +168,42 @@ public class HubService {
         return new HubManagerCheckResponseDto(isManager);
     }
 
+    public boolean validateHub(UUID hubId) {
+
+        return hubRepository.existsById(hubId);
+    }
+
+    /**
+     * 권한: 로그인한 사용자 (본인이 관리하는 허브만 조회 가능, MASTER는 모든 매니저의 허브 조회 가능)
+     */
+    public Page<HubResponseDto> getHubsByManagerId(UUID hubManagerId, Pageable pageable, String accessToken) {
+
+        // // JWT 토큰 파싱 및 검증
+        // UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        //
+        // if (!"MASTER".equals(userInfo.role()) && !userInfo.userId().equals(hubManagerId)) {
+        //     throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        // }
+
+        validatePageSize(pageable.getPageSize());
+
+        Page<Hub> hubs = hubRepository.findByHubManagerIdWithPaging(hubManagerId, pageable);
+
+        return hubs.map(hubMapper::toResponseDto);
+    }
+
     private void validatePageSize(int pageSize) {
         if (pageSize != 10 && pageSize != 30 && pageSize != 50) {
             throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE);
         }
+    }
+
+    /**
+     * 두 허브 간 최단 경로 조회
+     * 권한: 모든 로그인 사용자 (현재는 권한 체크 없음)
+     */
+    public HubRouteResponseDto getRouteBetweenHubs(UUID startHubId, UUID endHubId, String accessToken) {
+        log.info("Getting route between hubs: {} -> {}", startHubId, endHubId);
+        return hubRouteService.getRoute(startHubId, endHubId, accessToken);
     }
 }

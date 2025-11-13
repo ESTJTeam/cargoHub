@@ -6,6 +6,7 @@ import com.cargohub.firm_service.domain.entity.Firm;
 import com.cargohub.firm_service.domain.port.HubValidatorPort;
 import com.cargohub.firm_service.domain.repository.FirmRepository;
 import com.cargohub.firm_service.domain.vo.HubId;
+import com.cargohub.firm_service.domain.vo.UserId;
 import com.cargohub.firm_service.presentation.dto.response.FirmDetailResponseV1;
 import com.cargohub.firm_service.presentation.dto.response.FirmListResponseV1;
 import com.cargohub.firm_service.presentation.dto.response.FirmSummaryV1;
@@ -67,11 +68,17 @@ public class FirmServiceV1 {
             throw new IllegalArgumentException("유효하지 않는 허브 ID 입니다." + hubId.getHubId());
         }
 
+        // UserId 생성
+        UserId userId = UserId.of(command.userId());
+
+        // UserId 유효성 검증 (추후 추가 예정)
+
         // Firm 생성 후 저장
         Firm firm = Firm.ofNewFirm(
           command.name(),
           command.type(),
           hubId,
+          userId,
           command.address()
         );
 
@@ -93,11 +100,17 @@ public class FirmServiceV1 {
             throw new IllegalArgumentException("유효하지 않은 허브 ID입니다: " + hubId.getHubId());
         }
 
+        // UserId VO 변환
+        UserId userId = UserId.of(command.userId());
+
+        // UserId 검증 (추후 추가 예정)
+
         // 엔티티에 값 반영
         firm.update(
                 command.name(),
                 command.type(),
                 hubId,
+                userId,
                 command.address()
         );
     }

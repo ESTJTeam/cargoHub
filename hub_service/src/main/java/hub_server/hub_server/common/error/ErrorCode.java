@@ -19,9 +19,12 @@ public enum ErrorCode {
 
     // 404
     HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "허브를 찾을 수 없습니다."),
+    HUB_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "허브 연결 정보를 찾을 수 없습니다."),
+    HUB_ROUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "허브 경로 정보를 찾을 수 없습니다."),
 
     // 409
-    HUB_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 허브명입니다.");
+    HUB_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 허브명입니다."),
+    HUB_INFO_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 허브 연결입니다.");
 
     private final HttpStatus status;
     private final String message;

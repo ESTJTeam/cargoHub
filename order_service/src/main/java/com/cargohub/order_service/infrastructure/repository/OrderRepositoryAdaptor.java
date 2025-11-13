@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,8 +44,18 @@ public class OrderRepositoryAdaptor implements OrderRepository {
     }
 
     @Override
+    public Page<Order> findOrderPageByFirmIdIn(Collection<UUID> firmIds, SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPageByFirmIdIn(firmIds, search, pageable);
+    }
+
+    @Override
     public Page<Order> findOrderPageByReceiverId(ReceiverId receiverId, SearchOrderCommandV1 search, Pageable pageable) {
         return jpaOrderRepository.findOrderPageByReceiverId(receiverId, search, pageable);
+    }
+
+    @Override
+    public Page<Order> findOrderPageByFirmId(UUID firmId, SearchOrderCommandV1 search, Pageable pageable) {
+        return jpaOrderRepository.findOrderPageByFirmId(firmId, search, pageable);
     }
 
     @Override

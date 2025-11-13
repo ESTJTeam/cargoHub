@@ -66,6 +66,7 @@ public class FirmControllerV1 {
                 request.name(),
                 request.type(),
                 request.hubId(),
+                request.userId(),
                 address
         );
 
@@ -100,6 +101,7 @@ public class FirmControllerV1 {
                 request.name(),
                 request.type(),
                 request.hubId(),
+                request.userId(),
                 address
         );
 

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public record FirmSummaryV1(
         UUID id,
+        UUID userId,
         String name,
         FirmType type,
         LocalDateTime createdAt,
@@ -19,6 +20,7 @@ public record FirmSummaryV1(
     public static FirmSummaryV1 from(Firm firm) {
         return new FirmSummaryV1(
                 firm.getId(),
+                firm.getUserId().getUserId(),
                 firm.getName(),
                 firm.getType(),
                 firm.getCreatedAt(),
