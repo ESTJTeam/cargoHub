@@ -8,7 +8,8 @@ public record CreateOrderClientRequestV1(
     UUID supplierId,
     UUID receiverId,
     String requestNote,
-    List<OrderProductInfo> products
+    List<OrderProductInfo> products,
+    UUID createdBy
     ) {
     public record OrderProductInfo(
         UUID id,

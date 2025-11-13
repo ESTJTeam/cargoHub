@@ -16,7 +16,7 @@ public interface HubClient {
     @GetMapping("/{hubId}")
     boolean validateHub(@PathVariable UUID hubId);
 
-    @GetMapping("/{hubId}/address")
+    @GetMapping("/{hubId}/addresses")
     HubResponseV1 getHub(@PathVariable UUID hubId);
 
     @GetMapping("/manager/{hubManagerId}")

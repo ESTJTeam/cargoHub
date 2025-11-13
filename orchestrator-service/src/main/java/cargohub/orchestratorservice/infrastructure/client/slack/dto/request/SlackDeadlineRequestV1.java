@@ -31,19 +31,13 @@ public class SlackDeadlineRequestV1 {
     @Builder
     private SlackDeadlineRequestV1(
         String receiverSlackId,
-//        String slackFormattedText,
         String orderInfo,
         LocalDateTime finalDeadline,
         UUID aiLogId
     ) {
         this.receiverSlackId = receiverSlackId;
-//        this.slackFormattedText = slackFormattedText;
         this.orderInfo = orderInfo;
         this.finalDeadline = finalDeadline;
         this.aiLogId = aiLogId;
     }
 }
-
-/* TODO
- * 주석처리된 미사용 코드 제거
- */

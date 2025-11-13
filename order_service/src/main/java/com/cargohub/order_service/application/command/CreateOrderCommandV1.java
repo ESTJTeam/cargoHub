@@ -9,7 +9,7 @@ public record CreateOrderCommandV1(
     UUID receiverId,
     List<OrderProductInfo> products,
     String requestNote,
-    UserInfo user
+    UUID createdBy
 ) {
     public record OrderProductInfo(
         UUID id,

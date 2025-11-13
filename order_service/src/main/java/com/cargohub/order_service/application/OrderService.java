@@ -14,7 +14,8 @@ import com.cargohub.order_service.application.service.hub.HubClient;
 import com.cargohub.order_service.application.service.hub.HubManagerCheckResponseDto;
 import com.cargohub.order_service.application.service.hub.HubResponseV1;
 import com.cargohub.order_service.application.service.product.*;
-import com.cargohub.order_service.application.service.user.UserInfoResponse;
+import com.cargohub.order_service.application.service.user.UserClient;
+import com.cargohub.order_service.application.service.user.UserInfoResponseV1;
 import com.cargohub.order_service.common.JwtUtil;
 import com.cargohub.order_service.domain.entity.Order;
 import com.cargohub.order_service.domain.entity.OrderProduct;
@@ -42,18 +43,20 @@ public class OrderService {
 
     private final JwtUtil jwtUtil;
 
+    private final UserClient userClient;
     private final ProductClient productClient;
     private final HubClient hubClient;
     private final FirmClient firmClient;
 
     @Transactional
     public CreateOrderResultV1 createOrder(CreateOrderCommandV1 createOrderCommandV1) {
-        // todo: 권한 체크 - 분리
-        UserRole role = createOrderCommandV1.user().role();
-        if(!UserRole.MASTER.equals(role)
-            && !UserRole.SUPPLIER_MANAGER.equals(role)) {
-            throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
-        }
+        // 권한 체크 - 분리
+//        UserInfoResponseV1 userInfo = userClient.getUser(createOrderCommandV1.createdBy());
+//        UserRole role =userInfo.role();
+//        if(!UserRole.MASTER.equals(role)
+//            && !UserRole.SUPPLIER_MANAGER.equals(role)) {
+//            throw new OrderException(OrderErrorCode.ORDER_ACCESS_DENIED);
+//        }
 
         List<OrderProduct> productList = createOrderCommandV1.products().stream()
             .map(request -> {
@@ -75,16 +78,10 @@ public class OrderService {
             supplierId,
             receiverId,
             createOrderCommandV1.requestNote(),
-            createOrderCommandV1.user().id()
+            createOrderCommandV1.createdBy()
         );
 
         Order newOrder = orderRepository.save(order);
-
-        // todo: 배송 생성
-
-//        HubDeliveryId hubDeliveryId = HubDeliveryId.of(UUID.randomUUID());
-//        FirmDeliveryId firmDeliveryId = FirmDeliveryId.of(UUID.randomUUID());
-//        newOrder.ship(hubDeliveryId, firmDeliveryId);
 
         return CreateOrderResultV1.from(newOrder);
     }
@@ -116,12 +113,12 @@ public class OrderService {
                 orderPage = orderRepository.findOrderPageByFirmIdIn(firmIdList, searchOrderCommandV1, pageable);
             }
             case SUPPLIER_MANAGER -> {
-                // todo: firm client에서 userId로 업체 찾기
+                // firm client에서 userId로 업체 찾기
                 UUID firmId = UUID.randomUUID();
                 orderPage = orderRepository.findOrderPageByFirmId(firmId, searchOrderCommandV1, pageable);
             }
             case DELIVERY_MANAGER -> {
-                // todo 배송 담당자 조회(업체 배송, 허브 배송)
+                // 배송 담당자 조회(업체 배송, 허브 배송)
                 /**
                  * 1. 허브 배송인지, 업체 배송인지 확인
                  * 2. UserId로 업체 배송, 허브 배송 Client에서 배송 ID 조회
@@ -163,7 +160,7 @@ public class OrderService {
     @Transactional
     public void updateOrderStatus(UpdateOrderStatusCommandV1 updateOrderStatusCommandV1, String accessToken) {
         // todo: 권한체크 - 분리
-        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
+        UserInfoResponseV1 user = jwtUtil.parseJwt(accessToken);
 
         UserRole role = user.role();
         if(!UserRole.MASTER.equals(role)

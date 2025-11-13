@@ -3,9 +3,6 @@ package cargohub.orchestratorservice.application;
 import cargohub.orchestratorservice.infrastructure.client.ai.AiClient;
 import cargohub.orchestratorservice.infrastructure.client.ai.dto.request.CalculateAiDeadlineRequestV1;
 import cargohub.orchestratorservice.infrastructure.client.ai.dto.response.AiDeadlineResponseV1;
-import cargohub.orchestratorservice.infrastructure.client.delivery.DeliveryClient;
-import cargohub.orchestratorservice.infrastructure.client.delivery.dto.DeliveryRequestV1;
-import cargohub.orchestratorservice.infrastructure.client.delivery.dto.DeliveryResponseV1;
 import cargohub.orchestratorservice.infrastructure.client.firm.FirmClient;
 import cargohub.orchestratorservice.infrastructure.client.firm.dto.FirmResponseV1;
 import cargohub.orchestratorservice.infrastructure.client.hub.HubClient;
@@ -45,9 +42,8 @@ public class OrchestratorOrderService {
     private final AiClient aiClient;
     private final UserClient userClient;
     private final SlackClient slackClient;
-    private final DeliveryClient deliveryClient;
 
-    public void createOrder(CreateOrderRequestV1 createOrderRequestV1) {
+    public void createOrder(CreateOrderRequestV1 createOrderRequestV1) throws BusinessException {
 
         // 상품 조회
         BulkProductQueryRequestV1 requestV1 = new BulkProductQueryRequestV1(
@@ -100,7 +96,8 @@ public class OrchestratorOrderService {
             supplierId,
             receiverId,
             createOrderRequestV1.requestNote(),
-            orderProducts
+            orderProducts,
+            UUID.randomUUID()
         );
 
         CreateOrderResponseV1 order = orderClient.createOrder(orderRequest);
@@ -116,18 +113,6 @@ public class OrchestratorOrderService {
         // 수령업체 (도착지)
         FirmResponseV1 receiver = firmClient.getFirm(receiverId);
         HubResponseV1 receiverHub = hubClient.getHub(receiver.hubId());
-
-        DeliveryRequestV1 deliveryRequest = DeliveryRequestV1.builder()
-            .orderId(order.id())
-            .fromHubId(supplierHub.id())
-            .toHubId(receiverHub.id())
-            .destinationId(order.receiverId())
-            .supplierHubManagerSlackId(user.slackId())  // 공급 허브 담당자의 슬랙 아이디
-            .build();
-
-        // 배송 생성
-        // 출발허브 주소, 도착허브 주소
-        DeliveryResponseV1 delivery = deliveryClient.createDelivery(deliveryRequest);
 
         // 최종 발송 시한 계산 요청 구성
         CalculateAiDeadlineRequestV1 aiDeadlineRequest = CalculateAiDeadlineRequestV1.builder()
@@ -146,7 +131,7 @@ public class OrchestratorOrderService {
 
         // 슬랙 메시지 content 구성
         SlackDeadlineRequestV1 request = SlackDeadlineRequestV1.builder()
-            .receiverSlackId(delivery.supplierUserSlackId())
+            .receiverSlackId(user.slackId())
             .orderInfo(aiResponse.orderInfo())
             .finalDeadline(aiResponse.finalDeadline())
             .aiLogId(aiResponse.aiLogId())
@@ -157,7 +142,3 @@ public class OrchestratorOrderService {
 
     }
 }
-
-/* TODO
- * 주석처리된 미사용 코드 제거
- */

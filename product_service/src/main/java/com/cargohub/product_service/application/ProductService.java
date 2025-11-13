@@ -49,17 +49,17 @@ public class ProductService {
         UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
         // 업체 존재 확인
-        FirmResponseV1 firmInfo = firmClient.getFirm(createProductCommandV1.firmId());
-        if(firmInfo == null) {
-            throw new ProductException(ProductErrorCode.FIRM_NOT_FOUND);
-        }
+//        FirmResponseV1 firmInfo = firmClient.getFirm(createProductCommandV1.firmId());
+//        if(firmInfo == null) {
+//            throw new ProductException(ProductErrorCode.FIRM_NOT_FOUND);
+//        }
         FirmId firmId = FirmId.of(createProductCommandV1.firmId());
 
         // 허브 존재 확인
-        boolean hubInfo = hubClient.validateHub(createProductCommandV1.hubId());
-        if(!hubInfo) {
-            throw new ProductException(ProductErrorCode.HUB_NOT_FOUND);
-        }
+//        //boolean hubInfo = hubClient.validateHub(createProductCommandV1.hubId());
+//        if(!hubInfo) {
+//            throw new ProductException(ProductErrorCode.HUB_NOT_FOUND);
+//        }
         HubId hubId = HubId.of(createProductCommandV1.hubId());
 
         // 권한 체크

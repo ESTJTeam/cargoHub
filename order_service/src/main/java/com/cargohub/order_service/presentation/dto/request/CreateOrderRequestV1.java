@@ -18,7 +18,9 @@ public record CreateOrderRequestV1(
         String requestNote,
 
         @NotEmpty(message = "주문 상품 목록은 비어 있을 수 없습니다.")
-        List<@Valid OrderProductRequestV1> products
+        List<@Valid OrderProductRequestV1> products,
+
+        UUID createdBy
 ) {
 
 }

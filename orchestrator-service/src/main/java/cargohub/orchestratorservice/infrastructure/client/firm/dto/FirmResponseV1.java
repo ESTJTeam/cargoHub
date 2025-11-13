@@ -1,5 +1,6 @@
 package cargohub.orchestratorservice.infrastructure.client.firm.dto;
 
+import cargohub.orchestratorservice.domain.FirmType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,7 +10,7 @@ public record FirmResponseV1(
         UUID hubId,
         UUID userId,
         String name,
-        String type,
+        FirmType type,
         LocalDateTime createdAt,
         UUID createdBy,
         LocalDateTime updatedAt,
