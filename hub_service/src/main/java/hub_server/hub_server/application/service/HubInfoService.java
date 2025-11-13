@@ -6,7 +6,7 @@ import hub_server.hub_server.application.dto.query.HubInfoResponseDto;
 import hub_server.hub_server.application.dto.vo.ShortestPathResult;
 import hub_server.hub_server.common.error.BusinessException;
 import hub_server.hub_server.common.error.ErrorCode;
-import hub_server.hub_server.common.security.JwtTokenProvider;
+import hub_server.hub_server.common.security.JwtUtil;
 import hub_server.hub_server.common.security.UserInfo;
 import hub_server.hub_server.domain.entity.Hub;
 import hub_server.hub_server.domain.entity.HubInfo;
@@ -39,7 +39,7 @@ public class HubInfoService {
     private final HubRepository hubRepository;
     private final HubRouteLogRepository hubRouteLogRepository;
     private final DijkstraRouteCalculator dijkstraCalculator;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtUtil jwtUtil;
 
     /**
      * 허브 연결 정보 생성
@@ -51,7 +51,7 @@ public class HubInfoService {
         log.info("Creating HubInfo from {} to {}", command.startHubId(), command.endHubId());
 
         // JWT 파싱 및 권한 검증 (테스트용 주석)
-        // UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        // UserInfo userInfo = jwtUtil.parseJwt(accessToken);
         // validateMasterRole(userInfo);
 
         // 허브 존재 여부 확인
@@ -95,7 +95,7 @@ public class HubInfoService {
         log.info("수정할 distance: {}", command.distance());
 
         // JWT 파싱 및 권한 검증 (테스트용 주석)
-        // UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        // UserInfo userInfo = jwtUtil.parseJwt(accessToken);
         // validateMasterRole(userInfo);
 
         try {
@@ -136,7 +136,7 @@ public class HubInfoService {
         log.info("Deleting HubInfo id: {}", hubInfoId);
 
         // JWT 파싱 및 권한 검증 (테스트용 주석)
-        // UserInfo userInfo = jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        // UserInfo userInfo = jwtUtil.parseJwt(accessToken);
         // validateMasterRole(userInfo);
 
         // 임시 userId (테스트용)
@@ -163,7 +163,7 @@ public class HubInfoService {
         log.info("Getting HubInfo id: {}", hubInfoId);
 
         // JWT 파싱 (권한 검증은 로그인 여부만 확인)
-        jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        jwtUtil.parseJwt(accessToken);
 
         HubInfo hubInfo = hubInfoRepository.findById(hubInfoId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.HUB_INFO_NOT_FOUND));
@@ -179,7 +179,7 @@ public class HubInfoService {
         log.info("Getting all HubInfos");
 
         // JWT 파싱
-        jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        jwtUtil.parseJwt(accessToken);
 
         List<HubInfo> hubInfos = hubInfoRepository.findAllActive();
 
@@ -196,7 +196,7 @@ public class HubInfoService {
         log.info("Getting HubInfos for hub id: {}", hubId);
 
         // JWT 파싱
-        jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        jwtUtil.parseJwt(accessToken);
 
         // 허브 존재 확인
         if (!hubRepository.existsById(hubId)) {
@@ -216,7 +216,7 @@ public class HubInfoService {
      * 캐시도 함께 비웁니다.
      */
     @CacheEvict(value = "hubRoute", allEntries = true)
-    private void recalculateAllRoutes() {
+    public void recalculateAllRoutes() {
         log.info("🔄 ========== 경로 재계산 시작 ==========");
 
         try {
