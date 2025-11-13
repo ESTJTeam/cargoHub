@@ -4,12 +4,20 @@ import com.cargohub.product_service.application.command.*;
 import com.cargohub.product_service.application.dto.CreateProductResultV1;
 import com.cargohub.product_service.application.dto.ReadProductDetailResultV1;
 import com.cargohub.product_service.application.dto.ReadProductSummaryResultV1;
+import com.cargohub.product_service.application.service.UserInfoResponse;
+import com.cargohub.product_service.application.service.firm.FirmClient;
+import com.cargohub.product_service.application.service.firm.FirmResponseV1;
+import com.cargohub.product_service.application.service.hub.HubClient;
+import com.cargohub.product_service.application.service.hub.HubManagerCheckResponseV1;
+import com.cargohub.product_service.application.service.hub.HubResponseV1;
+import com.cargohub.product_service.common.JwtUtil;
 import com.cargohub.product_service.domain.entity.Product;
 import com.cargohub.product_service.application.exception.ProductErrorCode;
 import com.cargohub.product_service.application.exception.ProductException;
 import com.cargohub.product_service.domain.repository.ProductRepository;
 import com.cargohub.product_service.domain.vo.FirmId;
 import com.cargohub.product_service.domain.vo.HubId;
+import com.cargohub.product_service.domain.vo.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,21 +38,37 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final JwtUtil jwtUtil;
 
-//    private final UserClient userClient;
-//    private final FirmClient firmClient;
-//    private final HubClient hubClient;
+    private final FirmClient firmClient;
+    private final HubClient hubClient;
 
     @Transactional
-    public CreateProductResultV1 createProduct(CreateProductCommandV1 createProductCommandV1) {
-        // todo: 권한 체크
+    public CreateProductResultV1 createProduct(CreateProductCommandV1 createProductCommandV1, String accessToken) {
 
-        // todo: 업체 존재 확인
+        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
+        // 업체 존재 확인
+        FirmResponseV1 firmInfo = firmClient.getFirm(createProductCommandV1.firmId());
+        if(firmInfo == null) {
+            throw new ProductException(ProductErrorCode.FIRM_NOT_FOUND);
+        }
         FirmId firmId = FirmId.of(createProductCommandV1.firmId());
-       // todo: 허브 존재 확인, 담당허브인지 확인
 
+        // 허브 존재 확인
+        boolean hubInfo = hubClient.validateHub(createProductCommandV1.hubId());
+        if(!hubInfo) {
+            throw new ProductException(ProductErrorCode.HUB_NOT_FOUND);
+        }
         HubId hubId = HubId.of(createProductCommandV1.hubId());
+
+        // 권한 체크
+        checkPermission(user.role());
+
+        // 허브 담당자일 경우 담당 허브인지 확인
+        validateHubManagerAuthority(createProductCommandV1.hubId(), user, accessToken);
+
+        // 상품 생성
         Product product = Product.ofNewProduct(
                 createProductCommandV1.name(),
                 firmId,
@@ -52,7 +76,7 @@ public class ProductService {
                 createProductCommandV1.stockQuantity(),
                 createProductCommandV1.price(),
                 createProductCommandV1.sellable(),
-                createProductCommandV1.createdBy()
+                user.userId()
         );
 
         Product newProduct = productRepository.save(product);
@@ -61,7 +85,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReadProductSummaryResultV1> readProductPage(SearchProductCommandV1 search, Pageable pageable, UserInfo user) {
+    public Page<ReadProductSummaryResultV1> readProductPage(SearchProductCommandV1 searchProductCommandV1, Pageable pageable) {
 
         Page<Product> productPage;
 
@@ -70,25 +94,30 @@ public class ProductService {
          * 업체 담당자일 경우 - 업체 id 필요함
          */
 
-        switch (user.role()) {
+        switch (searchProductCommandV1.user().role()) {
             case MASTER, DELIVERY_MANAGER ->
-                    productPage = productRepository.findProductPage(search, pageable);
+                    productPage = productRepository.findProductPage(searchProductCommandV1, pageable);
 
             case HUB_MANAGER -> {
-                // todo: userId를 통한 hubId 조회 -> hubClient 단건 조회
-                HubId hubId = HubId.of(UUID.randomUUID());
-                if(hubId == null) {
+                // userId를 통한 hubId 조회
+                Page<HubResponseV1> hubInfo = hubClient.getHubsByManager(searchProductCommandV1.user().id(), 100);
+                Set<UUID> hubIdSet = hubInfo.getContent().stream()
+                        .map(HubResponseV1::id)
+                        .collect(Collectors.toSet());
+
+                if (hubIdSet.isEmpty()) {
                     throw new ProductException(ProductErrorCode.HUB_ID_REQUIRED);
                 }
-                productPage = productRepository.findProductPageByHubId(hubId, search, pageable);
+                productPage = productRepository.findProductPageByHubIdIn(hubIdSet, searchProductCommandV1, pageable);
             }
+
             case SUPPLIER_MANAGER -> {
                 // todo: firmId 조회 -> firmClient 단건 조회
                 FirmId firmId = FirmId.of(UUID.randomUUID());
                 if(firmId == null) {
                     throw new ProductException(ProductErrorCode.FIRM_ID_REQUIRED);
                 }
-                productPage = productRepository.findProductPageByFirmId(firmId, search, pageable);
+                productPage = productRepository.findProductPageByFirmId(firmId, searchProductCommandV1, pageable);
             }
             default ->
                     throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
@@ -105,49 +134,97 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateProduct(UpdateProductCommandV1 updateProductCommandV1) {
-
-        // 권한 체크
-//        checkPermission(updateProductCommandV1.user().role());
+    public void updateProduct(UpdateProductCommandV1 updateProductCommandV1, String accessToken) {
 
         Product product = findProduct(updateProductCommandV1.id());
+        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
-        //todo: 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
+        // 권한 체크
+        checkPermission(user.role());
+
+        // 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
+        validateHubManagerAuthority(product.getHubId().getId(), user, accessToken);
 
         product.update(
                 updateProductCommandV1.name(),
                 updateProductCommandV1.stockQuantity(),
                 updateProductCommandV1.price(),
                 updateProductCommandV1.sellable(),
-                updateProductCommandV1.updatedBy()
+                user.userId()
         );
     }
 
     @Transactional
-    public void deleteProduct(DeleteProductCommandV1 deleteProductCommandV1) {
-        // 권한 체크
-//        checkPermission(deleteProductCommandV1.user().role());
+    public void deleteProduct(DeleteProductCommandV1 deleteProductCommandV1, String accessToken) {
 
         Product product = findProduct(deleteProductCommandV1.id());
+        UserInfoResponse user = jwtUtil.parseJwt(accessToken);
 
-        //todo: 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
+        // 권한 체크
+        checkPermission(user.role());
 
-        product.delete(deleteProductCommandV1.deletedBy());
+        // 허브 담당자일 경우 상품이 담당 허브에 소속되어 있는지 체크
+        validateHubManagerAuthority(product.getHubId().getId(), user, accessToken);
+
+        product.delete(user.userId());
     }
 
+    // 재고 확인
+    @Transactional(readOnly = true)
+    public void checkStock(CheckProductStockCommandV1 checkProductStockCommandV1) {
+
+        List<UUID> productIds = checkProductStockCommandV1.products().stream()
+                .map(CheckProductStockCommandV1.ProductStockItem::id)
+                .toList();
+
+        List<Product> products = productRepository.findAllById(productIds);
+
+        Map<UUID, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        for (var item : checkProductStockCommandV1.products()) {
+            Product product = productMap.get(item.id());
+
+            if (product == null) {
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
+            }
+
+            if(!product.getSellable()) {
+                throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOR_SALE);
+            }
+
+            if (product.getStockQuantity() < item.quantity()) {
+                throw new ProductException(ProductErrorCode.INVALID_DECREASE_QUANTITY);
+            }
+        }
+    }
+
+    // 재고 차감
     @Transactional
     public void decreaseStock(UpdateProductStockCommandV1 command) {
         updateStock(command, false);
     }
 
+    // 재고 증가
     @Transactional
     public void increaseStock(UpdateProductStockCommandV1 command) {
         updateStock(command, true);
     }
 
+    public List<ReadProductSummaryResultV1> bulkProduct(BulkProductQueryCommandV1 bulkProductQueryCommandV1) {
+
+        List<UUID> uniqueIds = bulkProductQueryCommandV1.ids().stream()
+                .distinct()
+                .toList();
+
+        return findProductList(uniqueIds).stream()
+                .map(ReadProductSummaryResultV1::from)
+                .toList();
+    }
+
     private void updateStock(UpdateProductStockCommandV1 command, boolean increase) {
 
-        List<Product> products = findProductList(command.items().keySet());
+        List<Product> products = findProductList(command.items().keySet().stream().toList());
 
         Map<UUID, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
@@ -171,7 +248,7 @@ public class ProductService {
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    private List<Product> findProductList(Set<UUID> productIds) {
+    private List<Product> findProductList(List<UUID> productIds) {
 
         List<Product> products = productRepository.findAllById(productIds);
         if (products.size() != productIds.size()) {
@@ -179,5 +256,23 @@ public class ProductService {
         }
 
         return products;
+    }
+
+    private void checkPermission(UserRole role) {
+
+        if(role != UserRole.MASTER
+                && role != UserRole.HUB_MANAGER) {
+            throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
+        }
+    }
+
+    private void validateHubManagerAuthority(UUID hubId, UserInfoResponse user, String accessToken) {
+
+        if(user.role().equals(UserRole.HUB_MANAGER)) {
+            HubManagerCheckResponseV1 supplierHub =  hubClient.checkHubManager(hubId, accessToken);
+            if(!supplierHub.isManager()){
+                throw new ProductException(ProductErrorCode.PRODUCT_ACCESS_DENIED);
+            }
+        }
     }
 }

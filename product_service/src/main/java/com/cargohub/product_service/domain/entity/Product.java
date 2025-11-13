@@ -75,6 +75,10 @@ public class Product extends BaseEntity {
 
     public void decreaseStock(int quantity) {
 
+        if(!sellable) {
+            throw new IllegalArgumentException("판매하지 않는 상품입니다.");
+        }
+
         if(quantity <= 0) {
             throw new IllegalArgumentException("차감 수량은 0보다 커야 합니다.");
         }

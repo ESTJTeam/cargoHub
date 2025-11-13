@@ -6,7 +6,8 @@ public record SearchProductCommandV1(
         String name,
         UUID firmId,
         UUID hubId,
-        Boolean sellable
+        Boolean sellable,
+        UserInfo user
 ) {
 
 }

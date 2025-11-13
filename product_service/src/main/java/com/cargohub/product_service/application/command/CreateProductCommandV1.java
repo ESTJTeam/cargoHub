@@ -9,7 +9,7 @@ public record CreateProductCommandV1(
         UUID hubId,
         Integer stockQuantity,
         BigDecimal price,
-        Boolean sellable,
-        UUID createdBy
+        Boolean sellable
+//        UserInfo user
 ) {
 }

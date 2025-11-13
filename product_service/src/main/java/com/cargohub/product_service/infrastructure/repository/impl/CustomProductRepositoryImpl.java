@@ -21,7 +21,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class CustomProductRepositoryImpl extends QuerydslRepositorySupport implements CustomProductRepository {
 
@@ -41,6 +43,11 @@ public class CustomProductRepositoryImpl extends QuerydslRepositorySupport imple
     @Override
     public Page<Product> findProductPageByHubId(HubId hubId, SearchProductCommandV1 param, Pageable pageable) {
         return findProductPageByCondition(param, pageable, qProduct.hubId.eq(hubId));
+    }
+
+    @Override
+    public Page<Product> findProductPageByHubIdIn(Collection<UUID> hubIds, SearchProductCommandV1 param, Pageable pageable) {
+        return findProductPageByCondition(param, pageable, qProduct.hubId.id.in(hubIds));
     }
 
     @Override

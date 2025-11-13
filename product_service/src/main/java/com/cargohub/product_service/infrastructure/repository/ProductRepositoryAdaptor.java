@@ -11,10 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -33,8 +30,8 @@ public class ProductRepositoryAdaptor implements ProductRepository {
     }
 
     @Override
-    public List<Product> findAllById(Set<UUID> id) {
-        return jpaProductRepository.findAllById(id);
+    public List<Product> findAllById(List<UUID> id) {
+        return jpaProductRepository.findAllByIdIn(id);
     }
 
     @Override
@@ -50,5 +47,10 @@ public class ProductRepositoryAdaptor implements ProductRepository {
     @Override
     public Page<Product> findProductPageByHubId(HubId hubId, SearchProductCommandV1 search, Pageable pageable) {
         return jpaProductRepository.findProductPageByHubId(hubId, search, pageable);
+    }
+
+    @Override
+    public Page<Product> findProductPageByHubIdIn(Collection<UUID> hubId, SearchProductCommandV1 search, Pageable pageable) {
+        return jpaProductRepository.findProductPageByHubIdIn(hubId, search, pageable);
     }
 }

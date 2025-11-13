@@ -28,3 +28,14 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVICE_URL}
+
+custom:
+  jwt:
+    secrets:
+      appkey: ${SECRET_APP_KEY}
+
+clients:
+  hub:
+    url: ${HUB_SERVICE_URL}
+  firm:
+    url: ${FIRM_SERVICE_URL}
