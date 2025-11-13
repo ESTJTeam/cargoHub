@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@FeignClient(name = "firms-service", url = "${clients.firm.url}", path = "/v1/firms")
+@FeignClient(name = "firms-service", path = "/v1/firms")
 public interface FirmClient {
     // todo: 업체 단건 조회
 
