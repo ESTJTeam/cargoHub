@@ -69,7 +69,6 @@ public class UserService {
         response.setHeader("Authorization", "Bearer " + accessToken);
         CookieUtils.setRefreshTokenCookie(response, refreshToken, ttl);
 
-        // TODO redis 예정
     }
 
 

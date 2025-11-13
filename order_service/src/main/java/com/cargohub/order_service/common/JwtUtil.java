@@ -1,6 +1,6 @@
 package com.cargohub.order_service.common;
 
-import com.cargohub.order_service.application.service.user.UserInfoResponse;
+import com.cargohub.order_service.application.service.user.UserInfoResponseV1;
 import com.cargohub.order_service.domain.vo.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -24,7 +24,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(appkey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public UserInfoResponse parseJwt(String token) {
+    public UserInfoResponseV1 parseJwt(String token) {
         Jws<Claims> parsed = Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
@@ -35,6 +35,6 @@ public class JwtUtil {
         String username = parsed.getPayload().get("username", String.class);
         String type = parsed.getPayload().get("type", String.class);
 
-        return new UserInfoResponse(UUID.fromString(userId), UserRole.valueOf(role), username, type);
+        return new UserInfoResponseV1(UUID.fromString(userId), UserRole.valueOf(role), username, type);
     }
 }

@@ -30,10 +30,6 @@ public record UpdateUserInfoRequestV1(
 
     Integer point
 
-
-
-    // TODO 허브나 업체 id를 받고 존재하는 허브인지 체크 후 회원가입 ?
-    // UUID hubIdOrFirmId
 ) {
     @AssertTrue(message = "role은 DELIVERY_MANAGER 또는 SUPPLIER_MANAGER만 가능합니다.")
     public boolean isValidRole() {

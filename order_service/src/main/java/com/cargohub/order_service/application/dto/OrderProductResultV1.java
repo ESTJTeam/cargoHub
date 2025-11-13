@@ -6,10 +6,10 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record OrderProductResultV1(
-        UUID productId,
+        UUID id,
         String name,
         Integer quantity,
-        BigDecimal productPrice
+        BigDecimal price
 ) {
 
     public static OrderProductResultV1 from(OrderProduct orderProduct) {

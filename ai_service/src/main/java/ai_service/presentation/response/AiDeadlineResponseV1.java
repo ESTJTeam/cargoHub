@@ -13,18 +13,15 @@ public class AiDeadlineResponseV1 {
     private UUID aiLogId;
     private String orderInfo;
     private LocalDateTime finalDeadline;
-    private String slackFormattedText;
 
     @Builder
     public AiDeadlineResponseV1(
         UUID aiLogId,
         String orderInfo,
-        LocalDateTime finalDeadline,
-        String slackFormattedText
+        LocalDateTime finalDeadline
     ) {
         this.aiLogId = aiLogId;
         this.orderInfo = orderInfo;
         this.finalDeadline = finalDeadline;
-        this.slackFormattedText = slackFormattedText;
     }
 }

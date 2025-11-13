@@ -1,13 +1,20 @@
 package com.cargohub.order_service.application.command;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 public record CreateOrderCommandV1(
-        UUID receiverId,
-        List<OrderProductCommandV1> products,
-        String requestNote,
-        UserInfo user
+    UUID supplierId,
+    UUID receiverId,
+    List<OrderProductInfo> products,
+    String requestNote,
+    UUID createdBy
 ) {
-
+    public record OrderProductInfo(
+        UUID id,
+        String name,
+        Integer quantity,
+        BigDecimal price
+    ){}
 }

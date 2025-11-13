@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "hub-service")
 public interface HubFeign {
 
-    @GetMapping("/v1/hubs/{hubId]")
+    @GetMapping("/v1/hubs/{hubId}")
     boolean validateHub(@PathVariable("hubId") UUID hubId);
 
 

@@ -37,18 +37,16 @@ public class BaseEntity {
 
     protected UUID deletedBy;
 
-    // TODO - User 정보 가져와서 deletedBy 추가
     public void delete() {
-//        this.deletedBy = deletedBy;
+        this.deletedBy = deletedBy;
         this.deletedAt = LocalDateTime.now();
     }
 
-    // TODO - User 정보 가져와서 updatedBy 추가
     public void restore() {
         this.deletedAt = null;
         this.deletedBy = null;
         this.updatedAt = LocalDateTime.now();
-//        this.updatedBy = updatedBy;
+        this.updatedBy = updatedBy;
     }
 
     public boolean checkDeleted() {

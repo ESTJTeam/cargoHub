@@ -21,8 +21,6 @@ import slack_service.common.error.BusinessException;
 import slack_service.common.error.ErrorCode;
 import slack_service.domain.entity.SlackLog;
 import slack_service.domain.repository.SlackLogRepository;
-import slack_service.infrastructure.client.ai.AiClient;
-import slack_service.infrastructure.client.ai.response.AiDeadlineResponseV1;
 import slack_service.presentation.dto.response.SlackLogListResponseV1;
 import slack_service.presentation.dto.response.SlackLogResponseV1;
 
@@ -42,7 +40,6 @@ public class SlackService {
 
     private final RestClient restClient;
     private final SlackLogRepository slackLogRepository;
-    private final AiClient aiClient;
 
     /**
      * [Slack DM 채널 생성] 특정 사용자(userSlackId)와의 1:1 DM 채널을 개설하거나 기존 채널을 반환한다.
@@ -148,30 +145,7 @@ public class SlackService {
         sendDmToUser(request.getReceiverSlackId(), text);
     }
 
-    /**
-     * [주문 정보 기반 Slack 전송 메서드]
-     *
-     * @param orderId UUID orderId
-     * @param receiverSlackId 수신자의 Slack 아이디
-     */
-    @Transactional
-    public void sendDeadlineNoticeByOrderId(UUID orderId, String receiverSlackId) {
 
-        // 1. AI 서비스 호출
-        AiDeadlineResponseV1 ai = aiClient.generateDeadlineByOrderId(orderId);
-
-        // 2. Slack 요청 DTO 구성
-        SlackDeadlineRequestV1 request = SlackDeadlineRequestV1.builder()
-            // TODO receiverSlackId 매핑 필요
-            .receiverSlackId(receiverSlackId)
-            .slackFormattedText(ai.getSlackFormattedText())
-            .orderInfo(ai.getOrderInfo())
-            .finalDeadline(ai.getFinalDeadline())
-            .aiLogId(ai.getAiLogId())
-            .build();
-
-        sendDeadlineNotice(request);
-    }
 
     /**
      * [SlackLog 단건 조회] Slack 메시지 전송 이력을 ID로 단건 조회
@@ -227,7 +201,6 @@ public class SlackService {
         return result.map(SlackLogListResponseV1::from);
     }
 
-    // TODO - User UUID 가져와서 deleterUserId 추가
     /**
      * [Slack 로그 단건 삭제]
      * Soft Delete 처리

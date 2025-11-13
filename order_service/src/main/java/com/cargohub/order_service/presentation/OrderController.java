@@ -9,7 +9,7 @@ import com.cargohub.order_service.common.JwtUtil;
 import com.cargohub.order_service.common.success.BaseResponse;
 import com.cargohub.order_service.common.success.BaseStatus;
 import com.cargohub.order_service.domain.vo.OrderStatus;
-import com.cargohub.order_service.application.service.user.UserInfoResponse;
+import com.cargohub.order_service.application.service.user.UserInfoResponseV1;
 import com.cargohub.order_service.presentation.dto.request.CreateOrderRequestV1;
 import com.cargohub.order_service.presentation.dto.request.FirmInfoResponseV1;
 import com.cargohub.order_service.presentation.dto.request.SearchOrderRequestV1;
@@ -36,25 +36,26 @@ public class OrderController {
 //    private final UserClient userClient;
 
     @ModelAttribute("userInfo")
-    public UserInfoResponse getUser(@RequestHeader(value = "Authorization", required = false) String accessToken) {
+    public UserInfoResponseV1 getUser(@RequestHeader(value = "Authorization", required = false) String accessToken) {
 //        return userClient.getUser(accessToken);
         if (accessToken == null || accessToken.isBlank()) {
-            return UserInfoResponse.anonymous();
+            return UserInfoResponseV1.anonymous();
         }
         return jwtUtil.parseJwt(accessToken);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<CreateOrderResponseV1> createOrder(@RequestBody @Valid CreateOrderRequestV1 request, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
+    public BaseResponse<CreateOrderResponseV1> createOrder(@RequestBody @Valid CreateOrderRequestV1 request) {
 
         CreateOrderCommandV1 commandV1 = new CreateOrderCommandV1(
-                request.receiverId(),
-                request.products().stream()
-                        .map(p -> new OrderProductCommandV1(p.id(), p.quantity()))
-                        .toList(),
-                request.requestNote(),
-                new UserInfo(userInfoResponse.userId(), userInfoResponse.role())
+            request.supplierId(),
+            request.receiverId(),
+            request.products().stream()
+                .map(p -> new CreateOrderCommandV1.OrderProductInfo(p.id(), p.name(), p.quantity(), p.price()))
+                .toList(),
+            request.requestNote(),
+            request.createdBy()
         );
 
         CreateOrderResultV1 result = orderService.createOrder(commandV1);
@@ -74,7 +75,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public BaseResponse<Page<ReadOrderSummaryResponseV1>>  readOrderPage(@ModelAttribute SearchOrderRequestV1 search, @PageableDefault(size = 10)Pageable pageable, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
+    public BaseResponse<Page<ReadOrderSummaryResponseV1>>  readOrderPage(@ModelAttribute SearchOrderRequestV1 search, @PageableDefault(size = 10)Pageable pageable, @ModelAttribute("userInfo") UserInfoResponseV1 userInfoResponse) {
 
         SearchOrderCommandV1 searchCommandV1 = new SearchOrderCommandV1(
                 search.supplierId(),
@@ -133,7 +134,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}/cancel")
-    public BaseResponse<Void> cancelOrder(@PathVariable("id") UUID id, @ModelAttribute("userInfo") UserInfoResponse userInfoResponse) {
+    public BaseResponse<Void> cancelOrder(@PathVariable("id") UUID id, @ModelAttribute("userInfo") UserInfoResponseV1 userInfoResponse) {
 
         DeleteOrderCommandV1 commandV1 = new DeleteOrderCommandV1(
                 id,

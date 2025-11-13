@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import slack_service.application.SlackService;
+import slack_service.application.dto.request.SlackDeadlineRequestV1;
 import slack_service.application.dto.request.SlackMessageRequestV1;
 import slack_service.common.success.BaseResponse;
 import slack_service.common.success.BaseStatus;
@@ -47,15 +48,13 @@ public class SlackController {
      * [AI 발송 시한 안내 메시지 자동 전송]
      * AI로 계산된 최종 발송 시한 정보를 Slack API 통해 발송하는 허브 담당자에개 전송
      *
-     * @param orderId UUID orderId
-     * @param receiverSlackId 수신자의 Slack 아이디
+     * @param request SlackDeadlineRequestV1
      * @return status CREATED 반환
      */
-    @PostMapping("/send-deadline-notice/{orderId}")
-    public BaseResponse<Void> sendDeadlineNoticeByOrderId(@PathVariable UUID orderId,
-        @RequestParam("receiverSlackId") String receiverSlackId) {
+    @PostMapping("/send-deadline-notice")
+    public BaseResponse<Void> sendDeadlineNotice(SlackDeadlineRequestV1 request) {
 
-        slackService.sendDeadlineNoticeByOrderId(orderId, receiverSlackId);
+        slackService.sendDeadlineNotice(request);
 
         return BaseResponse.ok(BaseStatus.CREATED);
     }

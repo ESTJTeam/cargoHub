@@ -11,6 +11,7 @@ import com.cargohub.firm_service.presentation.dto.response.FirmDetailResponseV1;
 import com.cargohub.firm_service.presentation.dto.response.FirmListResponseV1;
 import com.cargohub.firm_service.presentation.dto.response.FirmSummaryV1;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FirmServiceV1 {
 
     private final FirmRepository firmRepository;
@@ -82,7 +84,12 @@ public class FirmServiceV1 {
           command.address()
         );
 
+
+
         firmRepository.save(firm);
+
+        log.info("firm id{}", firm.getId());
+
     }
 
     @Transactional
