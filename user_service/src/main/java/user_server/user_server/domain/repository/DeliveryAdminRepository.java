@@ -1,5 +1,6 @@
 package user_server.user_server.domain.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import user_server.user_server.domain.entity.DeliveryAdmin;
@@ -12,4 +13,8 @@ public interface DeliveryAdminRepository {
     long getHubUser(UUID hubId, UserRole userRole);
 
     Optional<DeliveryAdmin> readUser(String slackId);
+
+    List<DeliveryAdmin> readAllHubRoleUser(UUID hubId, UserRole userRole);
+
+    Optional<DeliveryAdmin> readFirstHubRoleUser(UUID uuid, UserRole userRole);
 }
