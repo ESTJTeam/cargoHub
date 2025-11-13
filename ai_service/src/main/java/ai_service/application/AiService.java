@@ -116,14 +116,14 @@ public class AiService {
      * [AI 발송 시한 계산 - 주문번호 기반 자동 생성 버전]
      * AI 프롬프트에 필요한 주문&배송 정보를 자동으로 구성해서 최종 발송 시한 계산
      *
-     * @param request 발송 시한 계산 대상 Order 정보 담은 DTO
+     * @param orderId 발송 시한 계산 대상 Order의 UUID
      * @return AI가 계산한 발송 시한과 Slack 메시지 원문, 주문 요약이 포함된 응답 DTO
      */
     @Transactional
-    public AiDeadlineResponseV1 generateDeadlineByOrder(CalculateAiDeadlineRequestV1 request) {
+    public AiDeadlineResponseV1 generateDeadlineByOrderId(UUID orderId) {
 
         // 1. Order 서비스에서 AI 발송시한 계산 위한 Order 정보 수집
-        OrderForAiResponseV1 order = orderClient.getOrderForAi(request.getOrderNum());
+        OrderForAiResponseV1 order = orderClient.getOrderForAi(orderId);
 
         // 2. 허브 주소 UUID 리스트 수집 (shipFromHub, viaHubs, destination)
         List<UUID> addressIdList = new ArrayList<>();

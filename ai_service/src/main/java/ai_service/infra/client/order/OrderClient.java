@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
-    name = "orderClient",
+    name = "order-service",
     url = "${clients.order.url}",
     configuration = ai_service.infra.config.FeignConfig.class
 )

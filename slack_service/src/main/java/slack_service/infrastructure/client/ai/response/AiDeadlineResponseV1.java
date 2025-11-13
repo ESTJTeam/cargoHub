@@ -1,4 +1,4 @@
-package ai_service.presentation.response;
+package slack_service.infrastructure.client.ai.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

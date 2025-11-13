@@ -21,6 +21,9 @@ spring:
   slack:
     bot-token: ${SLACK_BOT_TOKEN}
 
+custom:
+  service-url: ${SLACK_SERVICE_URL}
+
 server:
   port: ${SLACK_SERVER_PORT}
 
@@ -28,3 +31,17 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVICE_URL}
+
+# 내부 서비스 호출용 커스텀 엔드포인트
+clients:
+  ai:
+    url: ${AI_SERVICE_URL}
+
+# Spring Cloud OpenFeign 설정
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 3000
+        loggerLevel: basic
