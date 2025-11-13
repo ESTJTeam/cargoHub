@@ -7,7 +7,7 @@ public record CreateOrderCommandV1(
         UUID receiverId,
         List<OrderProductCommandV1> products,
         String requestNote,
-        UUID createdBy
+        UserInfo user
 ) {
 
 }

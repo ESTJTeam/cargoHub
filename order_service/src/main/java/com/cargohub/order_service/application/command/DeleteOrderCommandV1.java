@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record DeleteOrderCommandV1(
         UUID id,
-        UUID deletedBy
+        UserInfo user
 ) {
 }
