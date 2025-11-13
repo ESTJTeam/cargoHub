@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@FeignClient(name = "hub-service", url = "${clients.hub.url}", path = "/v1/hubs")
+@FeignClient(name = "hub-service", path = "/v1/hubs")
 public interface HubClient {
     // todo: Hub 조회 - 필요정보(id, name)
     @GetMapping("/{hubId}")
