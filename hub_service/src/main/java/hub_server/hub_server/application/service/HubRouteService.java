@@ -3,7 +3,7 @@ package hub_server.hub_server.application.service;
 import hub_server.hub_server.application.dto.query.HubRouteResponseDto;
 import hub_server.hub_server.common.error.BusinessException;
 import hub_server.hub_server.common.error.ErrorCode;
-import hub_server.hub_server.common.security.JwtTokenProvider;
+import hub_server.hub_server.common.security.JwtUtil;
 import hub_server.hub_server.domain.entity.HubRouteLog;
 import hub_server.hub_server.domain.repository.HubRepository;
 import hub_server.hub_server.domain.repository.HubRouteLogRepository;
@@ -29,7 +29,7 @@ public class HubRouteService {
 
     private final HubRouteLogRepository hubRouteLogRepository;
     private final HubRepository hubRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtUtil jwtUtil;
 
     /**
      * 특정 출발지와 도착지 간 최단 경로 조회
@@ -46,7 +46,7 @@ public class HubRouteService {
         log.info("Getting route from {} to {}", startHubId, endHubId);
 
         // JWT 파싱 (권한 검증은 로그인 여부만 확인)
-        // jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        // jwtUtil.parseAuthorizationHeader(accessToken);
 
         // 허브 존재 확인
         if (!hubRepository.existsById(startHubId)) {
@@ -75,7 +75,7 @@ public class HubRouteService {
         log.info("Getting all routes from hub {}", startHubId);
 
         // JWT 파싱
-        jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        jwtUtil.parseJwt(accessToken);
 
         // 허브 존재 확인
         if (!hubRepository.existsById(startHubId)) {
@@ -103,7 +103,7 @@ public class HubRouteService {
         log.info("Getting all routes");
 
         // JWT 파싱
-        jwtTokenProvider.parseAuthorizationHeader(accessToken);
+        jwtUtil.parseJwt(accessToken);
 
         List<HubRouteLog> routeLogs = hubRouteLogRepository.findAllActive();
 
