@@ -4,6 +4,7 @@ import hub_server.hub_server.application.dto.command.CreateHubCommandV1;
 import hub_server.hub_server.application.dto.command.UpdateHubCommandV1;
 import hub_server.hub_server.application.dto.query.HubManagerCheckResponseDto;
 import hub_server.hub_server.application.dto.query.HubResponseDto;
+import hub_server.hub_server.application.dto.query.HubRouteResponseDto;
 import hub_server.hub_server.application.dto.query.HubSearchCondition;
 import hub_server.hub_server.application.dto.query.HubSimpleResponseDto;
 import hub_server.hub_server.application.mapper.HubMapper;
@@ -31,6 +32,7 @@ public class HubService {
     private final HubRepository hubRepository;
     private final HubMapper hubMapper;
     private final JwtTokenProvider jwtTokenProvider;
+    private final HubRouteService hubRouteService;
 
     @Transactional
     public HubResponseDto createHub(CreateHubCommandV1 command, String accessToken) {
@@ -194,5 +196,14 @@ public class HubService {
         if (pageSize != 10 && pageSize != 30 && pageSize != 50) {
             throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE);
         }
+    }
+
+    /**
+     * 두 허브 간 최단 경로 조회
+     * 권한: 모든 로그인 사용자 (현재는 권한 체크 없음)
+     */
+    public HubRouteResponseDto getRouteBetweenHubs(UUID startHubId, UUID endHubId, String accessToken) {
+        log.info("Getting route between hubs: {} -> {}", startHubId, endHubId);
+        return hubRouteService.getRoute(startHubId, endHubId, accessToken);
     }
 }
