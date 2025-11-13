@@ -1,12 +1,9 @@
 package user_server.user_server.presentation.success.dto.request;
 
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import user_server.user_server.application.dto.command.DeliveryAminCommandV1;
-import user_server.user_server.domain.entity.Role;
 import user_server.user_server.domain.vo.UserRole;
 
 public record DeliverAdminRequestV1 (
