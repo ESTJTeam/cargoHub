@@ -2,7 +2,7 @@ spring:
   config:
     import: optional:file:${user.dir}/hub_service/.env[.properties]
   application:
-    name: hub_service
+    name: hub-service
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}

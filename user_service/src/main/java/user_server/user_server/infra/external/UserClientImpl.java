@@ -3,7 +3,6 @@ package user_server.user_server.infra.external;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import user_server.user_server.application.dto.query.UserResultQueryV1;
 import user_server.user_server.application.service.UserClient;
 import user_server.user_server.infra.external.dto.request.CreateDeliveryAdminRequestV1;
 import user_server.user_server.infra.external.dto.response.UserResponseV1;

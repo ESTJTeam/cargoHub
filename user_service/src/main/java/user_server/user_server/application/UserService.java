@@ -3,7 +3,6 @@ package user_server.user_server.application;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import user_server.user_server.application.dto.command.LoginCommandV1;
 import user_server.user_server.application.dto.command.SignupCommandV1;
 import user_server.user_server.application.dto.command.UpdateMyInfoCommandV1;
 import user_server.user_server.application.dto.query.MyInfoQueryV1;
+import user_server.user_server.application.dto.query.ReadDeliveryAdminQueryV1;
 import user_server.user_server.application.dto.query.UserResultQueryV1;
 import user_server.user_server.domain.entity.User;
 import user_server.user_server.domain.repository.UserRepository;
@@ -128,8 +128,8 @@ public class UserService {
         userValidationService.validateRoleUpdate(user, request.role());
     }
 
-    public UserResultQueryV1 readUser(UUID userId) {
-        User user = userRepository.findByUserId(userId)
+    public UserResultQueryV1 readUser(ReadDeliveryAdminQueryV1 query) {
+        User user = userRepository.findByUserId(query.userId())
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return UserResultQueryV1.from(user);
     }

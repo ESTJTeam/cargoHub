@@ -1,7 +1,6 @@
 package user_server.user_server.infra.external;
 
 import java.util.UUID;
-import lombok.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import user_server.user_server.application.dto.query.UserResultQueryV1;
 import user_server.user_server.infra.external.dto.request.CreateDeliveryAdminRequestV1;
-import user_server.user_server.presentation.success.dto.request.DeliveryAdminInfoRequestV1;
 
 @FeignClient(name = "user-service", url = "${custom.service-url}")
 

@@ -2,7 +2,7 @@ spring:
   config:
     import: optional:file:${user.dir}/user_service/.env[.properties]
   application:
-    name: user-server
+    name: user-service
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
